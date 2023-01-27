@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using Microsoft.Data.Sqlite;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
@@ -14,6 +15,20 @@ public class FinanceServer : IServer
 
 		try
 		{
+			/*using (var connection = new SqliteConnection("Data Source=testdb.db")) {
+				connection.Open();
+
+				var command = connection.CreateCommand();
+				command.CommandText =
+				@"
+					CREATE TABLE Transactions (
+						TransactionID int,
+						Value int
+					);
+				";
+				command.ExecuteNonQuery();
+			}*/
+
 			listener.Bind(ipEndPoint);
 
 			listener.Listen(1);

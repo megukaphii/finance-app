@@ -1,8 +1,6 @@
 ﻿using System.Net;
 using System.Net.Sockets;
-using System.Reflection;
 using System.Text;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Client.Classes;
 
@@ -23,7 +21,7 @@ public class FinanceClient : IClient
 			{
 				await Task.Delay(3000);
 
-				byte[] messageSent = Encoding.UTF8.GetBytes("Hello, world!<EOF>");
+				byte[] messageSent = Encoding.UTF8.GetBytes("10");
 				client.Send(messageSent);
 
 				byte[] messageReceived = new byte[1024];
@@ -32,20 +30,6 @@ public class FinanceClient : IClient
 				Console.WriteLine("Message from Server -> {0}", messageAsStr);
 			}
 
-			/*await Task.Delay(3000);
-
-			byte[] messageSent2 = Encoding.UTF8.GetBytes("Hi, again!<EOF>");
-			client.Send(messageSent2);
-
-			await Task.Delay(3000);
-
-			byte[] messageSent3 = Encoding.UTF8.GetBytes("Wow!<EOF>");
-			client.Send(messageSent3);
-
-			byte[] messageReceived = new byte[1024];
-			int byteRecv = await client.ReceiveAsync(messageReceived);
-			Console.WriteLine("Message from Server -> {0}", Encoding.UTF8.GetString(messageReceived, 0, byteRecv));
-*/
 			client.Shutdown(SocketShutdown.Both);
 			client.Close();
 		}
