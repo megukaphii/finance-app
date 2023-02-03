@@ -1,13 +1,13 @@
-﻿using Microsoft.Data.Sqlite;
+﻿using FinanceApp.DatabaseInterfaces;
 using System.Reflection;
 
 namespace Server.Database;
 internal class Parser {
-	private readonly SqliteDataReader reader;
+	private readonly IDataReader reader;
 	private readonly Type parseInto;
 	private readonly PropertyInfo[] properties;
 
-	public Parser(SqliteDataReader reader, Type parseInto, PropertyInfo[] properties) {
+	public Parser(IDataReader reader, Type parseInto, PropertyInfo[] properties) {
 		this.reader = reader;
 		this.parseInto = parseInto;
 		this.properties = properties;
@@ -32,7 +32,7 @@ internal class Parser {
 			PropertyInfo? field = properties.SingleOrDefault(p => p.Name == fieldName);
 
 			if (field != null) {
-				field.SetValue(t, reader.GetValue(i)); // TODO: Async
+				field.SetValue(t, reader.GetValue(i));
 			} else {
 				throw new Exception($"{parseInto.Name} doesn't contain field {fieldName}");
 			}

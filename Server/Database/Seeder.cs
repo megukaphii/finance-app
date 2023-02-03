@@ -1,8 +1,11 @@
-﻿namespace Server.Database;
+﻿using FinanceApp.DatabaseInterfaces;
+using FinanceApp.Extensions.Sqlite;
+
+namespace Server.Database;
 
 internal static class Seeder {
 	internal static void SeedDB() {
-		using (Database db = new Database()) {
+		using (SqliteDatabase db = new SqliteDatabase()) {
 			string sql =
 			@"
 				INSERT INTO Transactions (
@@ -12,7 +15,7 @@ internal static class Seeder {
 					120
 				);
 			";
-			db.ExecuteNonQuery(sql, Parameters.Empty);
+			db.ExecuteNonQuery(sql, ParameterCollection.Empty);
 		}
 	}
 }

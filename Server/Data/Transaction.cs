@@ -1,7 +1,7 @@
-﻿namespace Server.Data;
+﻿using FinanceApp.DatabaseInterfaces;
+using FinanceApp.Extensions.Sqlite;
 
-using Microsoft.Data.Sqlite;
-using Server.Database;
+namespace Server.Data;
 
 public class Transaction {
     // MONEY MONEY MONEY MONEY MONEY TRANSACTION MONEY MONEY I believe that's how banks work
@@ -10,13 +10,13 @@ public class Transaction {
     public long Value { get; set; }
 
 	public static List<Transaction> All() {
-		using (Database db = new Database()) {
+		using (SqliteDatabase db = new SqliteDatabase()) {
 			string sql =
 			@"
 				SELECT *
 				FROM Transactions
 			";
-			return db.ExecuteReader<Transaction>(sql, Parameters.Empty);
+			return db.ExecuteReader<Transaction>(sql, ParameterCollection.Empty);
 		}
 	}
 
@@ -25,7 +25,7 @@ public class Transaction {
 	}
 
 	public void ReadFromDatabase() {
-		using (var connection = new SqliteConnection("Data Source=test.db")) {
+		/*using (var connection = new SqliteConnection("Data Source=test.db")) {
 			connection.Open();
 
 			var command = connection.CreateCommand();
@@ -45,6 +45,6 @@ public class Transaction {
 					Console.WriteLine($"Hello, {name}!");
 				}
 			}
-		}
+		}*/
 	}
 }

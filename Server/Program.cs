@@ -1,8 +1,9 @@
 ﻿using Server.Classes;
 using Server.Data;
 using Server.Database;
+using Server.Services;
 
-Migration.RefreshTables();
+//MigrationService.RefreshTables();
 Seeder.SeedDB();
 List<Transaction> transactions = Transaction.All();
 foreach (Transaction t in transactions) {
