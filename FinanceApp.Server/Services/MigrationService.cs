@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using FinanceApp.DatabaseInterfaces;
+using FinanceApp.Abstractions;
 
 namespace Server.Services;
 

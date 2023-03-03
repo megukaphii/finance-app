@@ -3,15 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Server", "Server\Server.csproj", "{E259D224-F939-4E95-A6A0-A12FD18A4B02}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FinanceApp.Server", "FinanceApp.Server\FinanceApp.Server.csproj", "{E259D224-F939-4E95-A6A0-A12FD18A4B02}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Client", "Client\Client.csproj", "{F0180038-AEF7-4711-A2F2-108E9511CDE5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FinanceApp.Client", "FinanceApp.Client\FinanceApp.Client.csproj", "{F0180038-AEF7-4711-A2F2-108E9511CDE5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServerTests", "ServerTests\ServerTests.csproj", "{30DC7D73-9832-4D56-8A7B-F81378620821}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FinanceApp.ServerTests", "FinanceApp.ServerTests\FinanceApp.ServerTests.csproj", "{30DC7D73-9832-4D56-8A7B-F81378620821}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinanceApp.DatabaseInterfaces", "FinanceApp.DatabaseInterfaces\FinanceApp.DatabaseInterfaces.csproj", "{B2A01FCC-253B-416D-A480-1F831254A7C2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FinanceApp.Abstractions", "FinanceApp.Abstractions\FinanceApp.Abstractions.csproj", "{B2A01FCC-253B-416D-A480-1F831254A7C2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinanceApp.Extensions.Sqlite", "FinanceApp.Extensions.Sqlite\FinanceApp.Extensions.Sqlite.csproj", "{C45B4F56-C58E-4655-8714-C6547AF6E032}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FinanceApp.Extensions.Sqlite", "FinanceApp.Extensions.Sqlite\FinanceApp.Extensions.Sqlite.csproj", "{C45B4F56-C58E-4655-8714-C6547AF6E032}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FinanceApp.Data", "FinanceApp.Data\FinanceApp.Data.csproj", "{51B848D5-ED0E-4433-8758-14B881F10B18}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{C45B4F56-C58E-4655-8714-C6547AF6E032}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C45B4F56-C58E-4655-8714-C6547AF6E032}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C45B4F56-C58E-4655-8714-C6547AF6E032}.Release|Any CPU.Build.0 = Release|Any CPU
+		{51B848D5-ED0E-4433-8758-14B881F10B18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{51B848D5-ED0E-4433-8758-14B881F10B18}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{51B848D5-ED0E-4433-8758-14B881F10B18}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{51B848D5-ED0E-4433-8758-14B881F10B18}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

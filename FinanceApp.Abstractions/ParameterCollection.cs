@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Data;
 
-namespace FinanceApp.DatabaseInterfaces;
+namespace FinanceApp.Abstractions;
 
 public class ParameterCollection : IEnumerable<Parameter> {
 	private List<Parameter> parameters = new List<Parameter>();

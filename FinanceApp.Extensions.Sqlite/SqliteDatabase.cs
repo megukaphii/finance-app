@@ -1,4 +1,4 @@
-﻿using FinanceApp.DatabaseInterfaces;
+﻿using FinanceApp.Abstractions;
 using Microsoft.Data.Sqlite;
 using System.Data;
 using System.Reflection;
@@ -7,10 +7,21 @@ using MSSqliteParameter = Microsoft.Data.Sqlite.SqliteParameter;
 namespace FinanceApp.Extensions.Sqlite;
 
 public class SqliteDatabase : IDatabase {
-    private SqliteConnection DB = new SqliteConnection("Data Source=test.db");
+    private SqliteConnection DB = new("Data Source=test.db");
     public ConnectionState State => DB.State;
 
-    public SqliteDatabase()
+    public long? LastInsertId { get {
+            string sql = @"SELECT LAST_INSERT_ROWID() LIMIT 1";
+            SqliteCommand command = DB.CreateCommand();
+            command.CommandText = sql;
+            ParameterCollection parameters = ParameterCollection.Empty;
+            command.Parameters.AddRange(parameters.ConvertParameters(p => Convert(p)));
+
+			long? count = (long?) command.ExecuteScalar();
+            return count;
+        } }
+
+	public SqliteDatabase()
     {
         OpenConnection();
     }
@@ -29,12 +40,12 @@ public class SqliteDatabase : IDatabase {
 
         List<T> result = new();
 
-        using (DatabaseInterfaces.IDataReader reader = new SqliteDataReader(command.ExecuteReader()))
+        using (Abstractions.IDataReader reader = new SqliteDataReader(command.ExecuteReader()))
         {
             Type type = typeof(T);
             PropertyInfo[] properties = type.GetProperties();
-            /*Parser parser = new Parser(reader, type, properties);
-            result = parser.PerformParse<T>();*/
+            Parser parser = new Parser(reader, type, properties);
+            result = parser.PerformParse<T>();
         }
 
         return result;

@@ -1,0 +1,22 @@
+{
+	"createTransaction": {
+		"client": {
+			"Type": "create",
+			"Value": 420
+		},
+		"server": {
+			"Id": 1,
+			"Success": true
+		}
+	},
+	"viewTransaction": {
+		"client": {
+			"Type": "single",
+			"Id": 1
+		},
+		"server": {
+			"Value": 420,
+			"Success": true
+		}
+	}
+}

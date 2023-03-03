@@ -1,4 +1,4 @@
-﻿using FinanceApp.DatabaseInterfaces;
+﻿using FinanceApp.Abstractions;
 using FinanceApp.Extensions.Sqlite;
 
 namespace Server.Database;

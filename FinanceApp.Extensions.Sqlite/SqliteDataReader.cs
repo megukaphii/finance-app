@@ -1,4 +1,4 @@
-﻿using FinanceApp.DatabaseInterfaces;
+﻿using FinanceApp.Abstractions;
 using MSSqliteDataReader = Microsoft.Data.Sqlite.SqliteDataReader;
 
 namespace FinanceApp.Extensions.Sqlite;

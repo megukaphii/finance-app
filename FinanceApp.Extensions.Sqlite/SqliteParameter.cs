@@ -1,4 +1,4 @@
-﻿using FinanceApp.DatabaseInterfaces;
+﻿using FinanceApp.Abstractions;
 using Microsoft.Data.Sqlite;
 
 using MSSqliteParameter = Microsoft.Data.Sqlite.SqliteParameter;

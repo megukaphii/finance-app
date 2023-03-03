@@ -1,9 +1,7 @@
-using FinanceApp.DatabaseInterfaces;
+using FinanceApp.Abstractions;
 using FinanceApp.Extensions.Sqlite;
-using Microsoft.Data.Sqlite;
 using Server.Data;
 using Server.Services;
-using MSSqliteParameter = Microsoft.Data.Sqlite.SqliteParameter;
 
 namespace ServerTest;
 
@@ -105,7 +103,7 @@ public class DatabaseTest {
 				);
 			";
 			ParameterCollection parameters = new() {
-				new Parameter(System.Data.SqlDbType.Int, "$value", 125)
+				new Parameter(System.Data.SqlDbType.Int, "$value", value)
 			};
 			return db.ExecuteNonQuery(sql, parameters);
 		}

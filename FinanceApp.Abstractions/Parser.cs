@@ -1,8 +1,8 @@
-﻿using FinanceApp.DatabaseInterfaces;
-using System.Reflection;
+﻿using System.Reflection;
 
-namespace Server.Database;
-internal class Parser {
+namespace FinanceApp.Abstractions;
+
+public class Parser {
 	private readonly IDataReader reader;
 	private readonly Type parseInto;
 	private readonly PropertyInfo[] properties;

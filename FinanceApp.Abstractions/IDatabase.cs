@@ -1,9 +1,10 @@
 ﻿using System.Data;
 
-namespace FinanceApp.DatabaseInterfaces;
+namespace FinanceApp.Abstractions;
 
 public interface IDatabase : IDisposable {
 	ConnectionState State { get; }
+	long? LastInsertId { get; }
 
 	IDatabase OpenConnection();
 
