@@ -28,7 +28,15 @@ public class FinanceClient : IClient
 
 	public async Task Start()
 	{
-		IPEndPoint ipEndPoint = new IPEndPoint(IPAddress.Loopback, 42069);
+		Console.WriteLine("Please enter IP address!");
+
+		string ipStr = Console.ReadLine() ?? "";
+		if (ipStr == "") {
+			ipStr = "127.0.0.1";
+		}
+
+		IPAddress ip = IPAddress.Parse(ipStr);
+		IPEndPoint ipEndPoint = new IPEndPoint(ip, 42069);
 
 		try
 		{
@@ -84,7 +92,7 @@ public class FinanceClient : IClient
 			client.Close();*/
 		} catch (Exception e)
 		{
-			Console.WriteLine("oh no");
+			Console.WriteLine(e);
 		}
 	}
 

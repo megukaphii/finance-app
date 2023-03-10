@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "FinanceApp.Server": {
+      "commandName": "Project"
+    },
+    "Docker": {
+      "commandName": "Docker"
+    }
+  }
+}

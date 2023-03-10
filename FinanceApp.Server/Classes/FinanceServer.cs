@@ -18,15 +18,18 @@ public class FinanceServer : IServer
 	{
 		serverCertificate = X509Certificate.CreateFromCertFile("./Resources/certificate.pfx");
 
-		IPEndPoint ipEndPoint = new IPEndPoint(IPAddress.Loopback, 42069);
+		IPEndPoint ipEndPoint = new IPEndPoint(IPAddress.Any, 42069);
 
 		try
 		{
+			Console.WriteLine("i made it to the first bit");
 			listener.Bind(ipEndPoint);
 
 			listener.Listen(1);
 
+			Console.WriteLine("i made it here yay");
 			Socket handler = await listener.AcceptAsync();
+			Console.WriteLine("i found a thing to connect to");
 			using NetworkStream networkStream = new NetworkStream(handler);
 			Console.WriteLine(handler.Connected);
 			SslStream sslStream = new SslStream(networkStream, false);
@@ -53,11 +56,14 @@ public class FinanceServer : IServer
 						Value
 					)
 					VALUES (
-						250
+						$value
 					);
 				";
+				ParameterCollection parameters = new() {
+					new Parameter(System.Data.SqlDbType.Int, "$value", transaction.Value)
+				};
 
-				int rowsUpdated = db.ExecuteNonQuery(sql, ParameterCollection.Empty);
+				int rowsUpdated = db.ExecuteNonQuery(sql, parameters);
 				long newId = db.LastInsertId ?? -1;
 
 				CreateTransactionResponse response = new() {
