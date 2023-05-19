@@ -22,14 +22,12 @@ public class FinanceServer : IServer
 
 		try
 		{
-			Console.WriteLine("i made it to the first bit");
+			Console.WriteLine("Starting listener...");
 			listener.Bind(ipEndPoint);
-
 			listener.Listen(1);
 
-			Console.WriteLine("i made it here yay");
 			Socket handler = await listener.AcceptAsync();
-			Console.WriteLine("i found a thing to connect to");
+			Console.WriteLine("Connection found.");
 			using NetworkStream networkStream = new NetworkStream(handler);
 			Console.WriteLine(handler.Connected);
 			SslStream sslStream = new SslStream(networkStream, false);

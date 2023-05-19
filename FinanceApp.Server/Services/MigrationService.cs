@@ -13,11 +13,23 @@ public class MigrationService : IMigrationService
     {
         DropTables<TDatabase>();
         CreateTablesIfNotExists<TDatabase>();
-    }
+	}
 
-    private void CreateTablesIfNotExists<TDatabase>() where TDatabase : IDatabase, new()
-    {
-        using (IDatabase db = new TDatabase())
+	private void DropTables<TDatabase>() where TDatabase : IDatabase, new() {
+		Console.WriteLine("Dropping tables...");
+		using (IDatabase db = new TDatabase()) {
+			string sql =
+			@"
+				DROP TABLE IF EXISTS Transactions
+			";
+			db.ExecuteNonQuery(sql, ParameterCollection.Empty);
+		}
+        Console.WriteLine("Tables dropped.");
+	}
+
+	private void CreateTablesIfNotExists<TDatabase>() where TDatabase : IDatabase, new() {
+		Console.WriteLine("Creating tables...");
+		using (IDatabase db = new TDatabase())
         {
             string sql =
             @"
@@ -27,20 +39,9 @@ public class MigrationService : IMigrationService
 				);
 			";
             db.ExecuteNonQuery(sql, ParameterCollection.Empty);
-        }
-    }
-
-    private void DropTables<TDatabase>() where TDatabase : IDatabase, new()
-    {
-        using (IDatabase db = new TDatabase())
-        {
-            string sql =
-            @"
-				DROP TABLE IF EXISTS Transactions
-			";
-            db.ExecuteNonQuery(sql, ParameterCollection.Empty);
-        }
-    }
+		}
+		Console.WriteLine("Tables created.");
+	}
 }
 
 public static class MigrationServiceExtensions
