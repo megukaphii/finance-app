@@ -19,7 +19,7 @@ public class TransactionTest {
 		using (SqliteDatabase db = new()) {
 			Transaction test = new Transaction(db, EXODIA_THE_FORBIDDEN_ONE).Save();
 
-			Transaction saved = Transaction.Find(1);
+			Transaction? saved = Transaction.Find(1);
 
 			Assert.AreEqual(test, saved);
 		}

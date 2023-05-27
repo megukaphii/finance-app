@@ -3,5 +3,5 @@
 public interface IEloquent<T> {
 	public T Save();
 
-	public abstract static T Find(int id);
+	public abstract static T? Find(int id);
 }

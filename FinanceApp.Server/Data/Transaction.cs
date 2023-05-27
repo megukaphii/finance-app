@@ -12,13 +12,13 @@ public class Transaction : IEloquent<Transaction> {
 
 	private readonly IDatabase Database;
 
-	[Column]
+	[Column("ID")]
 	public long ID { get; set; }
-	[Column]
+	[Column("Value")]
     public long Value { get; set; }
 
 	public Transaction() {
-		// necessary for db.ExecuteReader
+		// [TODO] necessary for db.ExecuteReader
 	}
 
 	public Transaction(IDatabase database, long value)
@@ -29,7 +29,7 @@ public class Transaction : IEloquent<Transaction> {
 
 	public static List<Transaction> All() {
 		using (SqliteDatabase db = new SqliteDatabase()) {
-			// Better way to do this?
+			// [TODO] Better way to do this?
 			string sql = QueryBuilder.Build<Transaction>().AsSelect().ToString();
 			return db.ExecuteReader<Transaction>(sql, ParameterCollection.Empty);
 		}
@@ -39,12 +39,55 @@ public class Transaction : IEloquent<Transaction> {
 		return $"Transaction ID: {ID}, Value: {Value}";
 	}
 
-	public Transaction Save() {
-		return this;
-		throw new NotImplementedException();
+	public override bool Equals(object? obj) {
+		if ((obj == null) || !GetType().Equals(obj.GetType())) {
+			return false;
+		} else {
+			Transaction other = (Transaction) obj;
+			return (ID == other.ID) && (Value == other.Value);
+		}
 	}
 
-	public static Transaction Find(int id) {
+	public Transaction Save() {
+		using (SqliteDatabase db = new SqliteDatabase()) {
+			ParameterCollection parameters = new() {
+				new Parameter(System.Data.SqlDbType.Int, "$Value", Value)
+			};
+			string sql = QueryBuilder.Build<Transaction>().AsInsert().ToString();
+
+			try {
+				db.ExecuteNonQuery(sql, parameters);
+			} catch (Exception ex) {
+				throw new Exception($"Query Failed! SQL: {sql}", ex);
+			}
+
+			// This should be fine right?
+			ID = (long) db.LastInsertId!;
+
+			return this;
+		}
+	}
+
+	public static Transaction? Find(int id) {
+		using (SqliteDatabase db = new SqliteDatabase()) {
+			ParameterCollection parameters = new() {
+				new Parameter(System.Data.SqlDbType.Int, "$ID", id)
+			};
+			string sql = QueryBuilder.Build<Transaction>().AsSelect().Where("ID", id).ToString();
+
+			Transaction? result = null;
+			try {
+				result = db.ExecuteReader<Transaction>(sql, parameters).FirstOrDefault();
+			} catch (Exception ex) {
+				throw new Exception($"Query Failed! SQL: {sql}", ex);
+			}
+
+			return result;
+		}
+	}
+
+	// It complains if we don't override this too
+	public override int GetHashCode() {
 		throw new NotImplementedException();
 	}
 }
