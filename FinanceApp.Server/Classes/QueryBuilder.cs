@@ -12,12 +12,17 @@ public class QueryProperty {
 public class QueryBuilder {
 	public string TableName { get; set; } = string.Empty;
 	public List<string> Columns { get; set; } = new List<string>();
+	public string Query { get; set; } = string.Empty;
 
 	public List<QueryProperty> KeyProperties { get; set; } = new List<QueryProperty>();
 	public List<QueryProperty> NonKeyProperties { get; set; } = new List<QueryProperty>();
 	public List<QueryProperty> AllProperties { get; set; } = new List<QueryProperty>();
 
-	public string AsSelect() {
+	public override string ToString() {
+		return Query;
+	}
+
+	public QueryBuilder AsSelect() {
 		var sb = new StringBuilder();
 		sb.Append("SELECT ");
 
@@ -30,7 +35,8 @@ public class QueryBuilder {
 			sb.Append(string.Join(" AND ", KeyProperties.Select(x => $"{x.Name} = @{x.Name}")));
 		}*/
 
-		return sb.ToString();
+		Query = sb.ToString();
+		return this;
 	}
 
 	/*public string AsInsert(bool explicitColumns = true) {

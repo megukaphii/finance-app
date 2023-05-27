@@ -29,7 +29,8 @@ public class Transaction : IEloquent<Transaction> {
 
 	public static List<Transaction> All() {
 		using (SqliteDatabase db = new SqliteDatabase()) {
-			string sql = QueryBuilder.Build<Transaction>().AsSelect();
+			// Better way to do this?
+			string sql = QueryBuilder.Build<Transaction>().AsSelect().ToString();
 			return db.ExecuteReader<Transaction>(sql, ParameterCollection.Empty);
 		}
 	}
