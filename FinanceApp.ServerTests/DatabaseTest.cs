@@ -1,4 +1,3 @@
-using FinanceApp.Abstractions;
 using FinanceApp.Extensions.Sqlite;
 using Server.Data;
 using Server.Services;
@@ -6,106 +5,23 @@ using Server.Services;
 namespace ServerTest;
 
 [TestClass]
-public class DatabaseTest {
+public class TransactionTest {
+	const long EXODIA_THE_FORBIDDEN_ONE = 120;
+
 	[ClassInitialize]
 	public static void ClassInit(TestContext context) {
 		MigrationService ms = new MigrationService();
 		ms.RefreshTables<SqliteDatabase>();
 	}
 
-	/*[ClassCleanup]
-	public static void ClassCleanup(TestContext context) {
-		Migration.RefreshTables();
-	}*/
-
 	[TestMethod]
-	public void TestOpenClose() {
-		SqliteDatabase db = new();
-		db.OpenConnection();
-		Assert.IsTrue(db.State == System.Data.ConnectionState.Open);
-		db.Dispose();
-		Assert.IsTrue(db.State == System.Data.ConnectionState.Closed);
-	}
-
-	[TestMethod]
-	public void TestExecuteNonQuery() {
+	public void TestCreateTransaction() {
 		using (SqliteDatabase db = new()) {
-			string sql =
-			@"
-				INSERT INTO Transactions (
-					Value
-				)
-				VALUES (
-					250
-				);
-			";
+			Transaction test = new Transaction(db, EXODIA_THE_FORBIDDEN_ONE).Save();
 
-			int rowsUpdated = db.ExecuteNonQuery(sql, ParameterCollection.Empty);
-			Assert.AreEqual(1, rowsUpdated);
-		}
-	}
+			Transaction saved = Transaction.Find(1);
 
-	[TestMethod]
-	public void TestExecuteNonQueryWithParams() {
-		int rowsUpdated = InsertIntoTransactionsWithParams(125);
-		Assert.AreEqual(1, rowsUpdated);
-	}
-
-	[TestMethod]
-	public void TestExecuteReader() {
-		MigrationService ms = new MigrationService();
-		ms.RefreshTables<SqliteDatabase>();
-		InsertIntoTransactionsWithParams(250);
-		InsertIntoTransactionsWithParams(125);
-
-		using (SqliteDatabase db = new()) {
-			string sql =
-			@"
-				SELECT *
-				FROM Transactions
-			";
-			List<Transaction> transactions = db.ExecuteReader<Transaction>(sql, ParameterCollection.Empty);
-			Assert.AreEqual(2, transactions.Count);
-		}
-	}
-
-	[TestMethod]
-	public void TestExecuteReaderWithParams() {
-		MigrationService ms = new MigrationService();
-		ms.RefreshTables<SqliteDatabase>();
-		InsertIntoTransactionsWithParams(250);
-		InsertIntoTransactionsWithParams(125);
-
-		using (SqliteDatabase db = new()) {
-			string sql =
-			@"
-				SELECT *
-				FROM Transactions
-				WHERE Value = $value
-			";
-			ParameterCollection parameters = new() {
-				new Parameter(System.Data.SqlDbType.Int, "$value", 125)
-			};
-			List<Transaction> transactions = db.ExecuteReader<Transaction>(sql, parameters);
-			Assert.AreEqual(1, transactions.Count);
-		}
-	}
-
-	private int InsertIntoTransactionsWithParams(int value) {
-		using (SqliteDatabase db = new()) {
-			string sql =
-			@"
-				INSERT INTO Transactions (
-					Value
-				)
-				VALUES (
-					$value
-				);
-			";
-			ParameterCollection parameters = new() {
-				new Parameter(System.Data.SqlDbType.Int, "$value", value)
-			};
-			return db.ExecuteNonQuery(sql, parameters);
+			Assert.AreEqual(test, saved);
 		}
 	}
 }

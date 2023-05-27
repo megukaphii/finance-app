@@ -41,7 +41,7 @@ public class FinanceClient : IClient
 		try
 		{
 			await client.ConnectAsync(ipEndPoint);
-			Console.WriteLine(client.Connected);
+			Console.WriteLine("Connected!");
 
 			NetworkStream networkStream = new(client);
 			SslStream sslStream = new SslStream(
@@ -53,55 +53,41 @@ public class FinanceClient : IClient
 
 			sslStream.AuthenticateAsClient("Cory Macdonald");
 
-			int value = int.Parse(Console.ReadLine() ?? "0");
+			while (true) {
+				int value = int.Parse(Console.ReadLine() ?? "0");
 
-			if (value > 0) {
-				CreateTransaction transaction = new() {
-					Type = "create",
-					Value = value
-				};
+				if (value > 0) {
+					CreateTransaction transaction = new() {
+						Type = "create",
+						Value = value
+					};
 
-				string json = Newtonsoft.Json.JsonConvert.SerializeObject(transaction);
+					string json = Newtonsoft.Json.JsonConvert.SerializeObject(transaction);
 
-				byte[] messsage = Encoding.UTF8.GetBytes(json + "<EOF>");
-				sslStream.Write(messsage);
-				sslStream.Flush();
+					byte[] messsage = Encoding.UTF8.GetBytes(json + "<EOF>");
+					sslStream.Write(messsage);
+					sslStream.Flush();
 
-				string messageReceived = ReadMessage(sslStream);
-				CreateTransactionResponse? response = Newtonsoft.Json.JsonConvert.DeserializeObject<CreateTransactionResponse>(messageReceived);
-				Console.WriteLine(response);
+					string messageReceived = await ReadMessage(sslStream);
+					CreateTransactionResponse? response = Newtonsoft.Json.JsonConvert.DeserializeObject<CreateTransactionResponse>(messageReceived);
+					Console.WriteLine(response);
+				}
 			}
 
 			client.Close();
 			Console.WriteLine("Client closed.");
-
-			/*while (true)
-			{
-				await Task.Delay(3000);
-
-				byte[] messageSent = Encoding.UTF8.GetBytes("10");
-				client.Send(messageSent);
-
-				byte[] messageReceived = new byte[1024];
-				int numByte = await client.ReceiveAsync(messageReceived);
-				string messageAsStr = Encoding.UTF8.GetString(messageReceived, 0, numByte);
-				Console.WriteLine("Message from Server -> {0}", messageAsStr);
-			}
-
-			client.Shutdown(SocketShutdown.Both);
-			client.Close();*/
 		} catch (Exception e)
 		{
 			Console.WriteLine(e);
 		}
 	}
 
-	static string ReadMessage(SslStream sslStream) {
+	static async Task<string> ReadMessage(SslStream sslStream) {
 		byte[] buffer = new byte[2048];
 		StringBuilder messageData = new StringBuilder();
 		int bytes = -1;
 		do {
-			bytes = sslStream.Read(buffer, 0, buffer.Length);
+			bytes = await sslStream.ReadAsync(buffer, 0, buffer.Length);
 
 			Decoder decoder = Encoding.UTF8.GetDecoder();
 			char[] chars = new char[decoder.GetCharCount(buffer, 0, bytes)];

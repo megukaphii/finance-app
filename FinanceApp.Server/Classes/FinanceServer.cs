@@ -36,72 +36,60 @@ public class FinanceServer : IServer
 			sslStream.ReadTimeout = 1000000;
 			sslStream.WriteTimeout = 1000000;
 
-			string messageReceived = ReadMessage(sslStream);
-			CreateTransaction? transaction = Newtonsoft.Json.JsonConvert.DeserializeObject<CreateTransaction>(messageReceived);
-			Console.WriteLine(transaction);
+			while (true) {
+				string messageReceived = await ReadMessageAsync(sslStream);
+				CreateTransaction? transaction = Newtonsoft.Json.JsonConvert.DeserializeObject<CreateTransaction>(messageReceived);
 
-			if (transaction == null)
-			{
-				Console.WriteLine("oh no the transaction is null");
-				handler.Close();
-				return;
-			}
+				if (transaction == null) {
+					Console.WriteLine("Transaction was null");
+					handler.Close();
+					return;
+				}
 
-			using (SqliteDatabase db = new()) {
-				string sql =
-				@"
-					INSERT INTO Transactions (
-						Value
-					)
-					VALUES (
-						$value
-					);
-				";
-				ParameterCollection parameters = new() {
-					new Parameter(System.Data.SqlDbType.Int, "$value", transaction.Value)
-				};
+				Console.WriteLine(transaction);
+				using (SqliteDatabase db = new()) {
+					string sql =
+						@"
+						INSERT INTO Transactions (
+							Value
+						)
+						VALUES (
+							$value
+						);
+					";
+					ParameterCollection parameters = new() {
+						new Parameter(System.Data.SqlDbType.Int, "$value", transaction.Value)
+					};
 
-				int rowsUpdated = db.ExecuteNonQuery(sql, parameters);
-				long newId = db.LastInsertId ?? -1;
+					int rowsUpdated = db.ExecuteNonQuery(sql, parameters);
+					long newId = db.LastInsertId ?? -1;
 
-				CreateTransactionResponse response = new() {
-					Id = newId,
-					Success = true
-				};
-				string strResponse = Newtonsoft.Json.JsonConvert.SerializeObject(response);
+					CreateTransactionResponse response = new() {
+						Id = newId,
+						Success = true
+					};
+					string strResponse = Newtonsoft.Json.JsonConvert.SerializeObject(response);
 
-				byte[] messsage = Encoding.UTF8.GetBytes(strResponse + "<EOF>");
-				sslStream.Write(messsage);
-				sslStream.Flush();
-			}
-
-			// write message
-
-			/*while (true)
-			{
-				byte[] messageReceived = new byte[1024];
-				int numByte = await handler.ReceiveAsync(messageReceived);
-				string messageAsStr = Encoding.UTF8.GetString(messageReceived, 0, numByte);
-				Console.WriteLine("Message from Client -> {0}", messageAsStr);
-
-				byte[] messageSent = Encoding.UTF8.GetBytes(messageAsStr + " reply!");
-				handler.Send(messageSent);
+					byte[] messsage = Encoding.UTF8.GetBytes(strResponse + "<EOF>");
+					sslStream.Write(messsage);
+					sslStream.Flush();
+				}
 			}
 
 			handler.Shutdown(SocketShutdown.Both);
-			handler.Close();*/
+			handler.Close();
 		} catch (Exception e)
 		{
 			Console.WriteLine($"[{e.GetType()}]: {e.Message}");
 		}
 	}
-
-	static string ReadMessage(SslStream sslStream) {
+	
+	static async Task<string> ReadMessageAsync(SslStream sslStream) {
 		byte[] buffer = new byte[2048];
 		StringBuilder messageData = new StringBuilder();
 		int bytes = -1;
 		do {
-			bytes = sslStream.Read(buffer, 0, buffer.Length);
+			bytes = await sslStream.ReadAsync(buffer, 0, buffer.Length);
 
 			Decoder decoder = Encoding.UTF8.GetDecoder();
 			char[] chars = new char[decoder.GetCharCount(buffer, 0, bytes)];
