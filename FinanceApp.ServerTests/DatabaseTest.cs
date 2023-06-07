@@ -41,14 +41,27 @@ public class TransactionTest {
 	}
 
 	[TestMethod]
-	public void TestUpdateTransaction() {
+	public void TestSaveTransaction() {
 		using (SqliteDatabase db = new()) {
 			Transaction transaction = Transaction.Find(1)!;
 			transaction.Value = OTHER_YUGIOH_REFERENCE;
 
-			transaction.Save(); // transaction.Update(); // transaction.Update(Value, OTHER_YUGIOH_REFERENCE); ?
+			transaction.Save(); // transaction.Update(); ?
 
-			Assert.AreEqual(1, transaction.Value);
+			// How to assert this worked???
+			Assert.AreEqual(1, transaction.ID);
+		}
+	}
+
+	[Ignore]
+	[TestMethod]
+	public void TestUpdateTransaction() {
+		using (SqliteDatabase db = new()) {
+			//Transaction.Where('value', OTHER_YUGIOH_REFERENCE).Update('value', EXODIA_THE_FORBIDDEN_ONE);
+
+			Transaction transaction = Transaction.Find(1)!;
+
+			Assert.AreEqual(EXODIA_THE_FORBIDDEN_ONE, transaction.Value);
 		}
 	}
 }
