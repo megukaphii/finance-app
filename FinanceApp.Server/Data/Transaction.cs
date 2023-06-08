@@ -12,6 +12,7 @@ public class Transaction : IEloquent<Transaction> {
 
 	private readonly IDatabase Database;
 
+	// Prevent ID being modified if exists on DB = true?
 	[Column("ID")]
 	public long ID { get; set; }
 	[Column("Value")]
@@ -27,18 +28,11 @@ public class Transaction : IEloquent<Transaction> {
 		Value = value;
 	}
 
-	public static List<Transaction> All() {
-		using (SqliteDatabase db = new SqliteDatabase()) {
-			// [TODO] Better way to do this?
-			string sql = QueryBuilder.Build<Transaction>().AsSelect().ToString();
-			return db.ExecuteReader<Transaction>(sql, ParameterCollection.Empty);
-		}
-	}
-
 	public override string ToString() {
 		return $"Transaction ID: {ID}, Value: {Value}";
 	}
 
+	// [TODO] Can we pull this up to IEloquent? Value == other.Value and similar model-specific comparisons like that would be the only problem, but reflection could fix that? I think?
 	public override bool Equals(object? obj) {
 		if ((obj == null) || !GetType().Equals(obj.GetType())) {
 			return false;
@@ -48,7 +42,16 @@ public class Transaction : IEloquent<Transaction> {
 		}
 	}
 
-	public Transaction Save() {
+	// It complains if we don't override this too
+	public override int GetHashCode() {
+		throw new NotImplementedException();
+	}
+
+	protected override Transaction Update() {
+		throw new NotImplementedException();
+	}
+
+	protected override Transaction Insert() {
 		using (SqliteDatabase db = new SqliteDatabase()) {
 			ParameterCollection parameters = new() {
 				new Parameter(System.Data.SqlDbType.Int, "$Value", Value)
@@ -64,30 +67,9 @@ public class Transaction : IEloquent<Transaction> {
 			// This should be fine right?
 			ID = (long) db.LastInsertId!;
 
+			existsOnDb = true;
+
 			return this;
 		}
-	}
-
-	public static Transaction? Find(int id) {
-		using (SqliteDatabase db = new SqliteDatabase()) {
-			ParameterCollection parameters = new() {
-				new Parameter(System.Data.SqlDbType.Int, "$ID", id)
-			};
-			string sql = QueryBuilder.Build<Transaction>().AsSelect().Where("ID", id).ToString();
-
-			Transaction? result = null;
-			try {
-				result = db.ExecuteReader<Transaction>(sql, parameters).FirstOrDefault();
-			} catch (Exception ex) {
-				throw new Exception($"Query Failed! SQL: {sql}", ex);
-			}
-
-			return result;
-		}
-	}
-
-	// It complains if we don't override this too
-	public override int GetHashCode() {
-		throw new NotImplementedException();
 	}
 }
