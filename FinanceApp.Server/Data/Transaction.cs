@@ -48,7 +48,20 @@ public class Transaction : IEloquent<Transaction> {
 	}
 
 	protected override Transaction Update() {
-		throw new NotImplementedException();
+		using (SqliteDatabase db = new SqliteDatabase()) {
+			ParameterCollection parameters = new() {
+				new Parameter(System.Data.SqlDbType.Int, "$Value", Value)
+			};
+			string sql = QueryBuilder.Build<Transaction>().AsUpdate().ToString();
+
+			try {
+				db.ExecuteNonQuery(sql, parameters);
+			} catch (Exception ex) {
+				throw new Exception($"Query Failed! SQL: {sql}", ex);
+			}
+
+			return this;
+		}
 	}
 
 	protected override Transaction Insert() {

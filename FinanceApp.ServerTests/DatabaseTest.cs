@@ -9,10 +9,11 @@ public class TransactionTest {
 	const long EXODIA_THE_FORBIDDEN_ONE = 120;
 	const long OTHER_YUGIOH_REFERENCE = 150;
 
-	[ClassInitialize]
-	public static void ClassInit(TestContext context) {
+	[TestInitialize()]
+	public void TestInit() {
 		MigrationService ms = new MigrationService();
 		ms.RefreshTables<SqliteDatabase>();
+		SeedTestData();
 	}
 
 	[TestMethod]
@@ -24,7 +25,7 @@ public class TransactionTest {
 
 			test.Save();
 
-			Assert.AreEqual(1, test.ID);
+			Assert.AreEqual(2, test.ID);
 		}
 	}
 
@@ -45,11 +46,11 @@ public class TransactionTest {
 		using (SqliteDatabase db = new()) {
 			Transaction transaction = Transaction.Find(1)!;
 			transaction.Value = OTHER_YUGIOH_REFERENCE;
+			transaction.Save();
 
-			transaction.Save(); // transaction.Update(); ?
+			Transaction result = Transaction.Find(1)!;
 
-			// How to assert this worked???
-			Assert.AreEqual(1, transaction.ID);
+			Assert.AreEqual(OTHER_YUGIOH_REFERENCE, result.Value);
 		}
 	}
 
@@ -62,6 +63,13 @@ public class TransactionTest {
 			Transaction transaction = Transaction.Find(1)!;
 
 			Assert.AreEqual(EXODIA_THE_FORBIDDEN_ONE, transaction.Value);
+		}
+	}
+
+	private void SeedTestData() {
+		using (SqliteDatabase db = new()) {
+			Transaction test = new(db, EXODIA_THE_FORBIDDEN_ONE);
+			test.Save();
 		}
 	}
 }

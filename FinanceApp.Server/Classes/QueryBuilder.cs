@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using Microsoft.EntityFrameworkCore.Migrations.Operations.Builders;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
 using System.Text;
 
@@ -50,6 +51,20 @@ public class QueryBuilder {
 		// Is this safe, or should we grab the column name and stick a dollar sign in front of it?
 		sb.Append(string.Join(", ", Columns.Where(x => x != "ID").Select(x => $"${x}")));
 		sb.Append(")");
+
+		Query = sb.ToString();
+
+		return this;
+	}
+
+	public QueryBuilder AsUpdate() {
+		StringBuilder sb = new StringBuilder();
+
+		sb.Append($"UPDATE {TableName} SET ");
+
+		foreach (string col in Columns.Where(x => x != "ID")) {
+			sb.Append($"{col} = ${col}");
+		}
 
 		Query = sb.ToString();
 
