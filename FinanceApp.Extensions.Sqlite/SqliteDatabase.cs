@@ -15,7 +15,7 @@ public class SqliteDatabase : IDatabase {
 			SqliteCommand command = DB.CreateCommand();
 			command.CommandText = sql;
 			ParameterCollection parameters = ParameterCollection.Empty;
-			command.Parameters.AddRange(parameters.ConvertParameters(p => Convert(p)));
+			command.Parameters.AddRange(parameters.ConvertParameters(Convert));
 
 			long? count = (long?) command.ExecuteScalar();
 			return count;
@@ -33,7 +33,7 @@ public class SqliteDatabase : IDatabase {
 	public List<T> ExecuteReader<T>(string sql, ParameterCollection vars) where T : new() {
 		SqliteCommand command = DB.CreateCommand();
 		command.CommandText = sql;
-		command.Parameters.AddRange(vars.ConvertParameters(p => Convert(p)));
+		command.Parameters.AddRange(vars.ConvertParameters(Convert));
 
 		List<T> result = new();
 
@@ -56,7 +56,7 @@ public class SqliteDatabase : IDatabase {
 	public int ExecuteNonQuery(string sql, ParameterCollection vars) {
 		SqliteCommand command = DB.CreateCommand();
 		command.CommandText = sql;
-		command.Parameters.AddRange(vars.ConvertParameters(p => Convert(p)));
+		command.Parameters.AddRange(vars.ConvertParameters(Convert));
 		return command.ExecuteNonQuery();
 	}
 

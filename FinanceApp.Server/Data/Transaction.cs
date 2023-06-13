@@ -10,8 +10,6 @@ namespace Server.Data;
 
 [Table("Transactions")]
 public class Transaction : IEloquent<Transaction> {
-	// MONEY MONEY MONEY MONEY MONEY TRANSACTION MONEY MONEY I believe that's how banks work
-
 	private readonly IDatabase Database;
 
 	// Prevent ID being modified if exists on DB = true?
@@ -23,7 +21,7 @@ public class Transaction : IEloquent<Transaction> {
 	public string Transactee { get; set; }
 
 	public Transaction() {
-		// [TODO] necessary for db.ExecuteReader
+		// [TODO] necessary for db.ExecuteReader, can we remove or at least get rid of the underline on it?
 	}
 
 	public Transaction(IDatabase database, long value, string transactee)
@@ -34,7 +32,7 @@ public class Transaction : IEloquent<Transaction> {
 	}
 
 	public override string ToString() {
-		return $"Transaction ID: {ID}, Value: {Value}";
+		return $"Transaction ID: {ID}, Value: {Value}, Transactee: {Transactee}";
 	}
 
 	// [TODO] Can we pull this up to IEloquent? Value == other.Value and similar model-specific comparisons like that would be the only problem, but reflection could fix that? I think?
@@ -53,7 +51,9 @@ public class Transaction : IEloquent<Transaction> {
 	}
 
 	protected override Transaction Update() {
-		using (SqliteDatabase db = new SqliteDatabase()) {
+		using (SqliteDatabase db = new()) {
+			// [TODO] This whole deal of converting columns into their DB equivalent and using that to fill out Parameters, should be refactored, maybe moved into another class even?
+			// Something that can save a map of the properties to their DB types, and be thrown around - or do we want an Attribute to store DB type? Seems too manual, but would perform better?
 			List<PropertyInfo> cols = new();
 
 			Type type = typeof(Transaction);
@@ -87,9 +87,11 @@ public class Transaction : IEloquent<Transaction> {
 			}
 
 			// [TODO] Both Update here, and the QueryBuilder below need a list of columns. Can we safely pass through this list here while being safe from SQL injection? Probably.
+			// Also, is there a way/would it be useful to cache this data so we're not performing all these reflection operations on every query?
 			string sql = QueryBuilder.Build<Transaction>().AsUpdate().ToString();
 
 			try {
+				// Using Database property fails test, because after Find() gets the model from DB, the Database property is never filled.
 				db.ExecuteNonQuery(sql, parameters);
 			} catch (Exception ex) {
 				throw new Exception($"Query Failed! SQL: {sql}", ex);
@@ -100,53 +102,51 @@ public class Transaction : IEloquent<Transaction> {
 	}
 
 	protected override Transaction Insert() {
-		using (SqliteDatabase db = new SqliteDatabase()) {
-			List<PropertyInfo> cols = new();
+		List<PropertyInfo> cols = new();
 
-			Type type = typeof(Transaction);
-			foreach (PropertyInfo prop in type.GetProperties()) {
-				ColumnAttribute? nameAttr = (ColumnAttribute?) prop.GetCustomAttributes(typeof(ColumnAttribute), true).FirstOrDefault();
+		Type type = typeof(Transaction);
+		foreach (PropertyInfo prop in type.GetProperties()) {
+			ColumnAttribute? nameAttr = (ColumnAttribute?) prop.GetCustomAttributes(typeof(ColumnAttribute), true).FirstOrDefault();
 
-				if (nameAttr?.Name != null) {
-					cols.Add(prop);
-				}
+			if (nameAttr?.Name != null) {
+				cols.Add(prop);
 			}
-
-			ParameterCollection parameters = new();
-
-			foreach (PropertyInfo col in cols.Where(c => c.Name != "ID")) {
-				SqlDbType sqlDbType;
-
-				TypeCode typeCode = Type.GetTypeCode(col.PropertyType);
-				switch (typeCode) {
-					case TypeCode.Int64:
-						sqlDbType = SqlDbType.Int;
-						break;
-					case TypeCode.Boolean:
-						sqlDbType = SqlDbType.Bit;
-						break;
-					default:
-						sqlDbType = SqlDbType.Text;
-						break;
-				}
-
-				parameters.Add(new Parameter(sqlDbType, $"${col.Name}", col.GetValue(this)));
-			}
-
-			string sql = QueryBuilder.Build<Transaction>().AsInsert().ToString();
-
-			try {
-				db.ExecuteNonQuery(sql, parameters);
-			} catch (Exception ex) {
-				throw new Exception($"Query Failed! SQL: {sql}", ex);
-			}
-
-			// This should be fine right?
-			ID = (long) db.LastInsertId!;
-
-			existsOnDb = true;
-
-			return this;
 		}
+
+		ParameterCollection parameters = new();
+
+		foreach (PropertyInfo col in cols.Where(c => c.Name != "ID")) {
+			SqlDbType sqlDbType;
+
+			TypeCode typeCode = Type.GetTypeCode(col.PropertyType);
+			switch (typeCode) {
+				case TypeCode.Int64:
+					sqlDbType = SqlDbType.Int;
+					break;
+				case TypeCode.Boolean:
+					sqlDbType = SqlDbType.Bit;
+					break;
+				default:
+					sqlDbType = SqlDbType.Text;
+					break;
+			}
+
+			parameters.Add(new Parameter(sqlDbType, $"${col.Name}", col.GetValue(this)));
+		}
+
+		string sql = QueryBuilder.Build<Transaction>().AsInsert().ToString();
+
+		try {
+			Database.ExecuteNonQuery(sql, parameters);
+		} catch (Exception ex) {
+			throw new Exception($"Query Failed! SQL: {sql}", ex);
+		}
+
+		// This should be fine right?
+		ID = (long) Database.LastInsertId!;
+
+		existsOnDb = true;
+
+		return this;
 	}
 }

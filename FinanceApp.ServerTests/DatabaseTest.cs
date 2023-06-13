@@ -1,3 +1,4 @@
+using FinanceApp.Abstractions;
 using FinanceApp.Extensions.Sqlite;
 using Server.Data;
 using Server.Services;
@@ -5,72 +6,103 @@ using Server.Services;
 namespace ServerTest;
 
 [TestClass]
-public class TransactionTest {
-	const long EXODIA_THE_FORBIDDEN_ONE = 120;
-	const long OTHER_YUGIOH_REFERENCE = 150;
-	const string JOHN_DOE = "John Doe";
-
-	[TestInitialize()]
-	public void TestInit() {
+public class DatabaseTest {
+	[ClassInitialize]
+	public static void ClassInit(TestContext context) {
 		MigrationService ms = new MigrationService();
 		ms.RefreshTables<SqliteDatabase>();
-		SeedTestData();
 	}
 
 	[TestMethod]
-	public void TestCreateTransaction() {
+	public void TestOpenClose() {
+		SqliteDatabase db = new();
+		db.OpenConnection();
+		Assert.IsTrue(db.State == System.Data.ConnectionState.Open);
+		db.Dispose();
+		Assert.IsTrue(db.State == System.Data.ConnectionState.Closed);
+	}
+
+	[TestMethod]
+	public void TestExecuteNonQuery() {
 		using (SqliteDatabase db = new()) {
-			Transaction test = new(db, EXODIA_THE_FORBIDDEN_ONE, JOHN_DOE);
+			string sql =
+			@"
+				INSERT INTO Transactions (
+					Value
+				)
+				VALUES (
+					250
+				);
+			";
 
-			Assert.AreEqual(0, test.ID);
-
-			test.Save();
-
-			Assert.AreEqual(2, test.ID);
+			int rowsUpdated = db.ExecuteNonQuery(sql, ParameterCollection.Empty);
+			Assert.AreEqual(1, rowsUpdated);
 		}
 	}
 
 	[TestMethod]
-	public void TestSelectTransaction() {
-		using (SqliteDatabase db = new()) {
-			Transaction expected = new(db, EXODIA_THE_FORBIDDEN_ONE, JOHN_DOE);
-			expected.ID = 1;
-
-			Transaction? result = Transaction.Find(1);
-
-			Assert.AreEqual(expected, result);
-		}
+	public void TestExecuteNonQueryWithParams() {
+		int rowsUpdated = InsertIntoTransactionsWithParams(125);
+		Assert.AreEqual(1, rowsUpdated);
 	}
 
 	[TestMethod]
-	public void TestSaveTransaction() {
+	public void TestExecuteReader() {
+		MigrationService ms = new MigrationService();
+		ms.RefreshTables<SqliteDatabase>();
+		InsertIntoTransactionsWithParams(250);
+		InsertIntoTransactionsWithParams(125);
+
 		using (SqliteDatabase db = new()) {
-			Transaction transaction = Transaction.Find(1)!;
-			transaction.Value = OTHER_YUGIOH_REFERENCE;
-			transaction.Save();
-
-			Transaction result = Transaction.Find(1)!;
-
-			Assert.AreEqual(OTHER_YUGIOH_REFERENCE, result.Value);
+			string sql =
+			@"
+				SELECT *
+				FROM Transactions
+			";
+			List<Transaction> transactions = db.ExecuteReader<Transaction>(sql, ParameterCollection.Empty);
+			Assert.AreEqual(2, transactions.Count);
 		}
 	}
 
-	[Ignore]
+	// [TODO] Test reader with NULL result
+
 	[TestMethod]
-	public void TestUpdateTransaction() {
+	public void TestExecuteReaderWithParams() {
+		MigrationService ms = new MigrationService();
+		ms.RefreshTables<SqliteDatabase>();
+		InsertIntoTransactionsWithParams(250);
+		InsertIntoTransactionsWithParams(125);
+
 		using (SqliteDatabase db = new()) {
-			//Transaction.Where('value', OTHER_YUGIOH_REFERENCE).Update('value', EXODIA_THE_FORBIDDEN_ONE);
-
-			Transaction transaction = Transaction.Find(1)!;
-
-			Assert.AreEqual(EXODIA_THE_FORBIDDEN_ONE, transaction.Value);
+			string sql =
+			@"
+				SELECT *
+				FROM Transactions
+				WHERE Value = $value
+			";
+			ParameterCollection parameters = new() {
+				new Parameter(System.Data.SqlDbType.Int, "$value", 125)
+			};
+			List<Transaction> transactions = db.ExecuteReader<Transaction>(sql, parameters);
+			Assert.AreEqual(1, transactions.Count);
 		}
 	}
 
-	private void SeedTestData() {
+	private int InsertIntoTransactionsWithParams(int value) {
 		using (SqliteDatabase db = new()) {
-			Transaction test = new(db, EXODIA_THE_FORBIDDEN_ONE, JOHN_DOE);
-			test.Save();
+			string sql =
+			@"
+				INSERT INTO Transactions (
+					Value
+				)
+				VALUES (
+					$value
+				);
+			";
+			ParameterCollection parameters = new() {
+				new Parameter(System.Data.SqlDbType.Int, "$value", value)
+			};
+			return db.ExecuteNonQuery(sql, parameters);
 		}
 	}
 }

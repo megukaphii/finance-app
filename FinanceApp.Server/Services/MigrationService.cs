@@ -31,7 +31,7 @@ public class MigrationService : IMigrationService
 		Console.WriteLine("Creating tables...");
 		using (IDatabase db = new TDatabase())
         {
-			// [TODO] Generate SQL with reflection on model classes?
+			// [TODO] Generate SQL with reflection on model classes? Will fail DatabaseTest as NOT NULL values will be set to NULL, maybe have simpler DB structure just for those tests?
             string sql =
             @"
 				CREATE TABLE IF NOT EXISTS Transactions (

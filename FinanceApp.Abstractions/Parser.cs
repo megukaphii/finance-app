@@ -31,8 +31,10 @@ public class Parser {
 			string fieldName = reader.GetName(i);
 			PropertyInfo? field = properties.SingleOrDefault(p => p.Name == fieldName);
 
+			object? value = reader.GetValue(i);
+			value = value.GetType() == typeof(DBNull) ? null : value;
 			if (field != null) {
-				field.SetValue(t, reader.GetValue(i));
+				field.SetValue(t, value);
 			} else {
 				throw new Exception($"{parseInto.Name} doesn't contain field {fieldName}");
 			}

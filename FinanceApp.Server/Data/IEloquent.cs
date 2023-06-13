@@ -20,6 +20,7 @@ public abstract class IEloquent<T> where T : IEloquent<T>, new() {
 	protected abstract T Insert();
 
 	public static T? Find(int id){
+		// [TODO] Given that these are static methods, how do we inject the appropriate DB?
 		using (SqliteDatabase db = new SqliteDatabase()) {
 			ParameterCollection parameters = new() {
 				new Parameter(System.Data.SqlDbType.Int, "$ID", id)
