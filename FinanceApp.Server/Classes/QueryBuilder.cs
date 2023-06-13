@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations.Operations.Builders;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
 using System.Text;
 
@@ -62,9 +61,11 @@ public class QueryBuilder {
 
 		sb.Append($"UPDATE {TableName} SET ");
 
-		foreach (string col in Columns.Where(x => x != "ID")) {
-			sb.Append($"{col} = ${col}");
-		}
+		List<string> setCols = Columns
+			.Where(x => x != "ID")
+			.Select(x => $"{x} = ${x}")
+			.ToList();
+		sb.Append(string.Join(", ", setCols));
 
 		Query = sb.ToString();
 

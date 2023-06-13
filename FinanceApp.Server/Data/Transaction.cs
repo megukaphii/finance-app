@@ -54,9 +54,39 @@ public class Transaction : IEloquent<Transaction> {
 
 	protected override Transaction Update() {
 		using (SqliteDatabase db = new SqliteDatabase()) {
-			ParameterCollection parameters = new() {
-				new Parameter(System.Data.SqlDbType.Int, "$Value", Value)
-			};
+			List<PropertyInfo> cols = new();
+
+			Type type = typeof(Transaction);
+			foreach (PropertyInfo prop in type.GetProperties()) {
+				ColumnAttribute? nameAttr = (ColumnAttribute?) prop.GetCustomAttributes(typeof(ColumnAttribute), true).FirstOrDefault();
+
+				if (nameAttr?.Name != null) {
+					cols.Add(prop);
+				}
+			}
+
+			ParameterCollection parameters = new();
+
+			foreach (PropertyInfo col in cols.Where(c => c.Name != "ID")) {
+				SqlDbType sqlDbType;
+
+				TypeCode typeCode = Type.GetTypeCode(col.PropertyType);
+				switch (typeCode) {
+					case TypeCode.Int64:
+						sqlDbType = SqlDbType.Int;
+						break;
+					case TypeCode.Boolean:
+						sqlDbType = SqlDbType.Bit;
+						break;
+					default:
+						sqlDbType = SqlDbType.Text;
+						break;
+				}
+
+				parameters.Add(new Parameter(sqlDbType, $"${col.Name}", col.GetValue(this)));
+			}
+
+			// [TODO] Both Update here, and the QueryBuilder below need a list of columns. Can we safely pass through this list here while being safe from SQL injection? Probably.
 			string sql = QueryBuilder.Build<Transaction>().AsUpdate().ToString();
 
 			try {
