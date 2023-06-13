@@ -31,11 +31,13 @@ public class MigrationService : IMigrationService
 		Console.WriteLine("Creating tables...");
 		using (IDatabase db = new TDatabase())
         {
+			// [TODO] Generate SQL with reflection on model classes?
             string sql =
             @"
 				CREATE TABLE IF NOT EXISTS Transactions (
 					ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-					Value INTEGER
+					Value INTEGER,
+					Transactee TEXT
 				);
 			";
             db.ExecuteNonQuery(sql, ParameterCollection.Empty);

@@ -33,9 +33,9 @@ public class ParameterCollection : IEnumerable<Parameter> {
 public class Parameter {
 	public SqlDbType type;
 	public string name;
-	public object value;
+	public object? value;
 
-	public Parameter(SqlDbType type, string name, object value) {
+	public Parameter(SqlDbType type, string name, object? value) {
 		this.type = type;
 		this.name = name;
 		this.value = value;

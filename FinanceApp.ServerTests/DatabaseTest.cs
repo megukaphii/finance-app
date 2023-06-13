@@ -8,6 +8,7 @@ namespace ServerTest;
 public class TransactionTest {
 	const long EXODIA_THE_FORBIDDEN_ONE = 120;
 	const long OTHER_YUGIOH_REFERENCE = 150;
+	const string JOHN_DOE = "John Doe";
 
 	[TestInitialize()]
 	public void TestInit() {
@@ -19,7 +20,7 @@ public class TransactionTest {
 	[TestMethod]
 	public void TestCreateTransaction() {
 		using (SqliteDatabase db = new()) {
-			Transaction test = new(db, EXODIA_THE_FORBIDDEN_ONE);
+			Transaction test = new(db, EXODIA_THE_FORBIDDEN_ONE, JOHN_DOE);
 
 			Assert.AreEqual(0, test.ID);
 
@@ -32,7 +33,7 @@ public class TransactionTest {
 	[TestMethod]
 	public void TestSelectTransaction() {
 		using (SqliteDatabase db = new()) {
-			Transaction expected = new(db, EXODIA_THE_FORBIDDEN_ONE);
+			Transaction expected = new(db, EXODIA_THE_FORBIDDEN_ONE, JOHN_DOE);
 			expected.ID = 1;
 
 			Transaction? result = Transaction.Find(1);
@@ -68,7 +69,7 @@ public class TransactionTest {
 
 	private void SeedTestData() {
 		using (SqliteDatabase db = new()) {
-			Transaction test = new(db, EXODIA_THE_FORBIDDEN_ONE);
+			Transaction test = new(db, EXODIA_THE_FORBIDDEN_ONE, JOHN_DOE);
 			test.Save();
 		}
 	}

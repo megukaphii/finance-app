@@ -3,6 +3,8 @@ using FinanceApp.Extensions.Sqlite;
 using FinanceApp.Server.Classes;
 using FinanceApp.Server.Data;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Data;
+using System.Reflection;
 
 namespace Server.Data;
 
@@ -17,15 +19,18 @@ public class Transaction : IEloquent<Transaction> {
 	public long ID { get; set; }
 	[Column("Value")]
     public long Value { get; set; }
+	[Column("Transactee")]
+	public string Transactee { get; set; }
 
 	public Transaction() {
 		// [TODO] necessary for db.ExecuteReader
 	}
 
-	public Transaction(IDatabase database, long value)
+	public Transaction(IDatabase database, long value, string transactee)
 	{
 		Database = database;
 		Value = value;
+		Transactee = transactee;
 	}
 
 	public override string ToString() {
@@ -66,9 +71,38 @@ public class Transaction : IEloquent<Transaction> {
 
 	protected override Transaction Insert() {
 		using (SqliteDatabase db = new SqliteDatabase()) {
-			ParameterCollection parameters = new() {
-				new Parameter(System.Data.SqlDbType.Int, "$Value", Value)
-			};
+			List<PropertyInfo> cols = new();
+
+			Type type = typeof(Transaction);
+			foreach (PropertyInfo prop in type.GetProperties()) {
+				ColumnAttribute? nameAttr = (ColumnAttribute?) prop.GetCustomAttributes(typeof(ColumnAttribute), true).FirstOrDefault();
+
+				if (nameAttr?.Name != null) {
+					cols.Add(prop);
+				}
+			}
+
+			ParameterCollection parameters = new();
+
+			foreach (PropertyInfo col in cols.Where(c => c.Name != "ID")) {
+				SqlDbType sqlDbType;
+
+				TypeCode typeCode = Type.GetTypeCode(col.PropertyType);
+				switch (typeCode) {
+					case TypeCode.Int64:
+						sqlDbType = SqlDbType.Int;
+						break;
+					case TypeCode.Boolean:
+						sqlDbType = SqlDbType.Bit;
+						break;
+					default:
+						sqlDbType = SqlDbType.Text;
+						break;
+				}
+
+				parameters.Add(new Parameter(sqlDbType, $"${col.Name}", col.GetValue(this)));
+			}
+
 			string sql = QueryBuilder.Build<Transaction>().AsInsert().ToString();
 
 			try {
