@@ -1,9 +1,9 @@
 using FinanceApp.Abstractions;
 using FinanceApp.Extensions.Sqlite;
-using Server.Data;
-using Server.Services;
+using FinanceApp.Server.Data;
+using FinanceApp.Server.Services;
 
-namespace ServerTest;
+namespace FinanceApp.ServerTests;
 
 [TestClass]
 public class DatabaseTest {

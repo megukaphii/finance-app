@@ -1,13 +1,13 @@
-﻿using FinanceApp.Abstractions;
-using FinanceApp.Data;
-using FinanceApp.Extensions.Sqlite;
-using System.Net;
+﻿using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using FinanceApp.Abstractions;
+using FinanceApp.Data;
+using FinanceApp.Extensions.Sqlite;
 
-namespace Server.Classes;
+namespace FinanceApp.Server.Classes;
 
 public class FinanceServer : IServer
 {

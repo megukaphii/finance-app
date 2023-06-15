@@ -32,7 +32,7 @@ public class Parser {
 			PropertyInfo? field = properties.SingleOrDefault(p => p.Name == fieldName);
 
 			object? value = reader.GetValue(i);
-			value = value.GetType() == typeof(DBNull) ? null : value;
+			value = value is DBNull ? null : value;
 			if (field != null) {
 				field.SetValue(t, value);
 			} else {

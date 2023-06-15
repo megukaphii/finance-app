@@ -4,6 +4,7 @@ using System.Data;
 using System.Reflection;
 using MSSqliteParameter = Microsoft.Data.Sqlite.SqliteParameter;
 using Microsoft.Extensions.DependencyInjection;
+
 namespace FinanceApp.Extensions.Sqlite;
 
 public class SqliteDatabase : IDatabase {

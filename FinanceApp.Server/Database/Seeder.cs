@@ -1,7 +1,7 @@
 ﻿using FinanceApp.Abstractions;
 using FinanceApp.Extensions.Sqlite;
 
-namespace Server.Database;
+namespace FinanceApp.Server.Database;
 
 internal static class Seeder {
 	internal static void SeedDB() {

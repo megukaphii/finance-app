@@ -1,6 +1,6 @@
 ﻿using FinanceApp.Extensions.Sqlite;
-using Server.Classes;
-using Server.Services;
+using FinanceApp.Server.Classes;
+using FinanceApp.Server.Services;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 

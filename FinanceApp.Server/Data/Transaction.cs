@@ -1,12 +1,11 @@
-﻿using FinanceApp.Abstractions;
-using FinanceApp.Extensions.Sqlite;
-using FinanceApp.Server.Classes;
-using FinanceApp.Server.Data;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
 using System.Reflection;
+using FinanceApp.Abstractions;
+using FinanceApp.Extensions.Sqlite;
+using FinanceApp.Server.Classes;
 
-namespace Server.Data;
+namespace FinanceApp.Server.Data;
 
 [Table("Transactions")]
 public class Transaction : IEloquent<Transaction> {

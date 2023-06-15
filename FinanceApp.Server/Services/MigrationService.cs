@@ -1,7 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using FinanceApp.Abstractions;
+﻿using FinanceApp.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace Server.Services;
+namespace FinanceApp.Server.Services;
 
 public interface IMigrationService {
     void RefreshTables<TDatabase>() where TDatabase : IDatabase, new();

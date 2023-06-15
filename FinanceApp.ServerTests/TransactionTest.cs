@@ -1,8 +1,8 @@
 using FinanceApp.Extensions.Sqlite;
-using Server.Data;
-using Server.Services;
+using FinanceApp.Server.Data;
+using FinanceApp.Server.Services;
 
-namespace ServerTest;
+namespace FinanceApp.ServerTests;
 
 [TestClass]
 public class TransactionTest {
@@ -12,7 +12,7 @@ public class TransactionTest {
 
 	[TestInitialize()]
 	public void TestInit() {
-		MigrationService ms = new MigrationService();
+		MigrationService ms = new();
 		ms.RefreshTables<SqliteDatabase>();
 		SeedTestData();
 	}

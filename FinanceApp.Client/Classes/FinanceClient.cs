@@ -1,11 +1,11 @@
-﻿using FinanceApp.Data;
-using System.Net;
+﻿using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using FinanceApp.Data;
 
-namespace Client.Classes;
+namespace FinanceApp.Client.Classes;
 
 public class FinanceClient : IClient
 {

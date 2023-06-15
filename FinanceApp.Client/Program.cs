@@ -1,4 +1,4 @@
-﻿using Client.Classes;
+﻿using FinanceApp.Client.Classes;
 
 FinanceClient client = new();
 await client.Start();
