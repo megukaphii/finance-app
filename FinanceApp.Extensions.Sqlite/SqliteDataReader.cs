@@ -4,7 +4,7 @@ using MSSqliteDataReader = Microsoft.Data.Sqlite.SqliteDataReader;
 namespace FinanceApp.Extensions.Sqlite;
 
 public class SqliteDataReader : IDataReader {
-	MSSqliteDataReader dataReader;
+    private readonly MSSqliteDataReader dataReader;
 
 	public int FieldCount => dataReader.FieldCount;
 
@@ -29,6 +29,7 @@ public class SqliteDataReader : IDataReader {
 	}
 
 	public void Dispose() {
+        GC.SuppressFinalize(this);
 		dataReader.Dispose();
 	}
 }

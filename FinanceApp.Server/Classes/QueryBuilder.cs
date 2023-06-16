@@ -7,7 +7,7 @@ namespace FinanceApp.Server.Classes;
 
 public class QueryBuilder {
 	public string TableName { get; set; } = string.Empty;
-	public List<string> Columns { get; set; } = new List<string>();
+	public List<string> Columns { get; set; } = new();
 	public string Query { get; set; } = string.Empty;
 
 	public override string ToString() {
@@ -15,7 +15,7 @@ public class QueryBuilder {
 	}
 
 	public QueryBuilder AsSelect() {
-		StringBuilder sb = new StringBuilder();
+		StringBuilder sb = new();
 
 		sb.Append("SELECT ");
 
@@ -28,7 +28,7 @@ public class QueryBuilder {
 	}
 
 	public QueryBuilder AsInsert() {
-		StringBuilder sb = new StringBuilder();
+		StringBuilder sb = new();
 
 		sb.Append($"INSERT INTO {TableName} (");
 		// [TODO] Should we store the ID column separately? Probably?
@@ -44,7 +44,7 @@ public class QueryBuilder {
 	}
 
 	public QueryBuilder AsUpdate() {
-		StringBuilder sb = new StringBuilder();
+		StringBuilder sb = new();
 
 		sb.Append($"UPDATE {TableName} SET ");
 
@@ -60,15 +60,14 @@ public class QueryBuilder {
 	}
 
 	public QueryBuilder Where(string column, object value) {
-		StringBuilder sb = new StringBuilder(Query);
+		StringBuilder sb = new(Query);
 
 		// Would break if ID was extracted to its' own property
 		if (!Columns.Contains(column)) {
 			throw new ArgumentException($"Column {column} does not exist or is not accessible on {TableName}!");
 		}
 
-		// [TODO] It's hardcoded to the ID, duh
-		sb.Append($" WHERE {column} = $ID");
+		sb.Append($" WHERE {column} = ${column}");
 
 		Query = sb.ToString();
 

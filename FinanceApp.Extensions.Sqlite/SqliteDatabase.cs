@@ -31,6 +31,7 @@ public class SqliteDatabase : IDatabase {
 		return this;
 	}
 
+    // TODO Should implement IEloquent, then we can set existsOnDb, but that's a circular dependency
 	public List<T> ExecuteReader<T>(string sql, ParameterCollection vars) where T : new() {
 		SqliteCommand command = DB.CreateCommand();
 		command.CommandText = sql;
@@ -41,7 +42,7 @@ public class SqliteDatabase : IDatabase {
 		using (Abstractions.IDataReader reader = new SqliteDataReader(command.ExecuteReader())) {
 			Type type = typeof(T);
 			PropertyInfo[] properties = type.GetProperties();
-			Parser parser = new Parser(reader, type, properties);
+			Parser parser = new(reader, type, properties);
 			result = parser.PerformParse<T>();
 		}
 
@@ -49,7 +50,7 @@ public class SqliteDatabase : IDatabase {
 	}
 
 	private MSSqliteParameter Convert(Parameter parameter) {
-		MSSqliteParameter result = new MSSqliteParameter(parameter.name, (SqliteType) parameter.type);
+		MSSqliteParameter result = new(parameter.name, (SqliteType) parameter.type);
 		result.Value = parameter.value;
 		return result;
 	}
