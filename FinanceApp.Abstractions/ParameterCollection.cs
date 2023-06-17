@@ -4,7 +4,7 @@ using System.Data;
 namespace FinanceApp.Abstractions;
 
 public class ParameterCollection : IEnumerable<Parameter> {
-	private List<Parameter> parameters = new List<Parameter>();
+	private List<Parameter> parameters = new();
 
 	private static ParameterCollection empty = new();
 	public static ParameterCollection Empty => empty;

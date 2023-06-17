@@ -74,12 +74,10 @@ public class QueryBuilder {
 		return this;
 	}
 
-	public static QueryBuilder Build<T>(IEnumerable<string> additionalConstraints = null) {
-		var result = new QueryBuilder();
-
-		var type = typeof(T);
-
-		var attr = (TableAttribute?) type.GetCustomAttribute(typeof(TableAttribute), true);
+	public static QueryBuilder Build<T>() {
+		QueryBuilder result = new();
+		Type type = typeof(T);
+		TableAttribute? attr = (TableAttribute?) type.GetCustomAttribute(typeof(TableAttribute), true);
 
 		if (attr != null) {
 			result.TableName = attr.Name;
@@ -87,12 +85,11 @@ public class QueryBuilder {
 			throw new ArgumentException($"{type.Name} does not represent a DB table");
 		}
 
-		foreach (var prop in type.GetProperties()) {
-			// [TODO] Can we just get the list of properties with the column attribute, then use the property name, rather than the name provided to the attribute?
-			var nameAttr = (ColumnAttribute?) prop.GetCustomAttributes(typeof(ColumnAttribute), true).FirstOrDefault();
+		foreach (PropertyInfo prop in type.GetProperties()) {
+            bool hasColumnAttribute = prop.GetCustomAttributes(typeof(ColumnAttribute), true).Length > 0;
 
-			if (nameAttr?.Name != null) {
-				result.Columns.Add(nameAttr.Name);
+            if (hasColumnAttribute) {
+				result.Columns.Add(prop.Name);
 			}
 		}
 

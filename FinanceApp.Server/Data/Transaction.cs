@@ -8,7 +8,7 @@ using FinanceApp.Server.Classes;
 namespace FinanceApp.Server.Data;
 
 [Table("Transactions")]
-public class Transaction : IEloquent<Transaction> {
+public class Transaction : Eloquent<Transaction> {
 	private readonly IDatabase Database;
 
 	// Prevent ID being modified if exists on DB = true?
@@ -35,14 +35,15 @@ public class Transaction : IEloquent<Transaction> {
 	}
 
 	// [TODO] Can we pull this up to IEloquent? Value == other.Value and similar model-specific comparisons like that would be the only problem, but reflection could fix that? I think?
-	public override bool Equals(object? obj) {
-		if ((obj == null) || !GetType().Equals(obj.GetType())) {
+	public override bool Equals(object? obj)
+    {
+        if (obj == null || GetType() != obj.GetType()) {
 			return false;
-		} else {
-			Transaction other = (Transaction) obj;
-			return (ID == other.ID) && (Value == other.Value);
 		}
-	}
+
+        Transaction other = (Transaction) obj;
+        return ID == other.ID && Value == other.Value;
+    }
 
 	// It complains if we don't override this too
 	public override int GetHashCode() {
@@ -144,7 +145,7 @@ public class Transaction : IEloquent<Transaction> {
 		// This should be fine right?
 		ID = (long) Database.LastInsertId!;
 
-		existsOnDb = true;
+		ExistsOnDb = true;
 
 		return this;
 	}

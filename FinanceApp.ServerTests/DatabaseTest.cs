@@ -9,7 +9,7 @@ namespace FinanceApp.ServerTests;
 public class DatabaseTest {
 	[ClassInitialize]
 	public static void ClassInit(TestContext context) {
-		MigrationService ms = new MigrationService();
+		MigrationService ms = new();
 		ms.RefreshTables<SqliteDatabase>();
 	}
 
@@ -46,9 +46,33 @@ public class DatabaseTest {
 		Assert.AreEqual(1, rowsUpdated);
 	}
 
+    [TestMethod]
+    public void TestExecuteNonQueryWithNullParam()
+    {
+        int rowsUpdated;
+        using (SqliteDatabase db = new()) {
+            string sql =
+            @"
+			    INSERT INTO Transactions (
+				    Transactee
+			    )
+			    VALUES (
+				    $transactee
+			    );
+		    ";
+            
+            ParameterCollection parameters = new() {
+                new Parameter(System.Data.SqlDbType.Text, "$transactee", null)
+            };
+            rowsUpdated = db.ExecuteNonQuery(sql, parameters);
+        }
+        
+        Assert.AreEqual(1, rowsUpdated);
+    }
+
 	[TestMethod]
 	public void TestExecuteReader() {
-		MigrationService ms = new MigrationService();
+		MigrationService ms = new();
 		ms.RefreshTables<SqliteDatabase>();
 		InsertIntoTransactionsWithParams(250);
 		InsertIntoTransactionsWithParams(125);
@@ -56,7 +80,7 @@ public class DatabaseTest {
 		using (SqliteDatabase db = new()) {
 			string sql =
 			@"
-				SELECT *
+				SELECT ID, Value
 				FROM Transactions
 			";
 			List<Transaction> transactions = db.ExecuteReader<Transaction>(sql, ParameterCollection.Empty);
@@ -64,11 +88,27 @@ public class DatabaseTest {
 		}
 	}
 
-	// [TODO] Test reader with NULL result
+    [TestMethod]
+    public void TestExecuteReaderWithNullResult() {
+        MigrationService ms = new();
+        ms.RefreshTables<SqliteDatabase>();
+        InsertIntoTransactionsWithParams(250);
 
-	[TestMethod]
+        using (SqliteDatabase db = new()) {
+            string sql =
+                @"
+				SELECT Transactee
+				FROM Transactions
+				WHERE ID = 1
+			";
+            List<Transaction> transactions = db.ExecuteReader<Transaction>(sql, ParameterCollection.Empty);
+            Assert.IsNull(transactions[0].Transactee);
+        }
+    }
+
+    [TestMethod]
 	public void TestExecuteReaderWithParams() {
-		MigrationService ms = new MigrationService();
+		MigrationService ms = new();
 		ms.RefreshTables<SqliteDatabase>();
 		InsertIntoTransactionsWithParams(250);
 		InsertIntoTransactionsWithParams(125);
@@ -76,7 +116,7 @@ public class DatabaseTest {
 		using (SqliteDatabase db = new()) {
 			string sql =
 			@"
-				SELECT *
+				SELECT ID, Value
 				FROM Transactions
 				WHERE Value = $value
 			";
