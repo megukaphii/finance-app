@@ -62,7 +62,7 @@ public class DatabaseTest {
 		    ";
             
             ParameterCollection parameters = new() {
-                new Parameter(System.Data.SqlDbType.Text, "$transactee", DBNull.Value)
+                new Parameter(System.Data.SqlDbType.Text, "$transactee", null)
             };
             rowsUpdated = db.ExecuteNonQuery(sql, parameters);
         }
