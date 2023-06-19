@@ -2,43 +2,53 @@
 
 namespace FinanceApp.Abstractions;
 
-public class Parser {
-	private readonly IDataReader reader;
-	private readonly Type parseInto;
-	private readonly PropertyInfo[] properties;
+public class Parser
+{
+    private readonly IDataReader reader;
+    private readonly PropertyInfo[] properties;
 
-	public Parser(IDataReader reader, Type parseInto, PropertyInfo[] properties) {
-		this.reader = reader;
-		this.parseInto = parseInto;
-		this.properties = properties;
-	}
+    public Parser(IDataReader reader, PropertyInfo[] properties)
+    {
+        this.reader = reader;
+        this.properties = properties;
+    }
 
-	public List<T> PerformParse<T>() where T : new() {
-		List<T> result = new();
+    public List<T> PerformParse<T>() where T : new()
+    {
+        List<T> result = new();
+        while (reader.Read()) {
+            result.Add(ParseObject<T>());
+        }
+        return result;
+    }
 
-		while (reader.Read()) {
-			result.Add(ParseObject<T>());
-		}
+    private T ParseObject<T>() where T : new()
+    {
+        T instance = new();
+        for (int i = 0; i < reader.FieldCount; i++) {
+            ParseField(instance, i);
+        }
+        return instance;
+    }
 
-		return result;
-	}
+    private void ParseField<T>(T instance, int fieldIdx)
+    {
+        string fieldName = reader.GetName(fieldIdx);
+        PropertyInfo property = GetProperty<T>(fieldName);
+        SetValue(property, instance, reader.GetValue(fieldIdx));
+    }
 
-	private T ParseObject<T>() where T : new() {
-		T t = new();
-		for (int i = 0; i < reader.FieldCount; i++) {
-			Type fieldType = reader.GetFieldType(i);
+    private PropertyInfo GetProperty<T>(string fieldName)
+    {
+        try {
+            return properties.Single(p => p.Name == fieldName);
+        } catch (Exception e) {
+            throw new Exception($"{typeof(T)} doesn't contain field {fieldName}", e);
+        }
+    }
 
-			string fieldName = reader.GetName(i);
-			PropertyInfo? field = properties.SingleOrDefault(p => p.Name == fieldName);
-
-			object? value = reader.GetValue(i);
-			value = value is DBNull ? null : value;
-			if (field != null) {
-				field.SetValue(t, value);
-			} else {
-				throw new Exception($"{parseInto.Name} doesn't contain field {fieldName}");
-			}
-		}
-		return t;
-	}
+    private static void SetValue<T>(PropertyInfo property, T instance, object value)
+    {
+        property.SetValue(instance, value is DBNull ? null : value);
+    }
 }

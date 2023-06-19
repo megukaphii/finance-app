@@ -42,7 +42,7 @@ public class SqliteDatabase : IDatabase {
 		using (Abstractions.IDataReader reader = new SqliteDataReader(command.ExecuteReader())) {
 			Type type = typeof(T);
 			PropertyInfo[] properties = type.GetProperties();
-			Parser parser = new(reader, type, properties);
+			Parser parser = new(reader, properties);
 			result = parser.PerformParse<T>();
 		}
 
