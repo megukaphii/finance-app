@@ -1,4 +1,5 @@
-﻿using FinanceApp.Abstractions;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using FinanceApp.Abstractions;
 using FinanceApp.Extensions.Sqlite;
 using FinanceApp.Server.Classes;
 
@@ -6,6 +7,21 @@ namespace FinanceApp.Server.Data;
 
 public abstract class Eloquent<T> where T : Eloquent<T>, new() {
     protected bool ExistsOnDb;
+    
+    private long id;
+    
+    [Column("ID")]
+    public long ID {
+        get => id;
+        set
+        {
+            if (!ExistsOnDb) {
+                id = value;
+            } else {
+                throw new Exception("Cannot assign ID to existing DB entry");
+            }
+        }
+    }
 
 	public T Save()
     {

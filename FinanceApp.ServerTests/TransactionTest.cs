@@ -56,6 +56,14 @@ public class TransactionTest {
 		}
 	}
 
+    [TestMethod]
+    public void TestUpdateTransactionID() {
+        using (SqliteDatabase db = new()) {
+            Transaction transaction = Transaction.Find(1)!;
+            Assert.ThrowsException<Exception>(() => transaction.ID = 2);
+        }
+    }
+
 	[Ignore]
 	[TestMethod]
 	public void TestUpdateTransaction() {

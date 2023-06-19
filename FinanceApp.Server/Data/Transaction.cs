@@ -10,10 +10,7 @@ namespace FinanceApp.Server.Data;
 [Table("Transactions")]
 public class Transaction : Eloquent<Transaction> {
 	private readonly IDatabase Database;
-
-	// Prevent ID being modified if exists on DB = true?
-	[Column("ID")]
-	public long ID { get; set; }
+    
 	[Column("Value")]
     public long Value { get; set; }
 	[Column("Transactee")]
