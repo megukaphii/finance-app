@@ -4,95 +4,102 @@ using System.Text;
 
 namespace FinanceApp.Server.Classes;
 
+public class QueryBuilder
+{
+    private string TableName { get; set; } = string.Empty;
+    private List<string> AllColumns => Columns.Concat(KeyColumns).ToList();
+    private List<string> KeyColumns { get; } = new();
+    private List<string> Columns { get; } = new();
 
-public class QueryBuilder {
-	public string TableName { get; set; } = string.Empty;
-	public List<string> Columns { get; set; } = new();
-	public string Query { get; set; } = string.Empty;
+    private string Query { get; set; } = string.Empty;
 
-	public override string ToString() {
-		return Query;
-	}
+    public override string ToString() { return Query; }
 
-	public QueryBuilder AsSelect() {
-		StringBuilder sb = new();
+    public QueryBuilder AsSelect()
+    {
+        StringBuilder sb = new();
 
-		sb.Append("SELECT ");
+        sb.Append("SELECT ");
 
-		sb.Append(string.Join(", ", Columns));
-		
-		sb.Append(" FROM ").Append(TableName);
+        sb.Append(string.Join(", ", AllColumns));
 
-		Query = sb.ToString();
-		return this;
-	}
+        sb.Append(" FROM ").Append(TableName);
 
-	public QueryBuilder AsInsert() {
-		StringBuilder sb = new();
+        Query = sb.ToString();
+        return this;
+    }
 
-		sb.Append($"INSERT INTO {TableName} (");
-		// [TODO] Should we store the ID column separately? Probably?
-		sb.Append(string.Join(", ", Columns.Where(x => x != "ID")));
-		sb.Append(") VALUES (");
-		// Is this safe, or should we grab the column name and stick a dollar sign in front of it?
-		sb.Append(string.Join(", ", Columns.Where(x => x != "ID").Select(x => $"${x}")));
-		sb.Append(")");
+    public QueryBuilder AsInsert()
+    {
+        StringBuilder sb = new();
 
-		Query = sb.ToString();
+        sb.Append($"INSERT INTO {TableName} (");
+        sb.Append(string.Join(", ", Columns));
+        sb.Append(") VALUES (");
+        sb.Append(string.Join(", ", Columns.Select(x => $"${x}")));
+        sb.Append(')');
 
-		return this;
-	}
+        Query = sb.ToString();
 
-	public QueryBuilder AsUpdate() {
-		StringBuilder sb = new();
+        return this;
+    }
 
-		sb.Append($"UPDATE {TableName} SET ");
+    public QueryBuilder AsUpdate()
+    {
+        StringBuilder sb = new();
 
-		List<string> setCols = Columns
-			.Where(x => x != "ID")
-			.Select(x => $"{x} = ${x}")
-			.ToList();
-		sb.Append(string.Join(", ", setCols));
+        sb.Append($"UPDATE {TableName} SET ");
 
-		Query = sb.ToString();
+        List<string> setCols = Columns
+            .Select(x => $"{x} = ${x}")
+            .ToList();
+        sb.Append(string.Join(", ", setCols));
 
-		return this;
-	}
+        Query = sb.ToString();
 
-	public QueryBuilder Where(string column, object value) {
-		StringBuilder sb = new(Query);
+        return this;
+    }
 
-		// Would break if ID was extracted to its' own property
-		if (!Columns.Contains(column)) {
-			throw new ArgumentException($"Column {column} does not exist or is not accessible on {TableName}!");
-		}
+    public QueryBuilder Where(string column, object value)
+    {
+        StringBuilder sb = new(Query);
 
-		sb.Append($" WHERE {column} = ${column}");
+        if (!AllColumns.Contains(column)) {
+            throw new ArgumentException($"Column {column} does not exist or is not accessible on {TableName}!");
+        }
 
-		Query = sb.ToString();
+        sb.Append($" WHERE {column} = ${column}");
 
-		return this;
-	}
+        Query = sb.ToString();
 
-	public static QueryBuilder Build<T>() {
-		QueryBuilder result = new();
-		Type type = typeof(T);
-		TableAttribute? attr = (TableAttribute?) type.GetCustomAttribute(typeof(TableAttribute), true);
+        return this;
+    }
 
-		if (attr != null) {
-			result.TableName = attr.Name;
-		} else {
-			throw new ArgumentException($"{type.Name} does not represent a DB table");
-		}
+    public static QueryBuilder Build<T>()
+    {
+        QueryBuilder result = new();
+        Type type = typeof(T);
+        TableAttribute? attr = (TableAttribute?)type.GetCustomAttribute(typeof(TableAttribute), true);
 
-		foreach (PropertyInfo prop in type.GetProperties()) {
+        if (attr != null) {
+            result.TableName = attr.Name;
+        }
+        else {
+            throw new ArgumentException($"{type.Name} does not represent a DB table");
+        }
+
+        foreach (PropertyInfo prop in type.GetProperties()) {
             bool hasColumnAttribute = prop.GetCustomAttributes(typeof(ColumnAttribute), true).Length > 0;
 
-            if (hasColumnAttribute) {
-				result.Columns.Add(prop.Name);
-			}
-		}
+            if (!hasColumnAttribute) continue;
+            
+            if (prop.Name.Contains("ID")) {
+                result.KeyColumns.Add(prop.Name);
+            } else {
+                result.Columns.Add(prop.Name);
+            }
+        }
 
-		return result;
-	}
+        return result;
+    }
 }

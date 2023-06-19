@@ -11,14 +11,14 @@ namespace FinanceApp.Server.Classes;
 
 public class FinanceServer : IServer
 {
-	private Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+	private Socket listener = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 	private X509Certificate? serverCertificate = null;
 
 	public async Task Start()
 	{
 		serverCertificate = X509Certificate.CreateFromCertFile("./Resources/certificate.pfx");
 
-		IPEndPoint ipEndPoint = new IPEndPoint(IPAddress.Any, 42069);
+		IPEndPoint ipEndPoint = new(IPAddress.Any, 42069);
 
 		try
 		{
@@ -28,9 +28,9 @@ public class FinanceServer : IServer
 
 			Socket handler = await listener.AcceptAsync();
 			Console.WriteLine("Connection found.");
-			using NetworkStream networkStream = new NetworkStream(handler);
+			using NetworkStream networkStream = new(handler);
 			Console.WriteLine(handler.Connected);
-			SslStream sslStream = new SslStream(networkStream, false);
+			SslStream sslStream = new(networkStream, false);
 			sslStream.AuthenticateAsServer(serverCertificate, false, true);
 
 			sslStream.ReadTimeout = 1000000;
@@ -78,15 +78,14 @@ public class FinanceServer : IServer
 
 			handler.Shutdown(SocketShutdown.Both);
 			handler.Close();
-		} catch (Exception e)
-		{
+        } catch (Exception e) {
 			Console.WriteLine($"[{e.GetType()}]: {e.Message}");
 		}
 	}
 	
 	static async Task<string> ReadMessageAsync(SslStream sslStream) {
 		byte[] buffer = new byte[2048];
-		StringBuilder messageData = new StringBuilder();
+		StringBuilder messageData = new();
 		int bytes = -1;
 		do {
 			bytes = await sslStream.ReadAsync(buffer, 0, buffer.Length);
