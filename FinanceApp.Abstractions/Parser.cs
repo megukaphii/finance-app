@@ -17,12 +17,12 @@ public class Parser
     {
         List<T> result = new();
         while (reader.Read()) {
-            result.Add(ParseObject<T>());
+            result.Add(ParseRow<T>());
         }
         return result;
     }
 
-    private T ParseObject<T>() where T : new()
+    private T ParseRow<T>() where T : new()
     {
         T instance = new();
         for (int i = 0; i < reader.FieldCount; i++) {
