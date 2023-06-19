@@ -11,7 +11,7 @@ namespace FinanceApp.Server.Classes;
 
 public class FinanceServer : IServer
 {
-	private Socket listener = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+	private readonly Socket listener = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 	private X509Certificate? serverCertificate = null;
 
 	public async Task Start()
@@ -31,7 +31,7 @@ public class FinanceServer : IServer
 			using NetworkStream networkStream = new(handler);
 			Console.WriteLine(handler.Connected);
 			SslStream sslStream = new(networkStream, false);
-			sslStream.AuthenticateAsServer(serverCertificate, false, true);
+			await sslStream.AuthenticateAsServerAsync(serverCertificate, false, true);
 
 			sslStream.ReadTimeout = 1000000;
 			sslStream.WriteTimeout = 1000000;
@@ -48,8 +48,7 @@ public class FinanceServer : IServer
 
 				Console.WriteLine(transaction);
 				using (SqliteDatabase db = new()) {
-					string sql =
-						@"
+					const string sql = @"
 						INSERT INTO Transactions (
 							Value
 						)
@@ -70,8 +69,8 @@ public class FinanceServer : IServer
 					};
 					string strResponse = Newtonsoft.Json.JsonConvert.SerializeObject(response);
 
-					byte[] messsage = Encoding.UTF8.GetBytes(strResponse + "<EOF>");
-					sslStream.Write(messsage);
+					byte[] message = Encoding.UTF8.GetBytes(strResponse + "<EOF>");
+					sslStream.Write(message);
 					sslStream.Flush();
 				}
 			}
@@ -94,7 +93,7 @@ public class FinanceServer : IServer
 			char[] chars = new char[decoder.GetCharCount(buffer, 0, bytes)];
 			decoder.GetChars(buffer, 0, bytes, chars, 0);
 			messageData.Append(chars);
-			if (messageData.ToString().IndexOf("<EOF>") != -1) {
+			if (messageData.ToString().IndexOf("<EOF>", StringComparison.Ordinal) != -1) {
 				break;
 			}
 		} while (bytes != 0);
