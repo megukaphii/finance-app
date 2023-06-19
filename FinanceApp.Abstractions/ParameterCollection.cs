@@ -3,41 +3,34 @@ using System.Data;
 
 namespace FinanceApp.Abstractions;
 
-public class ParameterCollection : IEnumerable<Parameter> {
-	private List<Parameter> parameters = new();
+public class ParameterCollection : IEnumerable<Parameter>
+{
+    private readonly List<Parameter> parameters = new();
 
-	private static ParameterCollection empty = new();
-	public static ParameterCollection Empty => empty;
+    public static readonly ParameterCollection Empty = new();
 
-	public ParameterCollection() {}
+    IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
 
-	public ParameterCollection(IEnumerable<Parameter> parameters) {
-		this.parameters.AddRange(parameters);
-	}
+    public IEnumerator<Parameter> GetEnumerator() { return parameters.GetEnumerator(); }
 
-	public List<T> ConvertParameters<T>(Func<Parameter, T> sqlParameterAdapterFactory) {
-		return parameters.Select(p => sqlParameterAdapterFactory(p)).ToList();
-	}
+    public void Add(Parameter p) => parameters.Add(p);
 
-	public IEnumerator<Parameter> GetEnumerator() {
-		return parameters.GetEnumerator();
-	}
-
-	IEnumerator IEnumerable.GetEnumerator() {
-		return GetEnumerator();
-	}
-
-	public void Add(Parameter p) => parameters.Add(p);
+    public List<T> ConvertParameters<T>(Func<Parameter, T> sqlParameterAdapterFactory)
+    {
+        return parameters.Select(sqlParameterAdapterFactory).ToList();
+    }
 }
 
-public class Parameter {
-	public SqlDbType type;
-	public string name;
-	public object? value;
+public class Parameter
+{
+    public readonly SqlDbType Type;
+    public readonly string Name;
+    public readonly object? Value;
 
-	public Parameter(SqlDbType type, string name, object? value) {
-		this.type = type;
-		this.name = name;
-		this.value = value;
-	}
+    public Parameter(SqlDbType type, string name, object? value)
+    {
+        Type = type;
+        Name = name;
+        Value = value ?? DBNull.Value;
+    }
 }

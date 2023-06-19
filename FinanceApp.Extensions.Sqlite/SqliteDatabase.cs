@@ -50,9 +50,11 @@ public class SqliteDatabase : IDatabase {
 	}
 
 	private MSSqliteParameter Convert(Parameter parameter) {
-		MSSqliteParameter result = new(parameter.name, (SqliteType) parameter.type);
-		result.Value = parameter.value;
-		return result;
+		MSSqliteParameter result = new(parameter.Name, (SqliteType) parameter.Type)
+        {
+            Value = parameter.Value
+        };
+        return result;
 	}
 
 	public int ExecuteNonQuery(string sql, ParameterCollection vars) {
