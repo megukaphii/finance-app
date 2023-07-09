@@ -3,6 +3,7 @@ using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using FinanceApp.Abstractions;
 using FinanceApp.Data;
 using FinanceApp.Server.Data;
 
@@ -14,7 +15,7 @@ public class FinanceServer : IServer
     private readonly int timeoutInMs = 10000;
     private X509Certificate? serverCertificate = null;
 
-	public async Task Start()
+    public async Task Start()
 	{
 		try
 		{

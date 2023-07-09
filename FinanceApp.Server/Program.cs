@@ -11,8 +11,9 @@ IHost host = Host.CreateDefaultBuilder()
     })
     .ConfigureServices((_, services) =>
     {
+        services.AddSingleton<IServer, FinanceServer>();
         services.AddMigrationService();
-
+        services.AddSqliteDatabase();
         // Add IDatabase Dependencies here
         // TODO: IDatabase is IDisposable - figure out object lifetimes
         // The IDatabase should only really be closed when the application is closed, I think?
@@ -25,9 +26,10 @@ IHost host = Host.CreateDefaultBuilder()
     })
 .Build();
 
+IServer server = ActivatorUtilities.CreateInstance<IServer>(host.Services);
+
 IMigrationService ms = host.Services.GetRequiredService<IMigrationService>();
 ms.RefreshTables<SqliteDatabase>();
 
-FinanceServer server = new();
 await server.Start();
 Console.ReadKey();

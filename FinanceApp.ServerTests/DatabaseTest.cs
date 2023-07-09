@@ -2,18 +2,19 @@ using FinanceApp.Abstractions;
 using FinanceApp.Extensions.Sqlite;
 using FinanceApp.Server.Data;
 using FinanceApp.Server.Services;
+using NUnit.Framework;
 
 namespace FinanceApp.ServerTests;
 
-[TestClass]
+[TestFixture]
 public class DatabaseTest {
-	[ClassInitialize]
-	public static void ClassInit(TestContext context) {
+	[OneTimeSetUp]
+	public static void OneTimeSetUp() {
 		MigrationService ms = new();
 		ms.RefreshTables<SqliteDatabase>();
 	}
 
-	[TestMethod]
+	[Test]
 	public void TestOpenClose() {
 		SqliteDatabase db = new();
 		db.OpenConnection();
@@ -22,7 +23,7 @@ public class DatabaseTest {
 		Assert.IsTrue(db.State == System.Data.ConnectionState.Closed);
 	}
 
-	[TestMethod]
+	[Test]
 	public void TestExecuteNonQuery() {
 		using (SqliteDatabase db = new()) {
 			string sql =
@@ -40,13 +41,13 @@ public class DatabaseTest {
 		}
 	}
 
-	[TestMethod]
+	[Test]
 	public void TestExecuteNonQueryWithParams() {
 		int rowsUpdated = InsertIntoTransactionsWithParams(125);
 		Assert.AreEqual(1, rowsUpdated);
 	}
 
-    [TestMethod]
+    [Test]
     public void TestExecuteNonQueryWithNullParam()
     {
         int rowsUpdated;
@@ -70,7 +71,7 @@ public class DatabaseTest {
         Assert.AreEqual(1, rowsUpdated);
     }
 
-	[TestMethod]
+	[Test]
 	public void TestExecuteReader() {
 		MigrationService ms = new();
 		ms.RefreshTables<SqliteDatabase>();
@@ -88,7 +89,7 @@ public class DatabaseTest {
 		}
 	}
 
-    [TestMethod]
+    [Test]
     public void TestExecuteReaderWithNullResult() {
         MigrationService ms = new();
         ms.RefreshTables<SqliteDatabase>();
@@ -106,7 +107,7 @@ public class DatabaseTest {
         }
     }
 
-    [TestMethod]
+    [Test]
 	public void TestExecuteReaderWithParams() {
 		MigrationService ms = new();
 		ms.RefreshTables<SqliteDatabase>();
