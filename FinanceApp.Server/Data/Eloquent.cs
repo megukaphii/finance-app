@@ -34,7 +34,7 @@ public abstract class Eloquent<T> where T : Eloquent<T>, new() {
 
 	public static T? Find(int id)
     {
-		// [TODO] Given that these are static methods, how do we inject the appropriate DB?
+		// [TODO] Given that these are static methods, how do we inject the appropriate DB? Also, shouldn't depend on this!
 		using (SqliteDatabase db = new()) {
 			ParameterCollection parameters = new() {
 				new Parameter(System.Data.SqlDbType.Int, "$ID", id)

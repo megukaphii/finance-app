@@ -44,7 +44,7 @@ public class FinanceClient : IClient
 			Console.WriteLine("Connected!");
 
 			NetworkStream networkStream = new(client);
-			SslStream sslStream = new SslStream(
+			SslStream sslStream = new(
 				networkStream,
 				false,
 				new RemoteCertificateValidationCallback(ValidateServerCertificate),

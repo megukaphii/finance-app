@@ -3,85 +3,83 @@ using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using FinanceApp.Abstractions;
 using FinanceApp.Data;
-using FinanceApp.Extensions.Sqlite;
+using FinanceApp.Server.Data;
 
 namespace FinanceApp.Server.Classes;
 
 public class FinanceServer : IServer
 {
 	private readonly Socket listener = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-	private X509Certificate? serverCertificate = null;
+    private readonly int timeoutInMs = 10000;
+    private X509Certificate? serverCertificate = null;
 
 	public async Task Start()
 	{
-		serverCertificate = X509Certificate.CreateFromCertFile("./Resources/certificate.pfx");
-
-		IPEndPoint ipEndPoint = new(IPAddress.Any, 42069);
-
 		try
 		{
-			Console.WriteLine("Starting listener...");
-			listener.Bind(ipEndPoint);
-			listener.Listen(1);
+			Socket socket = await GetSocket();
+			using SslStream sslStream = await EstablishSslStream(socket);
 
-			Socket handler = await listener.AcceptAsync();
-			Console.WriteLine("Connection found.");
-			using NetworkStream networkStream = new(handler);
-			Console.WriteLine(handler.Connected);
-			SslStream sslStream = new(networkStream, false);
-			await sslStream.AuthenticateAsServerAsync(serverCertificate, false, true);
-
-			sslStream.ReadTimeout = 1000000;
-			sslStream.WriteTimeout = 1000000;
-
-			while (true) {
-				string messageReceived = await ReadMessageAsync(sslStream);
-				CreateTransaction? transaction = Newtonsoft.Json.JsonConvert.DeserializeObject<CreateTransaction>(messageReceived);
-
-				if (transaction == null) {
-					Console.WriteLine("Transaction was null");
-					handler.Close();
-					return;
-				}
-
-				Console.WriteLine(transaction);
-				using (SqliteDatabase db = new()) {
-					const string sql = @"
-						INSERT INTO Transactions (
-							Value
-						)
-						VALUES (
-							$value
-						);
-					";
-					ParameterCollection parameters = new() {
-						new Parameter(System.Data.SqlDbType.Int, "$value", transaction.Value)
-					};
-
-					int rowsUpdated = db.ExecuteNonQuery(sql, parameters);
-					long newId = db.LastInsertId ?? -1;
-
-					CreateTransactionResponse response = new() {
-						Id = newId,
-						Success = true
-					};
-					string strResponse = Newtonsoft.Json.JsonConvert.SerializeObject(response);
-
-					byte[] message = Encoding.UTF8.GetBytes(strResponse + "<EOF>");
-					sslStream.Write(message);
-					sslStream.Flush();
-				}
+			while (true)
+			{
+				HandleRequest(sslStream);
 			}
 
-			handler.Shutdown(SocketShutdown.Both);
-			handler.Close();
+            socket.Shutdown(SocketShutdown.Both);
+            socket.Close();
         } catch (Exception e) {
 			Console.WriteLine($"[{e.GetType()}]: {e.Message}");
 		}
 	}
-	
+
+	private async Task<Socket> GetSocket()
+    {
+        IPEndPoint ipEndPoint = new(IPAddress.Any, 42069);
+
+        listener.Bind(ipEndPoint);
+        listener.Listen(1);
+        Console.WriteLine("Starting listener...");
+
+        Socket handler = await listener.AcceptAsync();
+        Console.WriteLine("Connection found.");
+		return handler;
+    }
+
+	private async Task<SslStream> EstablishSslStream(Socket handler)
+    {
+		SslStream sslStream = GetSslStream(handler);
+		sslStream = await SetupSslStream(sslStream);
+
+		return sslStream;
+	}
+
+	private SslStream GetSslStream(Socket handler)
+	{
+		// TODO - Is using necessary here?
+        using NetworkStream networkStream = new(handler);
+        return new SslStream(networkStream, false);
+	}
+
+	private async Task<SslStream> SetupSslStream(SslStream sslStream)
+	{
+		serverCertificate = X509Certificate.CreateFromCertFile("./Resources/certificate.pfx");
+
+		await sslStream.AuthenticateAsServerAsync(serverCertificate, false, true);
+		sslStream.ReadTimeout = timeoutInMs;
+		sslStream.WriteTimeout = timeoutInMs;
+		Console.WriteLine("SSL connection established.");
+
+		return sslStream;
+	}
+
+	private async void HandleRequest(SslStream sslStream)
+	{
+        string messageReceived = await ReadMessageAsync(sslStream);
+		// TODO - Determine message type somehow?
+		HandleCreateTransactionRequest(messageReceived, sslStream);
+    }
+
 	static async Task<string> ReadMessageAsync(SslStream sslStream) {
 		byte[] buffer = new byte[2048];
 		StringBuilder messageData = new();
@@ -100,6 +98,42 @@ public class FinanceServer : IServer
 
 		return messageData.ToString().Replace("<EOF>", "");
 	}
+
+	private void HandleCreateTransactionRequest(string messageReceived, SslStream sslStream)
+	{
+        CreateTransaction? transactionRequest = Newtonsoft.Json.JsonConvert.DeserializeObject<CreateTransaction>(messageReceived);
+		// TODO - transactionRequest.Handle();
+
+        if (transactionRequest == null)
+        {
+            Console.WriteLine("Transaction was null");
+            return;
+        }
+        Console.WriteLine(transactionRequest);
+
+        Transaction transaction = new()
+        {
+            Value = transactionRequest.Value,
+            Transactee = "TEMP"
+        };
+        transaction.Save();
+
+        SendCreateTransactionResponse(sslStream, transaction);
+    }
+
+	private async void SendCreateTransactionResponse(SslStream sslStream, Transaction transaction)
+	{
+        CreateTransactionResponse response = new()
+        {
+            Id = transaction.ID,
+            Success = true
+        };
+        string strResponse = Newtonsoft.Json.JsonConvert.SerializeObject(response);
+
+        byte[] message = Encoding.UTF8.GetBytes(strResponse + "<EOF>");
+        await sslStream.WriteAsync(message);
+        sslStream.Flush();
+    }
 
 	static void DisplaySecurityLevel(SslStream stream) {
 		Console.WriteLine("Cipher: {0} strength {1}", stream.CipherAlgorithm, stream.CipherStrength);

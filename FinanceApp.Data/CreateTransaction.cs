@@ -1,6 +1,6 @@
 ﻿namespace FinanceApp.Data;
 
-public class CreateTransaction {
+public class CreateTransaction : IRequest {
     public required string Type { get; set; }
     public required int Value { get; set; }
 

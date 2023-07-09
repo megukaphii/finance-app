@@ -22,6 +22,7 @@ public class Parser
         return result;
     }
 
+    // TODO Should implement Eloquent, then we can set existsOnDb
     private T ParseRow<T>() where T : new()
     {
         T instance = new();
