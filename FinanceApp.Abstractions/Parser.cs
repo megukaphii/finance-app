@@ -13,7 +13,7 @@ public class Parser
         this.properties = properties;
     }
 
-    public List<T> PerformParse<T>() where T : new()
+    public List<T> PerformParse<T>() where T : Eloquent<T>, new()
     {
         List<T> result = new();
         while (reader.Read()) {
@@ -22,13 +22,13 @@ public class Parser
         return result;
     }
 
-    // TODO Should implement Eloquent, then we can set existsOnDb
-    private T ParseRow<T>() where T : new()
+    private T ParseRow<T>() where T : Eloquent<T>, new()
     {
         T instance = new();
         for (int i = 0; i < reader.FieldCount; i++) {
             ParseField(instance, i);
         }
+        instance.ExistsOnDb = true;
         return instance;
     }
 

@@ -2,7 +2,7 @@
 using System.Reflection;
 using System.Text;
 
-namespace FinanceApp.Server.Classes;
+namespace FinanceApp.Abstractions;
 
 public class QueryBuilder
 {

@@ -10,5 +10,5 @@ public interface IDatabase : IDisposable {
 
 	int ExecuteNonQuery(string sql, ParameterCollection vars);
 
-	List<T> ExecuteReader<T>(string sql, ParameterCollection vars) where T : new();
+	List<T> ExecuteReader<T>(string sql, ParameterCollection vars) where T : Eloquent<T>, new();
 }

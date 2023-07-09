@@ -1,7 +1,4 @@
-﻿using FinanceApp.Abstractions;
-using FinanceApp.Server.Classes;
-
-namespace FinanceApp.Server.Data;
+﻿namespace FinanceApp.Abstractions;
 
 public class EloquentRepository<T> : IEloquentRepository<T> where T : Eloquent<T>, new()
 {
@@ -29,9 +26,6 @@ public class EloquentRepository<T> : IEloquentRepository<T> where T : Eloquent<T
         {
             throw new Exception($"Query Failed! SQL: {sql}", e);
         }
-
-        // TODO - Should be moved into Parser!
-        result.ExistsOnDb = true;
 
         return result;
     }

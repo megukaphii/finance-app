@@ -31,7 +31,7 @@ public class SqliteDatabase : IDatabase {
 		return this;
 	}
 
-	public List<T> ExecuteReader<T>(string sql, ParameterCollection vars) where T : new() {
+	public List<T> ExecuteReader<T>(string sql, ParameterCollection vars) where T : Eloquent<T>, new() {
 		SqliteCommand command = DB.CreateCommand();
 		command.CommandText = sql;
 		command.Parameters.AddRange(vars.ConvertParameters(Convert));

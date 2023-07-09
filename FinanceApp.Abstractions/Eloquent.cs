@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace FinanceApp.Server.Data;
+namespace FinanceApp.Abstractions;
 
 public abstract class Eloquent<T> where T : Eloquent<T>, new() {
     public bool ExistsOnDb;
