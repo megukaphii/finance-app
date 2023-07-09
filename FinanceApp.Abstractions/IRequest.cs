@@ -1,9 +1,8 @@
 ﻿using System.Net.Security;
 
-namespace FinanceApp.Data
+namespace FinanceApp.Abstractions;
+
+public interface IRequest
 {
-    public interface IRequest
-    {
-        //public void Handle(SslStream sslStream);
-    }
+    //public void Handle(SslStream sslStream);
 }

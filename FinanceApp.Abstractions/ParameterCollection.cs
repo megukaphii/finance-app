@@ -5,9 +5,9 @@ namespace FinanceApp.Abstractions;
 
 public class ParameterCollection : IEnumerable<Parameter>
 {
-    private readonly List<Parameter> parameters = new();
-
     public static readonly ParameterCollection Empty = new();
+
+    private readonly List<Parameter> parameters = new();
 
     IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
 

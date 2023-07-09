@@ -1,4 +1,6 @@
-﻿namespace FinanceApp.Data;
+﻿using FinanceApp.Abstractions;
+
+namespace FinanceApp.Data;
 
 public class CreateTransaction : IRequest {
     public required string Type { get; set; }
