@@ -3,7 +3,6 @@ using System.Data;
 using System.Reflection;
 using FinanceApp.Abstractions;
 using FinanceApp.Extensions.Sqlite;
-using FinanceApp.Server.Classes;
 
 namespace FinanceApp.Server.Data;
 
@@ -14,13 +13,18 @@ public class Transaction : Eloquent<Transaction> {
 	[Column("Value")]
     public long Value { get; set; }
 	[Column("Transactee")]
-	public string Transactee { get; set; }
+	public string Transactee { get; set; } = string.Empty;
 
 	public Transaction() {
-		// [TODO] necessary for db.ExecuteReader, can we remove or at least get rid of the underline on it?
-	}
+        // [TODO] necessary for db.ExecuteReader, can we remove or at least get rid of the underline on it?
+    }
 
-	public Transaction(IDatabase database, long value, string transactee)
+    public Transaction(IDatabase database)
+    {
+        Database = database; // TODO - Necessary for DI, better way to do this or minimise number of constructors?
+    }
+
+    public Transaction(IDatabase database, long value, string transactee)
 	{
 		Database = database;
 		Value = value;
