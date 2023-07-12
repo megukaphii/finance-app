@@ -7,7 +7,7 @@ using FinanceApp.Extensions.Sqlite;
 namespace FinanceApp.Server.Data;
 
 [Table("Transactions")]
-public class Transaction : Eloquent<Transaction> {
+public class Transaction : Eloquent {
 	private readonly IDatabase Database;
     
 	[Column("Value")]

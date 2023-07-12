@@ -3,7 +3,7 @@
 namespace FinanceApp.Abstractions;
 
 // TODO - Can't we remove the generics and just use Eloquent instead?
-public abstract class Eloquent<T> where T : Eloquent<T>, new() {
+public abstract class Eloquent {
     public bool ExistsOnDb;
     private long id;
     
@@ -20,12 +20,12 @@ public abstract class Eloquent<T> where T : Eloquent<T>, new() {
         }
     }
 
-    public T Save()
+    public Eloquent Save()
     {
         return ExistsOnDb ? Update() : Insert();
     }
 
-	protected abstract T Update();
+	protected abstract Eloquent Update();
 
-	protected abstract T Insert();
+	protected abstract Eloquent Insert();
 }

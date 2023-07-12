@@ -1,6 +1,6 @@
 ﻿namespace FinanceApp.Abstractions;
 
-public class EloquentRepository<T> : IEloquentRepository<T> where T : Eloquent<T>, new()
+public class EloquentRepository<T> : IEloquentRepository<T> where T : Eloquent, new()
 {
     IDatabase db;
 

@@ -13,7 +13,7 @@ public class Parser
         this.properties = properties;
     }
 
-    public List<T> PerformParse<T>() where T : Eloquent<T>, new()
+    public List<T> PerformParse<T>() where T : Eloquent, new()
     {
         List<T> result = new();
         while (reader.Read()) {
@@ -22,7 +22,7 @@ public class Parser
         return result;
     }
 
-    private T ParseRow<T>() where T : Eloquent<T>, new()
+    private T ParseRow<T>() where T : Eloquent, new()
     {
         T instance = new();
         for (int i = 0; i < reader.FieldCount; i++) {
