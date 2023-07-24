@@ -15,18 +15,20 @@ public class TransactionTest {
 	const string JOHN_DOE = "John Doe";
 
 #pragma warning disable CS8618
-    private IHost _host;
+    private IDatabase _db;
 #pragma warning restore CS8618
 
     [OneTimeSetUp]
     public void OneTimeSetUp()
     {
-        _host = Host.CreateDefaultBuilder()
+        IHost host = Host.CreateDefaultBuilder()
             .ConfigureServices((_, services) =>
             {
                 services.AddSingleton<IDatabase, SqliteDatabase>();
             })
             .Build();
+
+		_db = host.Services.GetRequiredService<IDatabase>();
     }
 
     [SetUp]
@@ -40,8 +42,7 @@ public class TransactionTest {
 	[Test]
 	public void TestCreateTransaction()
     {
-		IDatabase db = _host.Services.GetRequiredService<IDatabase>();
-        Transaction test = new(db, EXODIA_THE_FORBIDDEN_ONE, JOHN_DOE);
+        Transaction test = new(_db, EXODIA_THE_FORBIDDEN_ONE, JOHN_DOE);
 
 		Assert.AreEqual(0, test.ID);
 		test.Save();
@@ -52,9 +53,8 @@ public class TransactionTest {
 	[Test]
 	public void TestSelectTransaction()
     {
-		IDatabase db = _host.Services.GetRequiredService<IDatabase>();
-		EloquentRepository<Transaction> repo = new(db);
-        Transaction expected = new(db, EXODIA_THE_FORBIDDEN_ONE, JOHN_DOE) { ID = 1 };
+		EloquentRepository<Transaction> repo = new(_db);
+        Transaction expected = new(_db, EXODIA_THE_FORBIDDEN_ONE, JOHN_DOE) { ID = 1 };
 
         Transaction? result = repo.Find(1);
 
@@ -64,8 +64,7 @@ public class TransactionTest {
 	[Test]
 	public void TestSaveTransaction()
 	{
-		IDatabase db = _host.Services.GetRequiredService<IDatabase>();
-		EloquentRepository<Transaction> repo = new(db);
+		EloquentRepository<Transaction> repo = new(_db);
 		Transaction transaction = repo.Find(1)!;
 
 		transaction.Value = OTHER_YUGIOH_REFERENCE;
@@ -78,8 +77,7 @@ public class TransactionTest {
     [Test]
     public void TestUpdateTransactionID()
 	{
-		IDatabase db = _host.Services.GetRequiredService<IDatabase>();
-		EloquentRepository<Transaction> repo = new(db);
+		EloquentRepository<Transaction> repo = new(_db);
 		Transaction transaction = repo.Find(1)!;
 
         Assert.Throws<Exception>(() => transaction.ID = 2);
@@ -89,8 +87,7 @@ public class TransactionTest {
 	[Test]
 	public void TestUpdateTransaction()
 	{
-		IDatabase db = _host.Services.GetRequiredService<IDatabase>();
-		EloquentRepository<Transaction> repo = new(db);
+		EloquentRepository<Transaction> repo = new(_db);
 
 		//Transaction.Update('value', EXODIA_THE_FORBIDDEN_ONE).Where('value', OTHER_YUGIOH_REFERENCE);
 		Transaction transaction = repo.Find(1)!;
@@ -100,8 +97,7 @@ public class TransactionTest {
 
 	private void SeedTestData()
 	{
-		IDatabase db = _host.Services.GetRequiredService<IDatabase>();
-		Transaction test = new(db, EXODIA_THE_FORBIDDEN_ONE, JOHN_DOE);
+		Transaction test = new(_db, EXODIA_THE_FORBIDDEN_ONE, JOHN_DOE);
         test.Save();
 	}
 }

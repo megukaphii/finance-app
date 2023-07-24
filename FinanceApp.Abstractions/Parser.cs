@@ -4,11 +4,13 @@ namespace FinanceApp.Abstractions;
 
 public class Parser
 {
+    private readonly IDatabase database;
     private readonly IDataReader reader;
     private readonly PropertyInfo[] properties;
 
-    public Parser(IDataReader reader, PropertyInfo[] properties)
+    public Parser(IDatabase database, IDataReader reader, PropertyInfo[] properties)
     {
+        this.database = database;
         this.reader = reader;
         this.properties = properties;
     }
@@ -27,8 +29,9 @@ public class Parser
         T instance = new();
         for (int i = 0; i < reader.FieldCount; i++) {
             ParseField(instance, i);
-        }
-        instance.ExistsOnDb = true;
+		}
+		instance.Database = database;
+		instance.ExistsOnDb = true;
         return instance;
     }
 

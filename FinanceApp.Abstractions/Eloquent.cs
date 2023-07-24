@@ -2,12 +2,13 @@
 
 namespace FinanceApp.Abstractions;
 
-// TODO - Can't we remove the generics and just use Eloquent instead?
 public abstract class Eloquent {
-    public bool ExistsOnDb;
+    // TODO - Would like this to be private and not nullable? But the parser is the issue with this.
+	public IDatabase? Database;
+	public bool ExistsOnDb;
     private long id;
-    
-    [Column("ID")]
+
+	[Column("ID")]
     public long ID {
         get => id;
         set

@@ -2,14 +2,11 @@
 using System.Data;
 using System.Reflection;
 using FinanceApp.Abstractions;
-using FinanceApp.Extensions.Sqlite;
 
 namespace FinanceApp.Server.Data;
 
 [Table("Transactions")]
 public class Transaction : Eloquent {
-	private readonly IDatabase Database;
-    
 	[Column("Value")]
     public long Value { get; set; }
 	[Column("Transactee")]
@@ -47,54 +44,51 @@ public class Transaction : Eloquent {
 	}
 
 	protected override Transaction Update() {
-		using (SqliteDatabase db = new()) {
-			// [TODO] This whole deal of converting columns into their DB equivalent and using that to fill out Parameters, should be refactored, maybe moved into another class even?
-			// Something that can save a map of the properties to their DB types, and be thrown around - or do we want an Attribute to store DB type? Seems too manual, but would perform better?
-			List<PropertyInfo> cols = new();
+		// [TODO] This whole deal of converting columns into their DB equivalent and using that to fill out Parameters, should be refactored, maybe moved into another class even?
+		// Something that can save a map of the properties to their DB types, and be thrown around - or do we want an Attribute to store DB type? Seems too manual, but would perform better?
+		List<PropertyInfo> cols = new();
 
-			Type type = typeof(Transaction);
-			foreach (PropertyInfo prop in type.GetProperties()) {
-				ColumnAttribute? nameAttr = (ColumnAttribute?) prop.GetCustomAttributes(typeof(ColumnAttribute), true).FirstOrDefault();
+		Type type = typeof(Transaction);
+		foreach (PropertyInfo prop in type.GetProperties()) {
+			ColumnAttribute? nameAttr = (ColumnAttribute?) prop.GetCustomAttributes(typeof(ColumnAttribute), true).FirstOrDefault();
 
-				if (nameAttr?.Name != null) {
-					cols.Add(prop);
-				}
+			if (nameAttr?.Name != null) {
+				cols.Add(prop);
 			}
-
-			ParameterCollection parameters = new();
-
-			foreach (PropertyInfo col in cols.Where(c => c.Name != "ID")) {
-				SqlDbType sqlDbType;
-
-				TypeCode typeCode = Type.GetTypeCode(col.PropertyType);
-				switch (typeCode) {
-					case TypeCode.Int64:
-						sqlDbType = SqlDbType.Int;
-						break;
-					case TypeCode.Boolean:
-						sqlDbType = SqlDbType.Bit;
-						break;
-					default:
-						sqlDbType = SqlDbType.Text;
-						break;
-				}
-
-				parameters.Add(new Parameter(sqlDbType, $"${col.Name}", col.GetValue(this)));
-			}
-
-			// [TODO] Both Update here, and the QueryBuilder below need a list of columns. Can we safely pass through this list here while being safe from SQL injection? Probably.
-			// Also, is there a way/would it be useful to cache this data so we're not performing all these reflection operations on every query?
-			string sql = QueryBuilder.Build<Transaction>().AsUpdate().ToString();
-
-			try {
-				// Using Database property fails test, because after Find() gets the model from DB, the Database property is never filled.
-				db.ExecuteNonQuery(sql, parameters);
-			} catch (Exception ex) {
-				throw new Exception($"Query Failed! SQL: {sql}", ex);
-			}
-
-			return this;
 		}
+
+		ParameterCollection parameters = new();
+
+		foreach (PropertyInfo col in cols.Where(c => c.Name != "ID")) {
+			SqlDbType sqlDbType;
+
+			TypeCode typeCode = Type.GetTypeCode(col.PropertyType);
+			switch (typeCode) {
+				case TypeCode.Int64:
+					sqlDbType = SqlDbType.Int;
+					break;
+				case TypeCode.Boolean:
+					sqlDbType = SqlDbType.Bit;
+					break;
+				default:
+					sqlDbType = SqlDbType.Text;
+					break;
+			}
+
+			parameters.Add(new Parameter(sqlDbType, $"${col.Name}", col.GetValue(this)));
+		}
+
+		// [TODO] Both Update here, and the QueryBuilder below need a list of columns. Can we safely pass through this list here while being safe from SQL injection? Probably.
+		// Also, is there a way/would it be useful to cache this data so we're not performing all these reflection operations on every query?
+		string sql = QueryBuilder.Build<Transaction>().AsUpdate().ToString();
+
+		try {
+			Database?.ExecuteNonQuery(sql, parameters);
+		} catch (Exception ex) {
+			throw new Exception($"Query Failed! SQL: {sql}", ex);
+		}
+
+		return this;
 	}
 
 	protected override Transaction Insert() {
@@ -133,7 +127,7 @@ public class Transaction : Eloquent {
 		string sql = QueryBuilder.Build<Transaction>().AsInsert().ToString();
 
 		try {
-			Database.ExecuteNonQuery(sql, parameters);
+			Database?.ExecuteNonQuery(sql, parameters);
 		} catch (Exception ex) {
 			throw new Exception($"Query Failed! SQL: {sql}", ex);
 		}

@@ -8,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace FinanceApp.Extensions.Sqlite;
 
 public class SqliteDatabase : IDatabase {
-	private SqliteConnection DB = new("Data Source=test.db");
+	private readonly SqliteConnection DB = new("Data Source=test.db");
 	public ConnectionState State => DB.State;
 
 	public long? LastInsertId { get {
@@ -41,7 +41,7 @@ public class SqliteDatabase : IDatabase {
 		using (Abstractions.IDataReader reader = new SqliteDataReader(command.ExecuteReader())) {
 			Type type = typeof(T);
 			PropertyInfo[] properties = type.GetProperties();
-			Parser parser = new(reader, properties);
+			Parser parser = new(this, reader, properties);
 			result = parser.PerformParse<T>();
 		}
 
