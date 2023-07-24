@@ -13,9 +13,15 @@ public class FinanceServer : IServer
 {
 	private readonly Socket listener = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
     private readonly int timeoutInMs = 10000;
-    private X509Certificate? serverCertificate = null;
+	private readonly X509Certificate serverCertificate;
+	private readonly IDatabase _database;
 
-    public async Task Start()
+	public FinanceServer(IDatabase database) {
+		serverCertificate = X509Certificate.CreateFromCertFile("./Resources/certificate.pfx");
+		_database = database;
+	}
+
+	public async Task Start()
 	{
 		try
 		{
@@ -57,15 +63,12 @@ public class FinanceServer : IServer
 
 	private SslStream GetSslStream(Socket handler)
 	{
-		// TODO - Is using necessary here?
-        using NetworkStream networkStream = new(handler);
+        NetworkStream networkStream = new(handler);
         return new SslStream(networkStream, false);
 	}
 
 	private async Task<SslStream> SetupSslStream(SslStream sslStream)
 	{
-		serverCertificate = X509Certificate.CreateFromCertFile("./Resources/certificate.pfx");
-
 		await sslStream.AuthenticateAsServerAsync(serverCertificate, false, true);
 		sslStream.ReadTimeout = timeoutInMs;
 		sslStream.WriteTimeout = timeoutInMs;
@@ -74,19 +77,20 @@ public class FinanceServer : IServer
 		return sslStream;
 	}
 
-	private async void HandleRequest(SslStream sslStream)
+	private void HandleRequest(SslStream sslStream)
 	{
-        string messageReceived = await ReadMessageAsync(sslStream);
-		// TODO - Determine message type somehow?
+        string messageReceived = ReadMessage(sslStream);
+		// TODO - Determine message type
 		HandleCreateTransactionRequest(messageReceived, sslStream);
     }
 
-	static async Task<string> ReadMessageAsync(SslStream sslStream) {
+	static string ReadMessage(SslStream sslStream) {
 		byte[] buffer = new byte[2048];
 		StringBuilder messageData = new();
 		int bytes = -1;
 		do {
-			bytes = await sslStream.ReadAsync(buffer, 0, buffer.Length);
+			// TODO - If ReadAsync is used, this will be called twice simultaeneously and cause an exception
+			bytes = sslStream.Read(buffer, 0, buffer.Length);
 
 			Decoder decoder = Encoding.UTF8.GetDecoder();
 			char[] chars = new char[decoder.GetCharCount(buffer, 0, bytes)];
@@ -103,7 +107,7 @@ public class FinanceServer : IServer
 	private void HandleCreateTransactionRequest(string messageReceived, SslStream sslStream)
 	{
         CreateTransaction? transactionRequest = Newtonsoft.Json.JsonConvert.DeserializeObject<CreateTransaction>(messageReceived);
-		// TODO - transactionRequest.Handle();
+		// TODO - transactionRequest.Handle(); ?
 
         if (transactionRequest == null)
         {
@@ -112,11 +116,7 @@ public class FinanceServer : IServer
         }
         Console.WriteLine(transactionRequest);
 
-        Transaction transaction = new()
-        {
-            Value = transactionRequest.Value,
-            Transactee = "TEMP"
-        };
+		Transaction transaction = new(_database, transactionRequest.Value, "TEMP");
         transaction.Save();
 
         SendCreateTransactionResponse(sslStream, transaction);

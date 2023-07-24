@@ -9,7 +9,7 @@ namespace FinanceApp.Client.Classes;
 
 public class FinanceClient : IClient
 {
-	private Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+	private readonly Socket client = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
 	public static bool ValidateServerCertificate(
 			  object sender,
@@ -35,11 +35,12 @@ public class FinanceClient : IClient
 			ipStr = "127.0.0.1";
 		}
 
-		IPAddress ip = IPAddress.Parse(ipStr);
-		IPEndPoint ipEndPoint = new IPEndPoint(ip, 42069);
+		IPAddress ip = Dns.GetHostEntry(ipStr).AddressList[0] ?? throw new Exception($"Unable to find IP address for {ipStr}");
+		IPEndPoint ipEndPoint = new (ip, 42069);
 
 		try
 		{
+			// TODO - Crashes when ipStr is "localhost"
 			await client.ConnectAsync(ipEndPoint);
 			Console.WriteLine("Connected!");
 
@@ -54,6 +55,7 @@ public class FinanceClient : IClient
 			sslStream.AuthenticateAsClient("Cory Macdonald");
 
 			while (true) {
+				Console.WriteLine("Please enter a transaction value!");
 				int value = int.Parse(Console.ReadLine() ?? "0");
 
 				if (value > 0) {

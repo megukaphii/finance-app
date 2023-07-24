@@ -19,11 +19,6 @@ public class Transaction : Eloquent {
         // [TODO] necessary for db.ExecuteReader, can we remove or at least get rid of the underline on it?
     }
 
-    public Transaction(IDatabase database)
-    {
-        Database = database; // TODO - Necessary for DI, better way to do this or minimise number of constructors?
-    }
-
     public Transaction(IDatabase database, long value, string transactee)
 	{
 		Database = database;

@@ -25,25 +25,23 @@ public class TransactionTest {
             .ConfigureServices((_, services) =>
             {
                 services.AddSingleton<IDatabase, SqliteDatabase>();
-                services.AddTransient<Transaction>();
-                services.AddTransient<EloquentRepository<Transaction>>();
             })
             .Build();
     }
 
     [SetUp]
-	public void SetUp() {
+	public void SetUp()
+    {
 		MigrationService ms = new();
 		ms.RefreshTables<SqliteDatabase>();
 		SeedTestData();
 	}
 
 	[Test]
-	public void TestCreateTransaction() {
-        // TODO - Can this be done in one line? I read something about factory somethings, will that work?
-        Transaction test = _host.Services.GetRequiredService<Transaction>();
-        test.Value = EXODIA_THE_FORBIDDEN_ONE;
-        test.Transactee = JOHN_DOE;
+	public void TestCreateTransaction()
+    {
+		IDatabase db = _host.Services.GetRequiredService<IDatabase>();
+        Transaction test = new(db, EXODIA_THE_FORBIDDEN_ONE, JOHN_DOE);
 
 		Assert.AreEqual(0, test.ID);
 		test.Save();
@@ -54,11 +52,9 @@ public class TransactionTest {
 	[Test]
 	public void TestSelectTransaction()
     {
-        EloquentRepository<Transaction> repo = _host.Services.GetRequiredService<EloquentRepository<Transaction>>();
-        Transaction expected = _host.Services.GetRequiredService<Transaction>();
-        expected.Value = EXODIA_THE_FORBIDDEN_ONE;
-        expected.Transactee = JOHN_DOE;
-        expected.ID = 1;
+		IDatabase db = _host.Services.GetRequiredService<IDatabase>();
+		EloquentRepository<Transaction> repo = new(db);
+        Transaction expected = new(db, EXODIA_THE_FORBIDDEN_ONE, JOHN_DOE) { ID = 1 };
 
         Transaction? result = repo.Find(1);
 
@@ -67,9 +63,10 @@ public class TransactionTest {
 
 	[Test]
 	public void TestSaveTransaction()
-    {
-        EloquentRepository<Transaction> repo = _host.Services.GetRequiredService<EloquentRepository<Transaction>>();
-        Transaction transaction = repo.Find(1)!;
+	{
+		IDatabase db = _host.Services.GetRequiredService<IDatabase>();
+		EloquentRepository<Transaction> repo = new(db);
+		Transaction transaction = repo.Find(1)!;
 
 		transaction.Value = OTHER_YUGIOH_REFERENCE;
 		transaction.Save();
@@ -80,9 +77,10 @@ public class TransactionTest {
 
     [Test]
     public void TestUpdateTransactionID()
-    {
-        EloquentRepository<Transaction> repo = _host.Services.GetRequiredService<EloquentRepository<Transaction>>();
-        Transaction transaction = repo.Find(1)!;
+	{
+		IDatabase db = _host.Services.GetRequiredService<IDatabase>();
+		EloquentRepository<Transaction> repo = new(db);
+		Transaction transaction = repo.Find(1)!;
 
         Assert.Throws<Exception>(() => transaction.ID = 2);
     }
@@ -90,20 +88,20 @@ public class TransactionTest {
 	[Ignore("Not working on this feature yet")]
 	[Test]
 	public void TestUpdateTransaction()
-    {
-        EloquentRepository<Transaction> repo = _host.Services.GetRequiredService<EloquentRepository<Transaction>>();
+	{
+		IDatabase db = _host.Services.GetRequiredService<IDatabase>();
+		EloquentRepository<Transaction> repo = new(db);
 
-        //Transaction.Update('value', EXODIA_THE_FORBIDDEN_ONE).Where('value', OTHER_YUGIOH_REFERENCE);
-        Transaction transaction = repo.Find(1)!;
+		//Transaction.Update('value', EXODIA_THE_FORBIDDEN_ONE).Where('value', OTHER_YUGIOH_REFERENCE);
+		Transaction transaction = repo.Find(1)!;
 
 		Assert.AreEqual(EXODIA_THE_FORBIDDEN_ONE, transaction.Value);
 	}
 
 	private void SeedTestData()
-    {
-        Transaction test = _host.Services.GetRequiredService<Transaction>();
-        test.Value = EXODIA_THE_FORBIDDEN_ONE;
-        test.Transactee = JOHN_DOE;
+	{
+		IDatabase db = _host.Services.GetRequiredService<IDatabase>();
+		Transaction test = new(db, EXODIA_THE_FORBIDDEN_ONE, JOHN_DOE);
         test.Save();
 	}
 }
