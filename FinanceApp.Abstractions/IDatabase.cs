@@ -4,7 +4,7 @@ namespace FinanceApp.Abstractions;
 
 public interface IDatabase : IDisposable {
 	ConnectionState State { get; }
-	long? LastInsertId { get; }
+	long LastInsertId { get; }
 
 	IDatabase OpenConnection();
 

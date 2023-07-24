@@ -13,7 +13,7 @@ public class Transaction : Eloquent {
 	public string Transactee { get; set; } = string.Empty;
 
 	public Transaction() {
-        // [TODO] necessary for db.ExecuteReader, can we remove or at least get rid of the underline on it?
+        // [TODO] necessary for db.ExecuteReader/Parser, can we remove it?
     }
 
     public Transaction(IDatabase database, long value, string transactee)
@@ -133,7 +133,7 @@ public class Transaction : Eloquent {
 		}
 
 		// This should be fine right?
-		ID = (long) Database.LastInsertId!;
+		ID = Database?.LastInsertId ?? -1;
 
 		ExistsOnDb = true;
 

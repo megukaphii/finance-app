@@ -11,15 +11,15 @@ public class SqliteDatabase : IDatabase {
 	private readonly SqliteConnection DB = new("Data Source=test.db");
 	public ConnectionState State => DB.State;
 
-	public long? LastInsertId { get {
+	public long LastInsertId { get {
 			string sql = @"SELECT LAST_INSERT_ROWID() LIMIT 1";
 			SqliteCommand command = DB.CreateCommand();
 			command.CommandText = sql;
 			ParameterCollection parameters = ParameterCollection.Empty;
 			command.Parameters.AddRange(parameters.ConvertParameters(Convert));
 
-			long? count = (long?) command.ExecuteScalar();
-			return count;
+			long? result = (long?) command.ExecuteScalar();
+			return result ?? -1;
 		} }
 
 	public SqliteDatabase() {

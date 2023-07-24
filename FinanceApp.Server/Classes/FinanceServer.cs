@@ -28,6 +28,7 @@ public class FinanceServer : IServer
 			Socket socket = await GetSocket();
 			using SslStream sslStream = await EstablishSslStream(socket);
 
+			// TODO - Implement handling multiple clients
 			while (true)
 			{
 				HandleRequest(sslStream);
