@@ -12,11 +12,15 @@ namespace FinanceApp.Server.Classes;
 public class FinanceServer : IServer
 {
 	private readonly Socket listener = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-    private readonly int timeoutInMs = 10000;
+    private readonly int timeoutInMs = 60000;
 	private readonly X509Certificate serverCertificate;
 	private readonly IDatabase _database;
 
+	private bool _isRunning = false;
+
 	public FinanceServer(IDatabase database) {
+		IPEndPoint ipEndPoint = new(IPAddress.Any, 42069);
+		listener.Bind(ipEndPoint);
 		serverCertificate = X509Certificate.CreateFromCertFile("./Resources/certificate.pfx");
 		_database = database;
 	}
@@ -25,34 +29,35 @@ public class FinanceServer : IServer
 	{
 		try
 		{
-			Socket socket = await GetSocket();
-			using SslStream sslStream = await EstablishSslStream(socket);
+			listener.Listen(10);
+			Console.WriteLine("Listener started.");
+			_isRunning = true;
 
-			// TODO - Implement handling multiple clients
-			while (true)
-			{
-				HandleRequest(sslStream);
+			while (_isRunning) {
+				Socket handle = await listener.AcceptAsync();
+				Console.WriteLine("Connection found.");
+				ThreadPool.QueueUserWorkItem(HandleNewConnection, handle);
 			}
-
-            socket.Shutdown(SocketShutdown.Both);
-            socket.Close();
-        } catch (Exception e) {
+		} catch (Exception e) {
 			Console.WriteLine($"[{e.GetType()}]: {e.Message}");
 		}
 	}
 
-	private async Task<Socket> GetSocket()
-    {
-        IPEndPoint ipEndPoint = new(IPAddress.Any, 42069);
+	private async void HandleNewConnection(object? handle) {
+		Socket client = (Socket)handle!;
+		using SslStream sslStream = await EstablishSslStream(client);
+		while (_isRunning) {
+			if (client.Poll(1, SelectMode.SelectRead) && client.Available == 0) {
+				// TODO - I don't understand how this works, please explain!
+				Console.WriteLine("Client has disconnected.");
+				break;
+			}
 
-        listener.Bind(ipEndPoint);
-        listener.Listen(1);
-        Console.WriteLine("Starting listener...");
+			string messageReceived = await ReadMessage(sslStream);
 
-        Socket handler = await listener.AcceptAsync();
-        Console.WriteLine("Connection found.");
-		return handler;
-    }
+			HandleCreateTransactionRequest(messageReceived, sslStream);
+		}
+	}
 
 	private async Task<SslStream> EstablishSslStream(Socket handler)
     {
@@ -78,20 +83,12 @@ public class FinanceServer : IServer
 		return sslStream;
 	}
 
-	private void HandleRequest(SslStream sslStream)
-	{
-        string messageReceived = ReadMessage(sslStream);
-		// TODO - Determine message type
-		HandleCreateTransactionRequest(messageReceived, sslStream);
-    }
-
-	static string ReadMessage(SslStream sslStream) {
+	static async Task<string> ReadMessage(SslStream sslStream) {
 		byte[] buffer = new byte[2048];
 		StringBuilder messageData = new();
 		int bytes = -1;
 		do {
-			// TODO - If ReadAsync is used, this will be called twice simultaeneously and cause an exception
-			bytes = sslStream.Read(buffer, 0, buffer.Length);
+			bytes = await sslStream.ReadAsync(buffer, 0, buffer.Length);
 
 			Decoder decoder = Encoding.UTF8.GetDecoder();
 			char[] chars = new char[decoder.GetCharCount(buffer, 0, bytes)];
