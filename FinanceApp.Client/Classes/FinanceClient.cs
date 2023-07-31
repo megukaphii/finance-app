@@ -66,7 +66,7 @@ public class FinanceClient : IClient
 
 					string json = Newtonsoft.Json.JsonConvert.SerializeObject(transaction);
 
-					byte[] messsage = Encoding.UTF8.GetBytes(json + "<EOF>");
+					byte[] messsage = Encoding.UTF8.GetBytes(CreateTransaction.GetFlag() + json + "<EOF>");
 					sslStream.Write(messsage);
 					sslStream.Flush();
 

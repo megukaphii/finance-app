@@ -55,7 +55,10 @@ public class FinanceServer : IServer
 
 			string messageReceived = await ReadMessage(sslStream);
 
-			HandleCreateTransactionRequest(messageReceived, sslStream);
+			if (messageReceived.StartsWith(CreateTransaction.GetFlag())) {
+				messageReceived.Replace(CreateTransaction.GetFlag(), "");
+				HandleCreateTransactionRequest(messageReceived, sslStream);
+			}
 		}
 	}
 
