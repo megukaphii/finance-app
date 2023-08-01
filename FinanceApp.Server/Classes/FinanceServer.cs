@@ -11,17 +11,17 @@ namespace FinanceApp.Server.Classes;
 
 public class FinanceServer : IServer
 {
-	private readonly Socket listener = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-    private readonly int timeoutInMs = 60000;
-	private readonly X509Certificate serverCertificate;
+	private const int TimeoutInMs = 60000;
+	private readonly Socket _listener = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+	private readonly X509Certificate _serverCertificate;
 	private readonly IDatabase _database;
 
-	private bool _isRunning = false;
+	private bool _isRunning;
 
 	public FinanceServer(IDatabase database) {
 		IPEndPoint ipEndPoint = new(IPAddress.Any, 42069);
-		listener.Bind(ipEndPoint);
-		serverCertificate = X509Certificate.CreateFromCertFile("./Resources/certificate.pfx");
+		_listener.Bind(ipEndPoint);
+		_serverCertificate = X509Certificate.CreateFromCertFile("./Resources/certificate.pfx");
 		_database = database;
 	}
 
@@ -29,12 +29,12 @@ public class FinanceServer : IServer
 	{
 		try
 		{
-			listener.Listen(10);
+			_listener.Listen(10);
 			Console.WriteLine("Listener started.");
 			_isRunning = true;
 
 			while (_isRunning) {
-				Socket handle = await listener.AcceptAsync();
+				Socket handle = await _listener.AcceptAsync();
 				Console.WriteLine("Connection found.");
 				ThreadPool.QueueUserWorkItem(HandleNewConnection, handle);
 			}
@@ -45,7 +45,7 @@ public class FinanceServer : IServer
 
 	private async void HandleNewConnection(object? handle) {
 		Socket client = (Socket)handle!;
-		using SslStream sslStream = await EstablishSslStream(client);
+		await using SslStream sslStream = await EstablishSslStream(client);
 		while (_isRunning) {
 			if (client.Poll(1, SelectMode.SelectRead) && client.Available == 0) {
 				// TODO - I don't understand how this works, please explain!
@@ -78,18 +78,18 @@ public class FinanceServer : IServer
 
 	private async Task<SslStream> SetupSslStream(SslStream sslStream)
 	{
-		await sslStream.AuthenticateAsServerAsync(serverCertificate, false, true);
-		sslStream.ReadTimeout = timeoutInMs;
-		sslStream.WriteTimeout = timeoutInMs;
+		await sslStream.AuthenticateAsServerAsync(_serverCertificate, false, true);
+		sslStream.ReadTimeout = TimeoutInMs;
+		sslStream.WriteTimeout = TimeoutInMs;
 		Console.WriteLine("SSL connection established.");
 
 		return sslStream;
 	}
 
-	static async Task<string> ReadMessage(SslStream sslStream) {
+	private static async Task<string> ReadMessage(Stream sslStream) {
 		byte[] buffer = new byte[2048];
 		StringBuilder messageData = new();
-		int bytes = -1;
+		int bytes;
 		do {
 			bytes = await sslStream.ReadAsync(buffer, 0, buffer.Length);
 
@@ -105,7 +105,7 @@ public class FinanceServer : IServer
 		return messageData.ToString().Replace("<EOF>", "");
 	}
 
-	private void HandleCreateTransactionRequest(string messageReceived, SslStream sslStream)
+	private void HandleCreateTransactionRequest(string messageReceived, Stream sslStream)
 	{
         CreateTransaction? transactionRequest = Newtonsoft.Json.JsonConvert.DeserializeObject<CreateTransaction>(messageReceived);
 		// TODO - transactionRequest.Handle(); ?
@@ -123,7 +123,7 @@ public class FinanceServer : IServer
         SendCreateTransactionResponse(sslStream, transaction);
     }
 
-	private async void SendCreateTransactionResponse(SslStream sslStream, Transaction transaction)
+	private async void SendCreateTransactionResponse(Stream sslStream, Transaction transaction)
 	{
         CreateTransactionResponse response = new()
         {
@@ -134,7 +134,7 @@ public class FinanceServer : IServer
 
         byte[] message = Encoding.UTF8.GetBytes(strResponse + "<EOF>");
         await sslStream.WriteAsync(message);
-        sslStream.Flush();
+        await sslStream.FlushAsync();
     }
 
 	static void DisplaySecurityLevel(SslStream stream) {

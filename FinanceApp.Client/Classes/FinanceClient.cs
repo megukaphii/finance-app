@@ -4,14 +4,15 @@ using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using FinanceApp.Data;
+using Newtonsoft.Json;
 
 namespace FinanceApp.Client.Classes;
 
 public class FinanceClient : IClient
 {
-	private readonly Socket client = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+	private readonly Socket _client = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-	public static bool ValidateServerCertificate(
+	private static bool ValidateServerCertificate(
 			  object sender,
 			  X509Certificate? certificate,
 			  X509Chain? chain,
@@ -35,24 +36,24 @@ public class FinanceClient : IClient
 			ipStr = "127.0.0.1";
 		}
 
-		IPAddress ip = Dns.GetHostEntry(ipStr).AddressList[0] ?? throw new Exception($"Unable to find IP address for {ipStr}");
+		IPAddress ip = (await Dns.GetHostEntryAsync(ipStr)).AddressList[0] ?? throw new Exception($"Unable to find IP address for {ipStr}");
 		IPEndPoint ipEndPoint = new (ip, 42069);
 
 		try
 		{
 			// TODO - Crashes when ipStr is "localhost"
-			await client.ConnectAsync(ipEndPoint);
+			await _client.ConnectAsync(ipEndPoint);
 			Console.WriteLine("Connected!");
 
-			NetworkStream networkStream = new(client);
+			NetworkStream networkStream = new(_client);
 			SslStream sslStream = new(
 				networkStream,
 				false,
-				new RemoteCertificateValidationCallback(ValidateServerCertificate),
+				ValidateServerCertificate,
 				null
 			);
 
-			sslStream.AuthenticateAsClient("Cory Macdonald");
+			await sslStream.AuthenticateAsClientAsync("Cory Macdonald");
 
 			while (true) {
 				Console.WriteLine("Please enter a transaction value!");
@@ -64,19 +65,19 @@ public class FinanceClient : IClient
 						Value = value
 					};
 
-					string json = Newtonsoft.Json.JsonConvert.SerializeObject(transaction);
+					string json = JsonConvert.SerializeObject(transaction);
 
-					byte[] messsage = Encoding.UTF8.GetBytes(CreateTransaction.GetFlag() + json + "<EOF>");
-					sslStream.Write(messsage);
+					byte[] message = Encoding.UTF8.GetBytes(CreateTransaction.GetFlag() + json + "<EOF>");
+					sslStream.Write(message);
 					sslStream.Flush();
 
 					string messageReceived = await ReadMessage(sslStream);
-					CreateTransactionResponse? response = Newtonsoft.Json.JsonConvert.DeserializeObject<CreateTransactionResponse>(messageReceived);
+					CreateTransactionResponse? response = JsonConvert.DeserializeObject<CreateTransactionResponse>(messageReceived);
 					Console.WriteLine(response);
 				}
 			}
 
-			client.Close();
+			_client.Close();
 			Console.WriteLine("Client closed.");
 		} catch (Exception e)
 		{
@@ -84,10 +85,10 @@ public class FinanceClient : IClient
 		}
 	}
 
-	static async Task<string> ReadMessage(SslStream sslStream) {
+	private static async Task<string> ReadMessage(Stream sslStream) {
 		byte[] buffer = new byte[2048];
-		StringBuilder messageData = new StringBuilder();
-		int bytes = -1;
+		StringBuilder messageData = new();
+		int bytes;
 		do {
 			bytes = await sslStream.ReadAsync(buffer, 0, buffer.Length);
 
@@ -95,7 +96,7 @@ public class FinanceClient : IClient
 			char[] chars = new char[decoder.GetCharCount(buffer, 0, bytes)];
 			decoder.GetChars(buffer, 0, bytes, chars, 0);
 			messageData.Append(chars);
-			if (messageData.ToString().IndexOf("<EOF>") != -1) {
+			if (messageData.ToString().IndexOf("<EOF>", StringComparison.Ordinal) != -1) {
 				break;
 			}
 		} while (bytes != 0);
