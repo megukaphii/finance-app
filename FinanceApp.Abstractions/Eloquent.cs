@@ -6,15 +6,15 @@ public abstract class Eloquent {
     // TODO - Would like this to be private and not nullable? But the parser is the issue with this.
 	public IDatabase? Database;
 	public bool ExistsOnDb;
-    private long id;
+    private long _id;
 
 	[Column("ID")]
-    public long ID {
-        get => id;
+    public long Id {
+        get => _id;
         set
         {
             if (!ExistsOnDb) {
-                id = value;
+                _id = value;
             } else {
                 throw new Exception("Cannot assign ID to existing DB entry");
             }

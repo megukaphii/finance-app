@@ -1,5 +1,4 @@
-﻿using System.Net.Security;
-using System.Reflection;
+﻿using System.Reflection;
 using Newtonsoft.Json;
 
 namespace FinanceApp.Abstractions;
@@ -32,5 +31,5 @@ public interface IRequest
 		throw new Exception($"No valid flag exists for message {message}");
 	}
 
-    public Task Handle(IDatabase database, SslStream stream);
+    public Task Handle(IDatabase database, Stream stream);
 }

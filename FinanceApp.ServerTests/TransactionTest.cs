@@ -10,9 +10,9 @@ namespace FinanceApp.ServerTests;
 
 [TestFixture]
 public class TransactionTest {
-	const long EXODIA_THE_FORBIDDEN_ONE = 120;
-	const long OTHER_YUGIOH_REFERENCE = 150;
-	const string JOHN_DOE = "John Doe";
+	const long ExodiaTheForbiddenOne = 120;
+	const long OtherYugiohReference = 150;
+	const string JohnDoe = "John Doe";
 
 #pragma warning disable CS8618
     private IDatabase _db;
@@ -42,19 +42,19 @@ public class TransactionTest {
 	[Test]
 	public void TestCreateTransaction()
     {
-        Transaction test = new(_db, EXODIA_THE_FORBIDDEN_ONE, JOHN_DOE);
+        Transaction test = new(_db, ExodiaTheForbiddenOne, JohnDoe);
 
-		Assert.AreEqual(0, test.ID);
+		Assert.AreEqual(0, test.Id);
 		test.Save();
 
-		Assert.AreEqual(2, test.ID);
+		Assert.AreEqual(2, test.Id);
 	}
 
 	[Test]
 	public void TestSelectTransaction()
     {
 		EloquentRepository<Transaction> repo = new(_db);
-        Transaction expected = new(_db, EXODIA_THE_FORBIDDEN_ONE, JOHN_DOE) { ID = 1 };
+        Transaction expected = new(_db, ExodiaTheForbiddenOne, JohnDoe) { Id = 1 };
 
         Transaction? result = repo.Find(1);
 
@@ -67,11 +67,11 @@ public class TransactionTest {
 		EloquentRepository<Transaction> repo = new(_db);
 		Transaction transaction = repo.Find(1)!;
 
-		transaction.Value = OTHER_YUGIOH_REFERENCE;
+		transaction.Value = OtherYugiohReference;
 		transaction.Save();
 		Transaction result = repo.Find(1)!;
 
-		Assert.AreEqual(OTHER_YUGIOH_REFERENCE, result.Value);
+		Assert.AreEqual(OtherYugiohReference, result.Value);
 	}
 
     [Test]
@@ -80,7 +80,7 @@ public class TransactionTest {
 		EloquentRepository<Transaction> repo = new(_db);
 		Transaction transaction = repo.Find(1)!;
 
-        Assert.Throws<Exception>(() => transaction.ID = 2);
+        Assert.Throws<Exception>(() => transaction.Id = 2);
     }
 
 	[Ignore("Not working on this feature yet")]
@@ -92,12 +92,12 @@ public class TransactionTest {
 		//Transaction.Update('value', EXODIA_THE_FORBIDDEN_ONE).Where('value', OTHER_YUGIOH_REFERENCE);
 		Transaction transaction = repo.Find(1)!;
 
-		Assert.AreEqual(EXODIA_THE_FORBIDDEN_ONE, transaction.Value);
+		Assert.AreEqual(ExodiaTheForbiddenOne, transaction.Value);
 	}
 
 	private void SeedTestData()
 	{
-		Transaction test = new(_db, EXODIA_THE_FORBIDDEN_ONE, JOHN_DOE);
+		Transaction test = new(_db, ExodiaTheForbiddenOne, JohnDoe);
         test.Save();
 	}
 }

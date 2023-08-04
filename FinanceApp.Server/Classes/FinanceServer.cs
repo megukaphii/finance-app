@@ -44,7 +44,7 @@ public class FinanceServer : IServer
 		}
 	}
 
-	private void LoadAssemblies()
+	private static void LoadAssemblies()
 	{
 		Assembly.Load("FinanceApp.Data");
 	}

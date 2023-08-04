@@ -24,7 +24,7 @@ public class Transaction : Eloquent {
 	}
 
 	public override string ToString() {
-		return $"Transaction ID: {ID}, Value: {Value}, Transactee: {Transactee}";
+		return $"Transaction ID: {Id}, Value: {Value}, Transactee: {Transactee}";
 	}
 
 	// [TODO] Can we pull this up to IEloquent? Value == other.Value and similar model-specific comparisons like that would be the only problem, but reflection could fix that? I think?
@@ -35,7 +35,7 @@ public class Transaction : Eloquent {
 		}
 
         Transaction other = (Transaction) obj;
-        return ID == other.ID && Value == other.Value;
+        return Id == other.Id && Value == other.Value;
     }
 
 	// It complains if we don't override this too
@@ -133,7 +133,7 @@ public class Transaction : Eloquent {
 		}
 
 		// This should be fine right?
-		ID = Database?.LastInsertId ?? -1;
+		Id = Database?.LastInsertId ?? -1;
 
 		ExistsOnDb = true;
 

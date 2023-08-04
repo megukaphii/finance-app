@@ -4,21 +4,21 @@ namespace FinanceApp.Abstractions;
 
 public class Parser
 {
-    private readonly IDatabase database;
-    private readonly IDataReader reader;
-    private readonly PropertyInfo[] properties;
+    private readonly IDatabase _database;
+    private readonly IDataReader _reader;
+    private readonly PropertyInfo[] _properties;
 
     public Parser(IDatabase database, IDataReader reader, PropertyInfo[] properties)
     {
-        this.database = database;
-        this.reader = reader;
-        this.properties = properties;
+        this._database = database;
+        this._reader = reader;
+        this._properties = properties;
     }
 
     public List<T> PerformParse<T>() where T : Eloquent, new()
     {
         List<T> result = new();
-        while (reader.Read()) {
+        while (_reader.Read()) {
             result.Add(ParseRow<T>());
         }
         return result;
@@ -27,25 +27,25 @@ public class Parser
     private T ParseRow<T>() where T : Eloquent, new()
     {
         T instance = new();
-        for (int i = 0; i < reader.FieldCount; i++) {
+        for (int i = 0; i < _reader.FieldCount; i++) {
             ParseField(instance, i);
 		}
-		instance.Database = database;
+		instance.Database = _database;
 		instance.ExistsOnDb = true;
         return instance;
     }
 
     private void ParseField<T>(T instance, int fieldIdx)
     {
-        string fieldName = reader.GetName(fieldIdx);
+        string fieldName = _reader.GetName(fieldIdx);
         PropertyInfo property = GetProperty<T>(fieldName);
-        SetValue(property, instance, reader.GetValue(fieldIdx));
+        SetValue(property, instance, _reader.GetValue(fieldIdx));
     }
 
     private PropertyInfo GetProperty<T>(string fieldName)
     {
         try {
-            return properties.Single(p => p.Name == fieldName);
+            return _properties.Single(p => p.Name == fieldName);
         } catch (Exception e) {
             throw new Exception($"{typeof(T)} doesn't contain field {fieldName}", e);
         }
