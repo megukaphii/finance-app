@@ -3,7 +3,7 @@ using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using FinanceApp.Data;
+using FinanceApp.Data.Requests;
 using Newtonsoft.Json;
 
 namespace FinanceApp.Client.Classes;
@@ -67,7 +67,7 @@ public class FinanceClient : IClient
 
 					string json = JsonConvert.SerializeObject(transaction);
 
-					byte[] message = Encoding.UTF8.GetBytes(CreateTransaction.GetFlag() + json + "<EOF>");
+					byte[] message = Encoding.UTF8.GetBytes(CreateTransaction.Flag + json + "<EOF>");
 					sslStream.Write(message);
 					sslStream.Flush();
 

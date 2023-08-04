@@ -1,11 +1,10 @@
 ﻿using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using FinanceApp.Abstractions;
-using FinanceApp.Data;
-using FinanceApp.Server.Data;
 
 namespace FinanceApp.Server.Classes;
 
@@ -27,6 +26,8 @@ public class FinanceServer : IServer
 
 	public async Task Start()
 	{
+		LoadAssemblies();
+
 		try
 		{
 			_listener.Listen(10);
@@ -36,29 +37,30 @@ public class FinanceServer : IServer
 			while (_isRunning) {
 				Socket handle = await _listener.AcceptAsync();
 				Console.WriteLine("Connection found.");
-				ThreadPool.QueueUserWorkItem(HandleNewConnection, handle);
+				await HandleNewConnection(handle);
 			}
 		} catch (Exception e) {
 			Console.WriteLine($"[{e.GetType()}]: {e.Message}");
 		}
 	}
 
-	private async void HandleNewConnection(object? handle) {
-		Socket client = (Socket)handle!;
+	private void LoadAssemblies()
+	{
+		Assembly.Load("FinanceApp.Data");
+	}
+
+	private async Task HandleNewConnection(Socket client)
+	{
 		await using SslStream sslStream = await EstablishSslStream(client);
 		while (_isRunning) {
 			if (client.Poll(1, SelectMode.SelectRead) && client.Available == 0) {
-				// TODO - I don't understand how this works, please explain!
 				Console.WriteLine("Client has disconnected.");
 				break;
 			}
 
-			string messageReceived = await ReadMessage(sslStream);
-
-			if (messageReceived.StartsWith(CreateTransaction.GetFlag())) {
-				messageReceived = messageReceived.Replace(CreateTransaction.GetFlag(), "");
-				HandleCreateTransactionRequest(messageReceived, sslStream);
-			}
+			string message = await ReadMessage(sslStream);
+			IRequest request = IRequest.GetRequest(message);
+			await request.Handle(_database, sslStream);
 		}
 	}
 
@@ -70,7 +72,7 @@ public class FinanceServer : IServer
 		return sslStream;
 	}
 
-	private SslStream GetSslStream(Socket handler)
+	private static SslStream GetSslStream(Socket handler)
 	{
         NetworkStream networkStream = new(handler);
         return new SslStream(networkStream, false);
@@ -104,38 +106,6 @@ public class FinanceServer : IServer
 
 		return messageData.ToString().Replace("<EOF>", "");
 	}
-
-	private void HandleCreateTransactionRequest(string messageReceived, Stream sslStream)
-	{
-        CreateTransaction? transactionRequest = Newtonsoft.Json.JsonConvert.DeserializeObject<CreateTransaction>(messageReceived);
-		// TODO - transactionRequest.Handle(); ?
-
-        if (transactionRequest == null)
-        {
-            Console.WriteLine("Transaction was null");
-            return;
-        }
-        Console.WriteLine(transactionRequest);
-
-		Transaction transaction = new(_database, transactionRequest.Value, "TEMP");
-        transaction.Save();
-
-        SendCreateTransactionResponse(sslStream, transaction);
-    }
-
-	private async void SendCreateTransactionResponse(Stream sslStream, Transaction transaction)
-	{
-        CreateTransactionResponse response = new()
-        {
-            Id = transaction.ID,
-            Success = true
-        };
-        string strResponse = Newtonsoft.Json.JsonConvert.SerializeObject(response);
-
-        byte[] message = Encoding.UTF8.GetBytes(strResponse + "<EOF>");
-        await sslStream.WriteAsync(message);
-        await sslStream.FlushAsync();
-    }
 
 	static void DisplaySecurityLevel(SslStream stream) {
 		Console.WriteLine("Cipher: {0} strength {1}", stream.CipherAlgorithm, stream.CipherStrength);

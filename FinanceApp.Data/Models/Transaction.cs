@@ -3,7 +3,7 @@ using System.Data;
 using System.Reflection;
 using FinanceApp.Abstractions;
 
-namespace FinanceApp.Server.Data;
+namespace FinanceApp.Data.Models;
 
 [Table("Transactions")]
 public class Transaction : Eloquent {
