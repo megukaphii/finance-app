@@ -56,23 +56,48 @@ public class FinanceClient : IClient
 			await sslStream.AuthenticateAsClientAsync("Cory Macdonald");
 
 			while (true) {
-				Console.WriteLine("Please enter a transaction value!");
-				int value = int.Parse(Console.ReadLine() ?? "0");
+				Console.WriteLine("Please select a request type:");
+				Console.WriteLine("1. Create transaction");
+				Console.WriteLine("2. View transactions");
+				int choice = int.Parse(Console.ReadLine() ?? "0");
+				if (choice == 1)
+				{
+					Console.WriteLine("Please enter a transaction value!");
+					int value = int.Parse(Console.ReadLine() ?? "0");
 
-				if (value > 0) {
-					CreateTransaction transaction = new() {
-						Type = "create",
-						Value = value
+					if (value > 0)
+					{
+						CreateTransaction transaction = new()
+						{
+							Value = value
+						};
+
+						string json = JsonConvert.SerializeObject(transaction);
+
+						byte[] message = Encoding.UTF8.GetBytes(CreateTransaction.Flag + json + "<EOF>");
+						sslStream.Write(message);
+						sslStream.Flush();
+
+						string messageReceived = await ReadMessage(sslStream);
+						CreateTransactionResponse? response =
+							JsonConvert.DeserializeObject<CreateTransactionResponse>(messageReceived);
+						Console.WriteLine(response);
+					}
+				} else if (choice == 2)
+				{
+					ViewTransactions request = new()
+					{
+						Page = 0
 					};
 
-					string json = JsonConvert.SerializeObject(transaction);
+					string json = JsonConvert.SerializeObject(request);
 
-					byte[] message = Encoding.UTF8.GetBytes(CreateTransaction.Flag + json + "<EOF>");
+					byte[] message = Encoding.UTF8.GetBytes(ViewTransactions.Flag + json + "<EOF>");
 					sslStream.Write(message);
 					sslStream.Flush();
 
 					string messageReceived = await ReadMessage(sslStream);
-					CreateTransactionResponse? response = JsonConvert.DeserializeObject<CreateTransactionResponse>(messageReceived);
+					ViewTransactionResponse? response = JsonConvert.DeserializeObject<ViewTransactionResponse>(messageReceived);
 					Console.WriteLine(response);
 				}
 			}

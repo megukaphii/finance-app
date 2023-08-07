@@ -2,11 +2,11 @@
 
 public class CreateTransactionResponse
 {
-    public required long Id { get; set; }
-    public required bool Success { get; set; }
+    public required bool Success { get; init; }
+    public required long Id { get; init; }
 
     public override string ToString()
     {
-        return $"{nameof(Id)}: {Id}, {nameof(Success)}: {Success}";
+        return $"{nameof(Success)}: {Success}, {nameof(Id)}: {Id}";
     }
 }

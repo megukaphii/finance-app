@@ -9,7 +9,7 @@ public abstract class Eloquent {
     private long _id;
 
 	[Column("ID")]
-    public long Id {
+    public long ID {
         get => _id;
         set
         {

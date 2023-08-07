@@ -44,17 +44,17 @@ public class TransactionTest {
     {
         Transaction test = new(_db, ExodiaTheForbiddenOne, JohnDoe);
 
-		Assert.AreEqual(0, test.Id);
+		Assert.AreEqual(0, test.ID);
 		test.Save();
 
-		Assert.AreEqual(2, test.Id);
+		Assert.AreEqual(2, test.ID);
 	}
 
 	[Test]
 	public void TestSelectTransaction()
     {
 		EloquentRepository<Transaction> repo = new(_db);
-        Transaction expected = new(_db, ExodiaTheForbiddenOne, JohnDoe) { Id = 1 };
+        Transaction expected = new(_db, ExodiaTheForbiddenOne, JohnDoe) { ID = 1 };
 
         Transaction? result = repo.Find(1);
 
@@ -80,7 +80,7 @@ public class TransactionTest {
 		EloquentRepository<Transaction> repo = new(_db);
 		Transaction transaction = repo.Find(1)!;
 
-        Assert.Throws<Exception>(() => transaction.Id = 2);
+        Assert.Throws<Exception>(() => transaction.ID = 2);
     }
 
 	[Ignore("Not working on this feature yet")]

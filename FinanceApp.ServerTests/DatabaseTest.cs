@@ -90,7 +90,7 @@ public class DatabaseTest {
 	}
 
     [Test]
-    public void TestExecuteReaderWithNullResult() {
+    public void TestExecuteReaderWithNullField() {
         MigrationService ms = new();
         ms.RefreshTables<SqliteDatabase>();
         InsertIntoTransactionsWithParams(250);

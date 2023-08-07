@@ -6,14 +6,13 @@ namespace FinanceApp.Data.Requests;
 
 public class CreateTransaction : IRequest
 {
-    public required string Type { get; init; }
-    public required int Value { get; init; }
-
     public static string Flag => "<CreateTransaction>";
+
+    public required int Value { get; init; }
 
     public override string ToString()
     {
-        return $"{nameof(Type)}: {Type}, {nameof(Value)}: {Value}";
+        return $"{Flag}: {nameof(Value)}: {Value}";
     }
 
     public async Task Handle(IDatabase database, Stream sslStream)
@@ -29,7 +28,7 @@ public class CreateTransaction : IRequest
     private async Task SendResponse(Stream sslStream, Transaction transaction)
     {
         CreateTransactionResponse response = new() {
-            Id = transaction.Id,
+            Id = transaction.ID,
             Success = true
         };
         string strResponse = Newtonsoft.Json.JsonConvert.SerializeObject(response);

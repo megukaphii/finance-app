@@ -87,8 +87,9 @@ public class FinanceServer : IServer
 				await request.Handle(_database, stream);
 			}
 		}
-		catch (Exception)
+		catch (Exception e)
 		{
+			Console.WriteLine(e);
 			RemoveClient(stream);
 		}
 	}
