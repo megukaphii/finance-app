@@ -21,7 +21,7 @@ public class FinanceServer : IServer
 	public FinanceServer(IDatabase database) {
 		IPEndPoint ipEndPoint = new(IPAddress.Any, 42069);
 		_listener.Bind(ipEndPoint);
-		_serverCertificate = X509Certificate.CreateFromCertFile("./certificate.pfx");
+		_serverCertificate = X509Certificate.CreateFromCertFile("../certificate.pfx");
 		_database = database;
 	}
 

@@ -6,8 +6,8 @@
       dockerfile: Dockerfile
     volumes:
       - type: bind
-        source: ./certificate.pfx
-        target: /app/certificate.pfx
+        source: ../certificate.pfx
+        target: /certificate.pfx
         read_only: true
 volumes:
   cert:
