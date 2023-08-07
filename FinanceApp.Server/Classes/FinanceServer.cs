@@ -14,6 +14,7 @@ public class FinanceServer : IServer
 	private readonly Socket _listener = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 	private readonly X509Certificate _serverCertificate;
 	private readonly IDatabase _database;
+	private readonly List<Stream> _clients = new();
 
 	private bool _isRunning;
 
@@ -37,8 +38,12 @@ public class FinanceServer : IServer
 			while (_isRunning) {
 				Socket handle = await _listener.AcceptAsync();
 				Console.WriteLine("Connection found.");
-				await HandleNewConnection(handle);
+				await using SslStream sslStream = await EstablishSslStream(handle);
+				_clients.Add(sslStream);
+				await HandleConnection(sslStream);
 			}
+
+			Close();
 		} catch (Exception e) {
 			Console.WriteLine($"[{e.GetType()}]: {e.Message}");
 		}
@@ -49,21 +54,6 @@ public class FinanceServer : IServer
 		Assembly.Load("FinanceApp.Data");
 	}
 
-	private async Task HandleNewConnection(Socket client)
-	{
-		await using SslStream sslStream = await EstablishSslStream(client);
-		while (_isRunning) {
-			if (client.Poll(1, SelectMode.SelectRead) && client.Available == 0) {
-				Console.WriteLine("Client has disconnected.");
-				break;
-			}
-
-			string message = await ReadMessage(sslStream);
-			IRequest request = IRequest.GetRequest(message);
-			await request.Handle(_database, sslStream);
-		}
-	}
-
 	private async Task<SslStream> EstablishSslStream(Socket handler)
     {
 		SslStream sslStream = GetSslStream(handler);
@@ -72,14 +62,12 @@ public class FinanceServer : IServer
 		return sslStream;
 	}
 
-	private static SslStream GetSslStream(Socket handler)
-	{
-        NetworkStream networkStream = new(handler);
-        return new SslStream(networkStream, false);
+	private static SslStream GetSslStream(Socket handler) {
+		NetworkStream networkStream = new(handler);
+		return new SslStream(networkStream, false);
 	}
 
-	private async Task<SslStream> SetupSslStream(SslStream sslStream)
-	{
+	private async Task<SslStream> SetupSslStream(SslStream sslStream) {
 		await sslStream.AuthenticateAsServerAsync(_serverCertificate, false, true);
 		sslStream.ReadTimeout = TimeoutInMs;
 		sslStream.WriteTimeout = TimeoutInMs;
@@ -88,12 +76,29 @@ public class FinanceServer : IServer
 		return sslStream;
 	}
 
-	private static async Task<string> ReadMessage(Stream sslStream) {
+	private async Task HandleConnection(Stream stream)
+	{
+		try
+		{
+			while (_isRunning)
+			{
+				string message = await ReadMessage(stream);
+				IRequest request = IRequest.GetRequest(message);
+				await request.Handle(_database, stream);
+			}
+		}
+		catch (Exception)
+		{
+			RemoveClient(stream);
+		}
+	}
+
+	private static async Task<string> ReadMessage(Stream stream) {
 		byte[] buffer = new byte[2048];
 		StringBuilder messageData = new();
 		int bytes;
 		do {
-			bytes = await sslStream.ReadAsync(buffer, 0, buffer.Length);
+			bytes = await stream.ReadAsync(buffer, 0, buffer.Length);
 
 			Decoder decoder = Encoding.UTF8.GetDecoder();
 			char[] chars = new char[decoder.GetCharCount(buffer, 0, bytes)];
@@ -105,6 +110,22 @@ public class FinanceServer : IServer
 		} while (bytes != 0);
 
 		return messageData.ToString().Replace("<EOF>", "");
+	}
+
+	private void Close()
+	{
+		foreach (Stream stream in _clients)
+		{
+			stream.Close();
+		}
+
+		_clients.Clear();
+	}
+
+	private void RemoveClient(Stream stream) {
+		stream.Close();
+		_clients.Remove(stream);
+		Console.WriteLine("Client connection closed.");
 	}
 
 	static void DisplaySecurityLevel(SslStream stream) {
