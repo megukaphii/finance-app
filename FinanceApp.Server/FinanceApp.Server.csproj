@@ -22,11 +22,4 @@
     <ProjectReference Include="..\FinanceApp.Extensions.Sqlite\FinanceApp.Extensions.Sqlite.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Include="certificate.pfx">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
-
 </Project>
