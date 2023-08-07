@@ -23,9 +23,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Resources\certificate.pfx">
+    <None Include="certificate.pfx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
 
 </Project>

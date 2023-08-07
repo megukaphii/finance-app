@@ -1,0 +1,13 @@
+﻿services:
+  financeapp.server:
+    image: financeapp.server
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - type: bind
+        source: ./certificate.pfx
+        target: /app/certificate.pfx
+        read_only: true
+volumes:
+  cert:
