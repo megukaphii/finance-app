@@ -2,11 +2,11 @@
 
 public class EloquentRepository<T> : IEloquentRepository<T> where T : Eloquent, new()
 {
-    IDatabase db;
+    private readonly IDatabase _db;
 
     public EloquentRepository(IDatabase db)
     {
-        this.db = db;
+        this._db = db;
     }
 
     public T Find(int id)
@@ -20,7 +20,7 @@ public class EloquentRepository<T> : IEloquentRepository<T> where T : Eloquent, 
         try
         {
             // Do what when element not found? Return null/default value, or throw exception? Null is bad, but an exception seems extreme.
-            result = db.ExecuteReader<T>(sql, parameters).First();
+            result = _db.ExecuteReader<T>(sql, parameters).First();
         }
         catch (Exception e)
         {
@@ -33,6 +33,6 @@ public class EloquentRepository<T> : IEloquentRepository<T> where T : Eloquent, 
     public List<T> All()
     {
         string sql = QueryBuilder.Build<T>().AsSelect().ToString();
-        return db.ExecuteReader<T>(sql, ParameterCollection.Empty);
+        return _db.ExecuteReader<T>(sql, ParameterCollection.Empty);
     }
 }

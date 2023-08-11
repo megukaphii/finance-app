@@ -10,9 +10,9 @@ public class Parser
 
     public Parser(IDatabase database, IDataReader reader, PropertyInfo[] properties)
     {
-        this._database = database;
-        this._reader = reader;
-        this._properties = properties;
+        _database = database;
+        _reader = reader;
+        _properties = properties;
     }
 
     public List<T> PerformParse<T>() where T : Eloquent, new()
