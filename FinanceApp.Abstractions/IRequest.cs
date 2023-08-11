@@ -11,12 +11,7 @@ public interface IRequest
 
 	public static IRequest GetRequest(string message)
 	{
-		if (_requestTypes == Array.Empty<Type>())
-		{
-			_requestTypes = AppDomain.CurrentDomain.GetAssemblies()
-				.SelectMany(assembly => assembly.GetTypes())
-				.Where(t => typeof(IRequest).IsAssignableFrom(t) && t != typeof(IRequest));
-		}
+		CacheRequestTypes();
 
 		foreach (Type t in _requestTypes)
 		{
@@ -30,6 +25,16 @@ public interface IRequest
 
 		throw new Exception($"No valid flag exists for message {message}");
 	}
+
+    private static void CacheRequestTypes()
+    {
+        if (_requestTypes == Array.Empty<Type>())
+        {
+            _requestTypes = AppDomain.CurrentDomain.GetAssemblies()
+                .SelectMany(assembly => assembly.GetTypes())
+                .Where(t => typeof(IRequest).IsAssignableFrom(t) && t != typeof(IRequest));
+        }
+    }
 
     public Task Handle(IDatabase database, Stream stream);
 }
