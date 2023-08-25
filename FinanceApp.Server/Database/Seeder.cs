@@ -3,19 +3,20 @@ using FinanceApp.Extensions.Sqlite;
 
 namespace FinanceApp.Server.Database;
 
-internal static class Seeder {
+internal static class Seeder
+{
+    public static IDatabase? DB;
+
 	internal static void SeedDB() {
-		using (SqliteDatabase db = new SqliteDatabase()) {
-			string sql =
-			@"
-				INSERT INTO Transactions (
-					Value
-				)
-				VALUES (
-					120
-				);
-			";
-			db.ExecuteNonQuery(sql, ParameterCollection.Empty);
-		}
+		string sql =
+		@"
+			INSERT INTO Transactions (
+				Value
+			)
+			VALUES (
+				120
+			);
+		";
+		DB?.ExecuteNonQuery(sql, ParameterCollection.Empty);
 	}
 }

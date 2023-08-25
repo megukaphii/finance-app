@@ -8,12 +8,13 @@ using Microsoft.Extensions.DependencyInjection;
 namespace FinanceApp.Extensions.Sqlite;
 
 public class SqliteDatabase : IDatabase {
-	private readonly SqliteConnection DB = new("Data Source=test.db");
-	public ConnectionState State => DB.State;
+	private readonly SqliteConnection _db = new("Data Source=test.db");
+    private readonly IParser _parser;
+	public ConnectionState State => _db.State;
 
 	public long LastInsertId { get {
-			string sql = @"SELECT LAST_INSERT_ROWID() LIMIT 1";
-			SqliteCommand command = DB.CreateCommand();
+			const string sql = @"SELECT LAST_INSERT_ROWID() LIMIT 1";
+			SqliteCommand command = _db.CreateCommand();
 			command.CommandText = sql;
 			ParameterCollection parameters = ParameterCollection.Empty;
 			command.Parameters.AddRange(parameters.ConvertParameters(Convert));
@@ -22,33 +23,31 @@ public class SqliteDatabase : IDatabase {
 			return result ?? -1;
 		} }
 
-	public SqliteDatabase() {
-		OpenConnection();
-	}
+	public SqliteDatabase(IParser parser)
+    {
+        _parser = parser;
+        OpenConnection();
+    }
 
 	public IDatabase OpenConnection() {
-		DB.Open();
+		_db.Open();
 		return this;
 	}
 
 	public List<T> ExecuteReader<T>(string sql, ParameterCollection vars) where T : Eloquent, new() {
-		SqliteCommand command = DB.CreateCommand();
+		SqliteCommand command = _db.CreateCommand();
 		command.CommandText = sql;
 		command.Parameters.AddRange(vars.ConvertParameters(Convert));
 
-		List<T> result = new();
+        using Abstractions.IDataReader reader = new SqliteDataReader(command.ExecuteReader());
+        Type type = typeof(T);
+        PropertyInfo[] properties = type.GetProperties();
+        List<T> result = _parser.PerformParse<T>();
 
-		using (Abstractions.IDataReader reader = new SqliteDataReader(command.ExecuteReader())) {
-			Type type = typeof(T);
-			PropertyInfo[] properties = type.GetProperties();
-			Parser parser = new(this, reader, properties);
-			result = parser.PerformParse<T>();
-		}
-
-		return result;
+        return result;
 	}
 
-	private MSSqliteParameter Convert(Parameter parameter) {
+	private static MSSqliteParameter Convert(Parameter parameter) {
 		MSSqliteParameter result = new(parameter.Name, (SqliteType) parameter.Type)
         {
             Value = parameter.Value
@@ -57,14 +56,15 @@ public class SqliteDatabase : IDatabase {
 	}
 
 	public int ExecuteNonQuery(string sql, ParameterCollection vars) {
-		SqliteCommand command = DB.CreateCommand();
+		SqliteCommand command = _db.CreateCommand();
 		command.CommandText = sql;
 		command.Parameters.AddRange(vars.ConvertParameters(Convert));
 		return command.ExecuteNonQuery();
 	}
 
 	public void Dispose() {
-		DB.Close();
+        GC.SuppressFinalize(this);
+		_db.Close();
 	}
 }
 

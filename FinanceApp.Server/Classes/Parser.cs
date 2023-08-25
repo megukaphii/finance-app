@@ -1,8 +1,9 @@
 ﻿using System.Reflection;
+using FinanceApp.Abstractions;
 
-namespace FinanceApp.Abstractions;
+namespace FinanceApp.Server.Classes;
 
-public class Parser
+public class Parser: IParser
 {
     private readonly IDatabase _database;
     private readonly IDataReader _reader;
