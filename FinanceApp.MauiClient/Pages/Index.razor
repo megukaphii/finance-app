@@ -1,0 +1,16 @@
+﻿@page "/"
+
+<MudStack AlignItems="AlignItems.Center">
+	<MudText Typo="Typo.h4">Quick Add</MudText>
+	<MudNumericField @bind-Value="TransactionValue" Label="Value" Variant="Variant.Text" Min="0.0" HideSpinButtons Adornment="Adornment.Start" AdornmentText="$"/>
+	<MudButton @onclick="Test" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Save">Submit</MudButton>
+</MudStack>
+
+@code {
+	public double TransactionValue { get; set; }
+
+	public void Test()
+	{
+		TransactionValue = 50;
+	}
+}
