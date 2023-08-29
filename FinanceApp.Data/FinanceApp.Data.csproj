@@ -10,4 +10,5 @@
     <ProjectReference Include="..\FinanceApp.Abstractions\FinanceApp.Abstractions.csproj" />
   </ItemGroup>
 
+
 </Project>

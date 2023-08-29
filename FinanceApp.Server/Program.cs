@@ -29,6 +29,6 @@ IHost host = Host.CreateDefaultBuilder()
 IServer server = host.Services.GetRequiredService<IServer>();
 
 IMigrationService ms = host.Services.GetRequiredService<IMigrationService>();
-ms.RefreshTables<SqliteDatabase>();
+//ms.RefreshTables<SqliteDatabase>();
 
 await server.Start();

@@ -7,37 +7,46 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace FinanceApp.Extensions.Sqlite;
 
-public class SqliteDatabase : IDatabase {
-	private readonly SqliteConnection _db = new("Data Source=test.db");
+public class SqliteDatabase : IDatabase
+{
+    private readonly SqliteConnection _db = new("Data Source=test.db");
     private readonly IParser _parser;
-	public ConnectionState State => _db.State;
+    public ConnectionState State => _db.State;
 
-	public long LastInsertId { get {
-			const string sql = @"SELECT LAST_INSERT_ROWID() LIMIT 1";
-			SqliteCommand command = _db.CreateCommand();
-			command.CommandText = sql;
-			ParameterCollection parameters = ParameterCollection.Empty;
-			command.Parameters.AddRange(parameters.ConvertParameters(Convert));
+    public long LastInsertId
+    {
+        get
+        {
+            const string sql = @"SELECT LAST_INSERT_ROWID() LIMIT 1";
+            SqliteCommand command = _db.CreateCommand();
+            command.CommandText = sql;
+            ParameterCollection parameters = ParameterCollection.Empty;
+            command.Parameters.AddRange(parameters.ConvertParameters(Convert));
 
-			long? result = (long?) command.ExecuteScalar();
-			return result ?? -1;
-		} }
+            long? result = (long?)command.ExecuteScalar();
+            return result ?? -1;
+        }
+    }
 
-	public SqliteDatabase(IParser parser)
+    public SqliteDatabase() { }
+
+    public SqliteDatabase(IParser parser)
     {
         _parser = parser;
         OpenConnection();
     }
 
-	public IDatabase OpenConnection() {
-		_db.Open();
-		return this;
-	}
+    public IDatabase OpenConnection()
+    {
+        _db.Open();
+        return this;
+    }
 
-	public List<T> ExecuteReader<T>(string sql, ParameterCollection vars) where T : Eloquent, new() {
-		SqliteCommand command = _db.CreateCommand();
-		command.CommandText = sql;
-		command.Parameters.AddRange(vars.ConvertParameters(Convert));
+    public List<T> ExecuteReader<T>(string sql, ParameterCollection vars) where T : Eloquent, new()
+    {
+        SqliteCommand command = _db.CreateCommand();
+        command.CommandText = sql;
+        command.Parameters.AddRange(vars.ConvertParameters(Convert));
 
         using Abstractions.IDataReader reader = new SqliteDataReader(command.ExecuteReader());
         Type type = typeof(T);
@@ -45,27 +54,30 @@ public class SqliteDatabase : IDatabase {
         List<T> result = _parser.PerformParse<T>();
 
         return result;
-	}
+    }
 
-	private static MSSqliteParameter Convert(Parameter parameter) {
-		MSSqliteParameter result = new(parameter.Name, (SqliteType) parameter.Type)
+    private static MSSqliteParameter Convert(Parameter parameter)
+    {
+        MSSqliteParameter result = new(parameter.Name, (SqliteType)parameter.Type)
         {
             Value = parameter.Value
         };
         return result;
-	}
+    }
 
-	public int ExecuteNonQuery(string sql, ParameterCollection vars) {
-		SqliteCommand command = _db.CreateCommand();
-		command.CommandText = sql;
-		command.Parameters.AddRange(vars.ConvertParameters(Convert));
-		return command.ExecuteNonQuery();
-	}
+    public int ExecuteNonQuery(string sql, ParameterCollection vars)
+    {
+        SqliteCommand command = _db.CreateCommand();
+        command.CommandText = sql;
+        command.Parameters.AddRange(vars.ConvertParameters(Convert));
+        return command.ExecuteNonQuery();
+    }
 
-	public void Dispose() {
+    public void Dispose()
+    {
         GC.SuppressFinalize(this);
-		_db.Close();
-	}
+        _db.Close();
+    }
 }
 
 public static class SqliteDatabaseExtensions

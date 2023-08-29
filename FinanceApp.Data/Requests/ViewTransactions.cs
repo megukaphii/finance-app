@@ -1,6 +1,6 @@
 ﻿using FinanceApp.Abstractions;
 using System.Text;
-using FinanceApp.Data.Models;
+using FinanceApp.Data.OldModels;
 
 namespace FinanceApp.Data.Requests;
 

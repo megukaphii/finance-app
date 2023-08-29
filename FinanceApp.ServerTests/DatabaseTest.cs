@@ -1,6 +1,6 @@
 using FinanceApp.Abstractions;
 using FinanceApp.Extensions.Sqlite;
-using FinanceApp.Data.Models;
+using FinanceApp.Data.OldModels;
 using FinanceApp.Server.Services;
 using NUnit.Framework;
 
