@@ -69,7 +69,8 @@ public class FinanceClient : IClient
 					{
 						CreateTransaction transaction = new()
 						{
-							Value = value
+							Value = value,
+                            CounterpartyName = "John"
 						};
 
 						string json = JsonConvert.SerializeObject(transaction);

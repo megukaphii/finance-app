@@ -73,7 +73,8 @@ namespace FinanceApp.MauiClient.Services.Implementations
                         {
                             CreateTransaction transaction = new()
                             {
-                                Value = value
+                                Value = value,
+                                CounterpartyName = "John"
                             };
 
                             string json = JsonConvert.SerializeObject(transaction);

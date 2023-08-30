@@ -1,6 +1,5 @@
 ﻿using FinanceApp.Extensions.Sqlite;
 using FinanceApp.Server.Classes;
-using FinanceApp.Server.Services;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,7 +11,6 @@ IHost host = Host.CreateDefaultBuilder()
     .ConfigureServices((_, services) =>
     {
         services.AddSingleton<IServer, FinanceServer>();
-        services.AddMigrationService();
         services.AddSqliteDatabase();
         // Add IDatabase Dependencies here
         // TODO: IDatabase is IDisposable - figure out object lifetimes
@@ -27,8 +25,5 @@ IHost host = Host.CreateDefaultBuilder()
 .Build();
 
 IServer server = host.Services.GetRequiredService<IServer>();
-
-IMigrationService ms = host.Services.GetRequiredService<IMigrationService>();
-//ms.RefreshTables<SqliteDatabase>();
 
 await server.Start();
