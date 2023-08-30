@@ -6,7 +6,7 @@ namespace FinanceApp.Abstractions;
 public interface IRequest
 {
     private static IEnumerable<Type> _requestTypes = Array.Empty<Type>();
-    public static abstract string Flag { get; }
+    public static readonly string Flag = string.Empty;
     public static readonly Type? Validator = null;
 
     public bool Validate()
@@ -29,8 +29,11 @@ public interface IRequest
         foreach (Type t in _requestTypes) {
             PropertyInfo? property = t.GetProperty(nameof(Flag));
             string flag = (string)property?.GetValue(null)!;
-            if (message.StartsWith(flag)) {
-                IRequest request = (IRequest)JsonConvert.DeserializeObject(message.Replace(flag, ""), t)!;
+            if (flag != string.Empty && message.StartsWith(flag)) {
+                IRequest? request = (IRequest)JsonConvert.DeserializeObject(message.Replace(flag, ""), t)!;
+                if (request == null) {
+                    throw new Exception($"Message {message} does not contain valid {t.Name} properties");
+                }
                 return request;
             }
         }
@@ -43,7 +46,15 @@ public interface IRequest
         if (_requestTypes == Array.Empty<Type>()) {
             _requestTypes = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(assembly => assembly.GetTypes())
-                .Where(t => typeof(IRequest).IsAssignableFrom(t) && t != typeof(IRequest));
+                .Where(t =>
+                {
+                    IEnumerable<Type> allInterfaces = t.GetInterfaces();
+                    IEnumerable<Type> immediateInterfaces = allInterfaces.Except(allInterfaces.SelectMany(immediateInterface => immediateInterface.GetInterfaces()));
+
+                    return typeof(IRequest).IsAssignableFrom(t) &&
+                           t != typeof(IRequest) &&
+                           !immediateInterfaces.Contains(typeof(IRequest));
+                });
         }
     }
 

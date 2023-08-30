@@ -2,7 +2,6 @@
 using System.Text;
 using FinanceApp.Data.OldModels;
 using FinanceApp.Data.RequestPatterns;
-using FinanceApp.Data.Validators;
 
 namespace FinanceApp.Data.Requests;
 
@@ -11,7 +10,7 @@ public class CreateTransaction : ISingleTransaction
     public static string Flag => "<CreateTransaction>";
 
     public required int Value { get; init; }
-    public required string CounterpartyName { get; set; }
+    public required string CounterpartyName { get; init; }
 
     public override string ToString()
     {
