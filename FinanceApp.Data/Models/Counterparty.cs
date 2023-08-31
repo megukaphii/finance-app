@@ -21,7 +21,7 @@ public class Counterparty
 
     private bool Equals(Counterparty other)
     {
-        return Id == other.Id && Name == other.Name;
+        return (Id == other.Id || Id == 0 || other.Id == 0) && Name == other.Name;
     }
 
     public override int GetHashCode()

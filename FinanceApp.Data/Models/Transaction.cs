@@ -21,7 +21,7 @@ public class Transaction
 
     private bool Equals(Transaction other)
     {
-        return Id == other.Id && Counterparty.Equals(other.Counterparty) && Value == other.Value;
+        return (Id == other.Id || Id == 0 || other.Id == 0) && Counterparty.Equals(other.Counterparty) && Value == other.Value;
     }
 
     public override int GetHashCode()

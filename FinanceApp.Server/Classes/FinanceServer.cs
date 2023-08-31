@@ -87,7 +87,7 @@ public class FinanceServer : IServer
 
                 IRequest request = IRequest.GetRequest(message);
                 if (request.Validate()) {
-                    await request.Handle(_dbContext);
+                    await request.Handle(_dbContext, stream);
                 } else {
                     // TODO - Send validation error!
                     RemoveClient(stream);

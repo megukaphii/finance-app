@@ -1,5 +1,4 @@
-﻿using FinanceApp.Abstractions;
-using System.Text;
+﻿using System.Text;
 using FinanceApp.Data.Models;
 using FinanceApp.Data.RequestPatterns;
 
@@ -17,7 +16,7 @@ public class CreateTransaction : ISingleTransaction
         return $"{Flag}: {nameof(Value)}: {Value}";
     }
 
-    public async Task Handle(FinanceAppContext database)
+    public async Task Handle(FinanceAppContext database, Stream stream)
     {
         Console.WriteLine(this);
 
@@ -33,10 +32,10 @@ public class CreateTransaction : ISingleTransaction
         await database.Transactions.AddAsync(created);
         await database.SaveChangesAsync();
 
-        //await SendResponse(sslStream, created);
+        await SendResponse(stream, created);
     }
 
-    private async Task SendResponse(Stream sslStream, Transaction transaction)
+    private async Task SendResponse(Stream stream, Transaction transaction)
     {
         CreateTransactionResponse response = new() {
             Id = transaction.Id,
@@ -45,7 +44,7 @@ public class CreateTransaction : ISingleTransaction
         string strResponse = Newtonsoft.Json.JsonConvert.SerializeObject(response);
 
         byte[] message = Encoding.UTF8.GetBytes(strResponse + "<EOF>");
-        await sslStream.WriteAsync(message);
-        await sslStream.FlushAsync();
+        await stream.WriteAsync(message);
+        await stream.FlushAsync();
     }
 }

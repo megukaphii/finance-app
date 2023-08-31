@@ -58,5 +58,5 @@ public interface IRequest
         }
     }
 
-    public Task Handle(FinanceAppContext database);
+    public Task Handle(FinanceAppContext database, Stream stream);
 }

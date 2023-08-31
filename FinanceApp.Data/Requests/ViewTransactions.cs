@@ -39,7 +39,7 @@ public class ViewTransactions : IRequest {
         await sslStream.FlushAsync();
     }
 
-    public Task Handle(FinanceAppContext database)
+    public Task Handle(FinanceAppContext database, Stream stream)
     {
         throw new NotImplementedException();
     }
