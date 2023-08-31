@@ -28,6 +28,14 @@ public class TransactionTest {
     };
     private static readonly string Message = $"<CreateTransaction>{JsonConvert.SerializeObject(TestRequest)}";
 
+    [OneTimeSetUp]
+    public async Task PerformMigrations()
+    {
+        if((await _db.Database.GetPendingMigrationsAsync()).Any()){
+            await _db.Database.MigrateAsync();
+        }
+    }
+
     [SetUp]
     public async Task ClearDB()
     {

@@ -19,7 +19,6 @@ public class RequestTest
             Name = "John"
         }
     };
-
     private static readonly string Message = $"<CreateTransaction>{JsonConvert.SerializeObject(TestRequest)}";
 
     [Test]
