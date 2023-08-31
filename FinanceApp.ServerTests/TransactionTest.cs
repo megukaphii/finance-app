@@ -1,103 +1,44 @@
-using FinanceApp.Abstractions;
-using FinanceApp.Extensions.Sqlite;
-using FinanceApp.Data.OldModels;
-using FinanceApp.Server.Services;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+using FinanceApp.Data;
+using FinanceApp.Data.Interfaces;
+using FinanceApp.Data.Models;
+using FinanceApp.Data.Requests;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using NUnit.Framework;
 
 namespace FinanceApp.ServerTests;
 
 [TestFixture]
 public class TransactionTest {
-	const long ExodiaTheForbiddenOne = 120;
-	const long OtherYugiohReference = 150;
-	const string JohnDoe = "John Doe";
+    private readonly FinanceAppContext _db = new();
 
-#pragma warning disable CS8618
-    private IDatabase _db;
-#pragma warning restore CS8618
-
-    [OneTimeSetUp]
-    public void OneTimeSetUp()
+    private static readonly Transaction TestTransaction = new()
     {
-        IHost host = Host.CreateDefaultBuilder()
-            .ConfigureServices((_, services) =>
-            {
-                services.AddSingleton<IDatabase, SqliteDatabase>();
-            })
-            .Build();
-
-		_db = host.Services.GetRequiredService<IDatabase>();
-    }
-
-    [SetUp]
-	public void SetUp()
+        Value = 100,
+        Counterparty = new Counterparty
+        {
+            Name = "John"
+        }
+    };
+    private static readonly CreateTransaction TestRequest = new()
     {
-		MigrationService ms = new();
-		ms.RefreshTables<SqliteDatabase>();
-		SeedTestData();
-	}
-
-	[Test]
-	public void TestCreateTransaction()
-    {
-        Transaction test = new(_db, ExodiaTheForbiddenOne, JohnDoe);
-
-		Assert.AreEqual(0, test.ID);
-		test.Save();
-
-		Assert.AreEqual(2, test.ID);
-	}
-
-	[Test]
-	public void TestSelectTransaction()
-    {
-		EloquentRepository<Transaction> repo = new(_db);
-        Transaction expected = new(_db, ExodiaTheForbiddenOne, JohnDoe) { ID = 1 };
-
-        Transaction? result = repo.Find(1);
-
-        Assert.AreEqual(expected, result);
-	}
-
-	[Test]
-	public void TestSaveTransaction()
-	{
-		EloquentRepository<Transaction> repo = new(_db);
-		Transaction transaction = repo.Find(1)!;
-
-		transaction.Value = OtherYugiohReference;
-		transaction.Save();
-		Transaction result = repo.Find(1)!;
-
-		Assert.AreEqual(OtherYugiohReference, result.Value);
-	}
+        Value = TestTransaction.Value,
+        Counterparty = TestTransaction.Counterparty
+    };
+    private static readonly string Message = $"<CreateTransaction>{JsonConvert.SerializeObject(TestRequest)}";
 
     [Test]
-    public void TestUpdateTransactionID()
-	{
-		EloquentRepository<Transaction> repo = new(_db);
-		Transaction transaction = repo.Find(1)!;
+    public async Task TestCreateTransaction()
+    {
+        IRequest request = IRequest.GetRequest(Message);
+        await request.Handle(_db);
 
-        Assert.Throws<Exception>(() => transaction.ID = 2);
+        Transaction? result = await _db.Transactions
+            .Include(transaction => transaction.Counterparty)
+            .FirstOrDefaultAsync(transaction => transaction.Id == 1);
+        TestTransaction.Id = result?.Id ?? 0;
+        TestTransaction.Counterparty.Id = result?.Counterparty.Id ?? 0;
+
+        Assert.AreEqual(TestTransaction, result);
     }
-
-	[Ignore("Not working on this feature yet")]
-	[Test]
-	public void TestUpdateTransaction()
-	{
-		EloquentRepository<Transaction> repo = new(_db);
-
-		//Transaction.Update('value', EXODIA_THE_FORBIDDEN_ONE).Where('value', OTHER_YUGIOH_REFERENCE);
-		Transaction transaction = repo.Find(1)!;
-
-		Assert.AreEqual(ExodiaTheForbiddenOne, transaction.Value);
-	}
-
-	private void SeedTestData()
-	{
-		Transaction test = new(_db, ExodiaTheForbiddenOne, JohnDoe);
-        test.Save();
-	}
 }

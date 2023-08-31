@@ -1,4 +1,5 @@
-﻿using FinanceApp.Abstractions;
+﻿using FinanceApp.Data.Interfaces;
+using FinanceApp.Data.Models;
 using FinanceApp.Data.RequestPatterns;
 using FinanceApp.Data.Requests;
 using FinanceApp.Data.Validators;
@@ -13,7 +14,10 @@ public class RequestTest
     private static readonly CreateTransaction TestRequest = new()
     {
         Value = 100,
-        CounterpartyName = "John"
+        Counterparty = new Counterparty
+        {
+            Name = "John"
+        }
     };
 
     private static readonly string Message = $"<CreateTransaction>{JsonConvert.SerializeObject(TestRequest)}";
@@ -27,7 +31,7 @@ public class RequestTest
     }
 
     [Test]
-    public void TestValidator()
+    public void TestValidatorExists()
     {
         IRequest request = IRequest.GetRequest(Message);
 

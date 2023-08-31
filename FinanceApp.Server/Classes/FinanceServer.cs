@@ -5,6 +5,8 @@ using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using FinanceApp.Abstractions;
+using FinanceApp.Data;
+using FinanceApp.Data.Interfaces;
 
 namespace FinanceApp.Server.Classes;
 
@@ -13,7 +15,6 @@ public class FinanceServer : IServer
     private const int TimeoutInMs = 60000;
     private readonly Socket _listener = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
     private readonly X509Certificate _serverCertificate;
-    private readonly IDatabase _database;
     private readonly List<Stream> _clients = new();
     private readonly FinanceAppContext _dbContext = new();
 
@@ -24,7 +25,6 @@ public class FinanceServer : IServer
         IPEndPoint ipEndPoint = new(IPAddress.Any, 42069);
         _listener.Bind(ipEndPoint);
         _serverCertificate = X509Certificate.CreateFromCertFile("../certificate.pfx");
-        _database = database;
     }
 
     public async Task Start()
@@ -87,9 +87,10 @@ public class FinanceServer : IServer
 
                 IRequest request = IRequest.GetRequest(message);
                 if (request.Validate()) {
-                    await request.Handle(_database, stream);
+                    await request.Handle(_dbContext);
                 } else {
                     // TODO - Send validation error!
+                    RemoveClient(stream);
                 }
             }
         } catch (Exception e) {

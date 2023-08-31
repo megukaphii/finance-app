@@ -1,5 +1,6 @@
 ﻿using FinanceApp.Abstractions;
 using System.Text;
+using FinanceApp.Data.Interfaces;
 using FinanceApp.Data.OldModels;
 
 namespace FinanceApp.Data.Requests;
@@ -36,5 +37,10 @@ public class ViewTransactions : IRequest {
         byte[] message = Encoding.UTF8.GetBytes(strResponse + "<EOF>");
         await sslStream.WriteAsync(message);
         await sslStream.FlushAsync();
+    }
+
+    public Task Handle(FinanceAppContext database)
+    {
+        throw new NotImplementedException();
     }
 }

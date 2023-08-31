@@ -1,4 +1,4 @@
-﻿namespace FinanceApp.Abstractions;
+﻿namespace FinanceApp.Data.Interfaces;
 
 public interface IValidator
 {

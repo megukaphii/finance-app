@@ -3,6 +3,7 @@ using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using FinanceApp.Data.Models;
 using FinanceApp.Data.Requests;
 using Newtonsoft.Json;
 using Services.Interfaces;
@@ -74,7 +75,10 @@ namespace FinanceApp.MauiClient.Services.Implementations
                             CreateTransaction transaction = new()
                             {
                                 Value = value,
-                                CounterpartyName = "John"
+                                Counterparty = new Counterparty
+                                {
+                                    Name = "John"
+                                }
                             };
 
                             string json = JsonConvert.SerializeObject(transaction);

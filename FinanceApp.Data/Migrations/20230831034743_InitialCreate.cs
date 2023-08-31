@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace FinanceApp.Server.Migrations
+namespace FinanceApp.Data.Migrations
 {
     /// <inheritdoc />
     public partial class InitialCreate : Migration

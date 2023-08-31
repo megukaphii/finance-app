@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using Newtonsoft.Json;
 
-namespace FinanceApp.Abstractions;
+namespace FinanceApp.Data.Interfaces;
 
 public interface IRequest
 {
@@ -58,5 +58,5 @@ public interface IRequest
         }
     }
 
-    public Task Handle(IDatabase database, Stream stream);
+    public Task Handle(FinanceAppContext database);
 }

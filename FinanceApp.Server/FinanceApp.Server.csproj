@@ -27,4 +27,5 @@
     <ProjectReference Include="..\FinanceApp.Extensions.Sqlite\FinanceApp.Extensions.Sqlite.csproj" />
   </ItemGroup>
 
+
 </Project>
