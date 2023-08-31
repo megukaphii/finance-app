@@ -6,6 +6,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using FinanceApp.Data;
 using FinanceApp.Data.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace FinanceApp.Server.Classes;
 
@@ -15,7 +16,7 @@ public class FinanceServer : IServer
     private readonly Socket _listener = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
     private readonly X509Certificate _serverCertificate;
     private readonly List<Stream> _clients = new();
-    private readonly FinanceAppContext _dbContext = new();
+    private readonly FinanceAppContext _db = new();
 
     private bool _isRunning;
 
@@ -28,6 +29,7 @@ public class FinanceServer : IServer
 
     public async Task Start()
     {
+        await PerformMigrations();
         LoadAssemblies();
 
         try {
@@ -46,6 +48,13 @@ public class FinanceServer : IServer
             Close();
         } catch (Exception e) {
             Console.WriteLine($"[{e.GetType()}]: {e.Message}");
+        }
+    }
+
+    private async Task PerformMigrations()
+    {
+        if ((await _db.Database.GetPendingMigrationsAsync()).Any()) {
+            await _db.Database.MigrateAsync();
         }
     }
 
@@ -86,7 +95,7 @@ public class FinanceServer : IServer
 
                 IRequest request = IRequest.GetRequest(message);
                 if (request.Validate()) {
-                    await request.Handle(_dbContext, stream);
+                    await request.Handle(_db, stream);
                 } else {
                     // TODO - Send validation error!
                     RemoveClient(stream);

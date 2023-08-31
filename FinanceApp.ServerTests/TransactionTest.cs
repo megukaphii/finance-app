@@ -10,7 +10,8 @@ using NUnit.Framework;
 namespace FinanceApp.ServerTests;
 
 [TestFixture]
-public class TransactionTest {
+public class TransactionTest
+{
     private readonly FinanceAppContext _db = new();
 
     private static readonly Transaction TestTransaction = new()
@@ -21,17 +22,19 @@ public class TransactionTest {
             Name = "John"
         }
     };
+
     private static readonly CreateTransaction TestRequest = new()
     {
         Value = TestTransaction.Value,
         Counterparty = TestTransaction.Counterparty
     };
+
     private static readonly string Message = $"<CreateTransaction>{JsonConvert.SerializeObject(TestRequest)}";
 
     [OneTimeSetUp]
     public async Task PerformMigrations()
     {
-        if((await _db.Database.GetPendingMigrationsAsync()).Any()){
+        if ((await _db.Database.GetPendingMigrationsAsync()).Any()) {
             await _db.Database.MigrateAsync();
         }
     }
@@ -69,7 +72,6 @@ public class TransactionTest {
         byte[] buffer = new byte[2048];
         MemoryStream stream = new(buffer);
         await request.Handle(_db, stream);
-
 
         CreateTransactionResponse expected = new()
         {
