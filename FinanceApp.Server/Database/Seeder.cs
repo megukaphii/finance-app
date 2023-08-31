@@ -1,22 +1,24 @@
-﻿using FinanceApp.Abstractions;
-using FinanceApp.Extensions.Sqlite;
+﻿using FinanceApp.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace FinanceApp.Server.Database;
 
 internal static class Seeder
 {
-    public static IDatabase? DB;
+    private static readonly FinanceAppContext DB = null!;
 
-	internal static void SeedDB() {
+	internal static async void SeedDB() {
 		string sql =
 		@"
 			INSERT INTO Transactions (
+			    CounterpartyId,
 				Value
 			)
 			VALUES (
+			    1,
 				120
 			);
 		";
-		DB?.ExecuteNonQuery(sql, ParameterCollection.Empty);
-	}
+        await DB.Database.ExecuteSqlRawAsync(sql);
+    }
 }

@@ -4,7 +4,6 @@ using System.Net.Sockets;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using FinanceApp.Abstractions;
 using FinanceApp.Data;
 using FinanceApp.Data.Interfaces;
 
@@ -20,7 +19,7 @@ public class FinanceServer : IServer
 
     private bool _isRunning;
 
-    public FinanceServer(IDatabase database)
+    public FinanceServer()
     {
         IPEndPoint ipEndPoint = new(IPAddress.Any, 42069);
         _listener.Bind(ipEndPoint);

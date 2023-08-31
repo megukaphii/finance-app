@@ -1,7 +1,6 @@
-﻿using FinanceApp.Abstractions;
-using System.Text;
+﻿using System.Text;
 using FinanceApp.Data.Interfaces;
-using FinanceApp.Data.OldModels;
+using Microsoft.EntityFrameworkCore;
 
 namespace FinanceApp.Data.Requests;
 
@@ -15,18 +14,7 @@ public class ViewTransactions : IRequest {
         return $"{Flag}: {nameof(Page)}: {Page}";
     }
 
-    public async Task Handle(IDatabase database, Stream sslStream)
-    {
-        Console.WriteLine(this);
-
-        EloquentRepository<Transaction> repo = new(database);
-        List<Transaction> transactions = repo.All();
-        List<SendableTransaction> result = transactions.Select(transaction => new SendableTransaction() { ID = transaction.ID, Value = transaction.Value, Transactee = transaction.Transactee }).ToList();
-
-        await SendResponse(sslStream, result);
-    }
-
-    private async Task SendResponse(Stream sslStream, List<SendableTransaction> transactions)
+    private async Task SendResponse(Stream sslStream, List<Models.Transaction> transactions)
     {
         ViewTransactionResponse response = new() {
             Transactions = transactions,
@@ -39,8 +27,9 @@ public class ViewTransactions : IRequest {
         await sslStream.FlushAsync();
     }
 
-    public Task Handle(FinanceAppContext database, Stream stream)
+    public async Task Handle(FinanceAppContext database, Stream stream)
     {
-        throw new NotImplementedException();
+        List<Models.Transaction> transactions = await database.Transactions.ToListAsync();
+        await SendResponse(stream, transactions);
     }
 }

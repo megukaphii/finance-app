@@ -22,9 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FinanceApp.Abstractions\FinanceApp.Abstractions.csproj" />
     <ProjectReference Include="..\FinanceApp.Data\FinanceApp.Data.csproj" />
-    <ProjectReference Include="..\FinanceApp.Extensions.Sqlite\FinanceApp.Extensions.Sqlite.csproj" />
   </ItemGroup>
 
 

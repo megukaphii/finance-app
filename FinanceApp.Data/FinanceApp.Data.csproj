@@ -12,11 +12,8 @@
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.10" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
         <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="7.0.0" />
-    </ItemGroup>
-    
-    <ItemGroup>
-        <ProjectReference Include="..\FinanceApp.Abstractions\FinanceApp.Abstractions.csproj" />
     </ItemGroup>
 
 </Project>

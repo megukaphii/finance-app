@@ -9,10 +9,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FinanceApp.Client", "Financ
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FinanceApp.ServerTests", "FinanceApp.ServerTests\FinanceApp.ServerTests.csproj", "{30DC7D73-9832-4D56-8A7B-F81378620821}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FinanceApp.Abstractions", "FinanceApp.Abstractions\FinanceApp.Abstractions.csproj", "{B2A01FCC-253B-416D-A480-1F831254A7C2}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FinanceApp.Extensions.Sqlite", "FinanceApp.Extensions.Sqlite\FinanceApp.Extensions.Sqlite.csproj", "{C45B4F56-C58E-4655-8714-C6547AF6E032}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FinanceApp.Data", "FinanceApp.Data\FinanceApp.Data.csproj", "{51B848D5-ED0E-4433-8758-14B881F10B18}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9FDE654D-ACFE-4543-A3AD-22AA67774761}"
@@ -40,14 +36,6 @@ Global
 		{30DC7D73-9832-4D56-8A7B-F81378620821}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{30DC7D73-9832-4D56-8A7B-F81378620821}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{30DC7D73-9832-4D56-8A7B-F81378620821}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B2A01FCC-253B-416D-A480-1F831254A7C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B2A01FCC-253B-416D-A480-1F831254A7C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B2A01FCC-253B-416D-A480-1F831254A7C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B2A01FCC-253B-416D-A480-1F831254A7C2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C45B4F56-C58E-4655-8714-C6547AF6E032}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C45B4F56-C58E-4655-8714-C6547AF6E032}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C45B4F56-C58E-4655-8714-C6547AF6E032}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C45B4F56-C58E-4655-8714-C6547AF6E032}.Release|Any CPU.Build.0 = Release|Any CPU
 		{51B848D5-ED0E-4433-8758-14B881F10B18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{51B848D5-ED0E-4433-8758-14B881F10B18}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{51B848D5-ED0E-4433-8758-14B881F10B18}.Release|Any CPU.ActiveCfg = Release|Any CPU

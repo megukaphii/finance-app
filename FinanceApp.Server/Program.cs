@@ -1,5 +1,4 @@
-﻿using FinanceApp.Extensions.Sqlite;
-using FinanceApp.Server.Classes;
+﻿using FinanceApp.Server.Classes;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -11,7 +10,6 @@ IHost host = Host.CreateDefaultBuilder()
     .ConfigureServices((_, services) =>
     {
         services.AddSingleton<IServer, FinanceServer>();
-        services.AddSqliteDatabase();
         // Add IDatabase Dependencies here
         // TODO: IDatabase is IDisposable - figure out object lifetimes
         // The IDatabase should only really be closed when the application is closed, I think?
