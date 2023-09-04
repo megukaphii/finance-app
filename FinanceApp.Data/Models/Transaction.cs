@@ -2,9 +2,9 @@
 
 public class Transaction
 {
-    public int Id { get; set; }
+    public long Id { get; set; }
     public required Counterparty Counterparty { get; set; }
-    public required int Value { get; set; }
+    public required long Value { get; set; }
 
     public override string ToString()
     {

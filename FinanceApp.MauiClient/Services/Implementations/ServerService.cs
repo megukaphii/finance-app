@@ -75,7 +75,7 @@ namespace FinanceApp.MauiClient.Services.Implementations
                         {
                             CreateTransaction transaction = new()
                             {
-                                Value = new RequestField<int>
+                                Value = new RequestField<long>
                                 {
                                     Value = value
                                 },

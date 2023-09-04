@@ -70,7 +70,7 @@ public class FinanceClient : IClient
 					{
 						CreateTransaction transaction = new()
 						{
-                            Value = new RequestField<int>
+                            Value = new RequestField<long>
                             {
                                 Value = value
                             },

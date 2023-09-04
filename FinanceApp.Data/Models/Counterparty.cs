@@ -1,9 +1,12 @@
-﻿namespace FinanceApp.Data.Models;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace FinanceApp.Data.Models;
 
 public class Counterparty
 {
-    public int Id { get; set; }
+    public long Id { get; set; }
     public List<Transaction> Transactions { get; set; } = new();
+    [MaxLength(255)]
     public required string Name { get; set; }
 
     public override string ToString()

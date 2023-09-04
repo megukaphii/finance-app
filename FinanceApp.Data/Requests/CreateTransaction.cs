@@ -8,7 +8,7 @@ public class CreateTransaction : ISingleTransaction
 {
     public static string Flag => "<CreateTransaction>";
 
-    public required RequestField<int> Value { get; init; }
+    public required RequestField<long> Value { get; init; }
     public required RequestField<Counterparty> Counterparty { get; init; }
 
     public override string ToString()
