@@ -4,9 +4,11 @@ using FinanceApp.Data.Interfaces;
 using FinanceApp.Data.Models;
 using FinanceApp.Data.RequestPatterns;
 using FinanceApp.Data.Requests;
+using FinanceApp.Data.Requests.Transaction;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using NUnit.Framework;
+using Index = FinanceApp.Data.Requests.Transaction.Index;
 
 namespace FinanceApp.ServerTests;
 
@@ -24,7 +26,7 @@ public class TransactionTest
         }
     };
 
-    private static readonly TransactionCreate TestCreateRequest = new()
+    private static readonly Create TestCreateRequest = new()
     {
         Value = new RequestField<long>
         {
@@ -36,9 +38,9 @@ public class TransactionTest
         }
     };
 
-    private static readonly string MessageCreteRequest = $"{TransactionCreate.Flag}{JsonConvert.SerializeObject(TestCreateRequest)}";
+    private static readonly string MessageCreteRequest = $"{Create.Flag}{JsonConvert.SerializeObject(TestCreateRequest)}";
 
-    private static readonly TransactionIndex TestIndexRequest = new()
+    private static readonly Index TestIndexRequest = new()
     {
         Page = new RequestField<long>
         {
@@ -46,7 +48,7 @@ public class TransactionTest
         }
     };
 
-    private static readonly string MessageIndexRequest = $"{Data.Requests.TransactionIndex.Flag}{JsonConvert.SerializeObject(TestIndexRequest)}";
+    private static readonly string MessageIndexRequest = $"{Index.Flag}{JsonConvert.SerializeObject(TestIndexRequest)}";
 
     private static readonly Counterparty SeedCounterparty1 = new() { Name = "John Doe" };
     private static readonly Counterparty SeedCounterparty2 = new() { Name = "Megumin" };
@@ -111,13 +113,13 @@ public class TransactionTest
         MemoryStream stream = new(buffer);
         await request.Handle(_db, stream);
 
-        TransactionCreateResponse expected = new()
+        CreateResponse expected = new()
         {
             Id = 1,
             Success = true
         };
         string message = Encoding.UTF8.GetString(stream.ToArray()).Replace("<EOF>", "");
-        TransactionCreateResponse? result = JsonConvert.DeserializeObject<TransactionCreateResponse>(message);
+        CreateResponse? result = JsonConvert.DeserializeObject<CreateResponse>(message);
 
         Assert.AreEqual(expected, result);
     }
@@ -133,7 +135,7 @@ public class TransactionTest
         await request.Handle(_db, stream);
 
         string message = Encoding.UTF8.GetString(stream.ToArray()).Replace("<EOF>", "");
-        TransactionIndexResponse? result = JsonConvert.DeserializeObject<TransactionIndexResponse>(message);
+        IndexResponse? result = JsonConvert.DeserializeObject<IndexResponse>(message);
 
         Assert.True(result?.Success);
         Assert.AreEqual(SeedTransactions, result?.Transactions);

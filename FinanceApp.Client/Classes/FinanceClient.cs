@@ -6,7 +6,9 @@ using System.Text;
 using FinanceApp.Data.Models;
 using FinanceApp.Data.RequestPatterns;
 using FinanceApp.Data.Requests;
+using FinanceApp.Data.Requests.Transaction;
 using Newtonsoft.Json;
+using Index = FinanceApp.Data.Requests.Transaction.Index;
 
 namespace FinanceApp.Client.Classes;
 
@@ -68,7 +70,7 @@ public class FinanceClient : IClient
 
 					if (value > 0)
 					{
-						TransactionCreate transaction = new()
+						Create transaction = new()
 						{
                             Value = new RequestField<long>
                             {
@@ -85,17 +87,17 @@ public class FinanceClient : IClient
 
 						string json = JsonConvert.SerializeObject(transaction);
 
-						byte[] message = Encoding.UTF8.GetBytes(TransactionCreate.Flag + json + "<EOF>");
+						byte[] message = Encoding.UTF8.GetBytes(Create.Flag + json + "<EOF>");
 						sslStream.Write(message);
 						sslStream.Flush();
 
 						string messageReceived = await ReadMessage(sslStream);
-						TransactionCreateResponse? response =
-							JsonConvert.DeserializeObject<TransactionCreateResponse>(messageReceived);
+						CreateResponse? response =
+							JsonConvert.DeserializeObject<CreateResponse>(messageReceived);
 						Console.WriteLine(response);
 					}
 				} else if (choice == 2) {
-					TransactionIndex request = new()
+					Index request = new()
 					{
 						Page = new RequestField<long>
                         {
@@ -105,12 +107,12 @@ public class FinanceClient : IClient
 
 					string json = JsonConvert.SerializeObject(request);
 
-					byte[] message = Encoding.UTF8.GetBytes(TransactionIndex.Flag + json + "<EOF>");
+					byte[] message = Encoding.UTF8.GetBytes(Index.Flag + json + "<EOF>");
 					sslStream.Write(message);
 					sslStream.Flush();
 
 					string messageReceived = await ReadMessage(sslStream);
-					TransactionIndexResponse? response = JsonConvert.DeserializeObject<TransactionIndexResponse>(messageReceived);
+					IndexResponse? response = JsonConvert.DeserializeObject<IndexResponse>(messageReceived);
 					Console.WriteLine(response);
 				}
 			}

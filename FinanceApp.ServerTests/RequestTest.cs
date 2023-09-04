@@ -2,6 +2,7 @@
 using FinanceApp.Data.Models;
 using FinanceApp.Data.RequestPatterns;
 using FinanceApp.Data.Requests;
+using FinanceApp.Data.Requests.Transaction;
 using FinanceApp.Data.Validators;
 using NUnit.Framework;
 using Newtonsoft.Json;
@@ -11,7 +12,7 @@ namespace FinanceApp.ServerTests;
 [TestFixture]
 public class RequestTest
 {
-    private static readonly TransactionCreate TestRequest = new()
+    private static readonly Create TestRequest = new()
     {
         Value = new RequestField<long>
         {
@@ -32,7 +33,7 @@ public class RequestTest
     {
         IRequest request = IRequest.GetRequest(Message);
 
-        Assert.IsInstanceOf<TransactionCreate>(request);
+        Assert.IsInstanceOf<Create>(request);
     }
 
     [Test]

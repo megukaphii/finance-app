@@ -1,12 +1,11 @@
 ﻿using System.Text;
-using FinanceApp.Data.Models;
 
-namespace FinanceApp.Data.Requests;
+namespace FinanceApp.Data.Requests.Transaction;
 
-public class TransactionIndexResponse
+public class IndexResponse
 {
 	public required bool Success { get; init; }
-	public required List<Transaction> Transactions { get; init; }
+	public required List<Models.Transaction> Transactions { get; init; }
 
     public override string ToString()
     {

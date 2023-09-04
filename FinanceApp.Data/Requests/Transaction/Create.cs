@@ -2,9 +2,9 @@
 using FinanceApp.Data.Models;
 using FinanceApp.Data.RequestPatterns;
 
-namespace FinanceApp.Data.Requests;
+namespace FinanceApp.Data.Requests.Transaction;
 
-public class TransactionCreate : ISingleTransaction
+public class Create : ISingleTransaction
 {
     public static string Flag => "<CreateTransaction>";
 
@@ -24,7 +24,7 @@ public class TransactionCreate : ISingleTransaction
             await database.Counterparties.AddAsync(Counterparty.Value);
         }
 
-        Transaction created = new()
+        Models.Transaction created = new()
         {
             Value = Value.Value,
             Counterparty = Counterparty.Value
@@ -35,9 +35,9 @@ public class TransactionCreate : ISingleTransaction
         await SendResponse(stream, created);
     }
 
-    private async Task SendResponse(Stream stream, Transaction transaction)
+    private async Task SendResponse(Stream stream, Models.Transaction transaction)
     {
-        TransactionCreateResponse response = new() {
+        CreateResponse response = new() {
             Id = transaction.Id,
             Success = true
         };

@@ -1,6 +1,6 @@
-﻿namespace FinanceApp.Data.Requests;
+﻿namespace FinanceApp.Data.Requests.Transaction;
 
-public class TransactionCreateResponse
+public class CreateResponse
 {
     public required bool Success { get; init; }
     public required long Id { get; init; }
@@ -15,10 +15,10 @@ public class TransactionCreateResponse
         if (ReferenceEquals(null, obj)) return false;
         if (ReferenceEquals(this, obj)) return true;
         if (obj.GetType() != GetType()) return false;
-        return Equals((TransactionCreateResponse)obj);
+        return Equals((CreateResponse)obj);
     }
 
-    private bool Equals(TransactionCreateResponse other)
+    private bool Equals(CreateResponse other)
     {
         return (Id == other.Id || Id == 0 || other.Id == 0) && Success == other.Success;
     }

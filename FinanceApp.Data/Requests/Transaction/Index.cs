@@ -1,12 +1,11 @@
 ﻿using System.Text;
-using FinanceApp.Data.Models;
 using FinanceApp.Data.RequestPatterns;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
-namespace FinanceApp.Data.Requests;
+namespace FinanceApp.Data.Requests.Transaction;
 
-public class TransactionIndex : IPageNumber
+public class Index : IPageNumber
 {
     public static string Flag => "<ViewTransactions>";
 
@@ -19,14 +18,14 @@ public class TransactionIndex : IPageNumber
 
     public async Task Handle(FinanceAppContext database, Stream stream)
     {
-        List<Transaction> transactions =
+        List<Models.Transaction> transactions =
             await database.Transactions.Include(transaction => transaction.Counterparty).ToListAsync();
         await SendResponse(stream, transactions);
     }
 
-    private async Task SendResponse(Stream stream, List<Transaction> transactions)
+    private async Task SendResponse(Stream stream, List<Models.Transaction> transactions)
     {
-        TransactionIndexResponse indexResponse = new()
+        IndexResponse indexResponse = new()
         {
             Transactions = transactions,
             Success = true,
