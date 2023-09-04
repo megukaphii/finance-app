@@ -68,7 +68,7 @@ public class FinanceClient : IClient
 
 					if (value > 0)
 					{
-						CreateTransaction transaction = new()
+						TransactionCreate transaction = new()
 						{
                             Value = new RequestField<long>
                             {
@@ -85,30 +85,32 @@ public class FinanceClient : IClient
 
 						string json = JsonConvert.SerializeObject(transaction);
 
-						byte[] message = Encoding.UTF8.GetBytes(CreateTransaction.Flag + json + "<EOF>");
+						byte[] message = Encoding.UTF8.GetBytes(TransactionCreate.Flag + json + "<EOF>");
 						sslStream.Write(message);
 						sslStream.Flush();
 
 						string messageReceived = await ReadMessage(sslStream);
-						CreateTransactionResponse? response =
-							JsonConvert.DeserializeObject<CreateTransactionResponse>(messageReceived);
+						TransactionCreateResponse? response =
+							JsonConvert.DeserializeObject<TransactionCreateResponse>(messageReceived);
 						Console.WriteLine(response);
 					}
-				} else if (choice == 2)
-				{
-					ViewTransactions request = new()
+				} else if (choice == 2) {
+					TransactionIndex request = new()
 					{
-						Page = 0
+						Page = new RequestField<long>
+                        {
+                            Value = 0
+                        }
 					};
 
 					string json = JsonConvert.SerializeObject(request);
 
-					byte[] message = Encoding.UTF8.GetBytes(ViewTransactions.Flag + json + "<EOF>");
+					byte[] message = Encoding.UTF8.GetBytes(TransactionIndex.Flag + json + "<EOF>");
 					sslStream.Write(message);
 					sslStream.Flush();
 
 					string messageReceived = await ReadMessage(sslStream);
-					ViewTransactionResponse? response = JsonConvert.DeserializeObject<ViewTransactionResponse>(messageReceived);
+					TransactionIndexResponse? response = JsonConvert.DeserializeObject<TransactionIndexResponse>(messageReceived);
 					Console.WriteLine(response);
 				}
 			}

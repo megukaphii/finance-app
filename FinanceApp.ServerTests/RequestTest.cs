@@ -11,7 +11,7 @@ namespace FinanceApp.ServerTests;
 [TestFixture]
 public class RequestTest
 {
-    private static readonly CreateTransaction TestRequest = new()
+    private static readonly TransactionCreate TestRequest = new()
     {
         Value = new RequestField<long>
         {
@@ -28,15 +28,15 @@ public class RequestTest
     private static readonly string Message = $"<CreateTransaction>{JsonConvert.SerializeObject(TestRequest)}";
 
     [Test]
-    public void TestGetRequest()
+    public void GetRequest()
     {
         IRequest request = IRequest.GetRequest(Message);
 
-        Assert.IsInstanceOf<CreateTransaction>(request);
+        Assert.IsInstanceOf<TransactionCreate>(request);
     }
 
     [Test]
-    public void TestValidatorExists()
+    public void ValidatorExists()
     {
         IRequest request = IRequest.GetRequest(Message);
 

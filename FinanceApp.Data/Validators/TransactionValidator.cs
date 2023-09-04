@@ -17,10 +17,8 @@ public class TransactionValidator : IValidator
             if (validateAgainst.Value.Value < MinValue) {
                 validateAgainst.Value.Error = $"{nameof(validateAgainst.Value)} should be greater than {MinValue}";
                 failure = true;
-            }
-
-            if (validateAgainst.Value.Value > MaxValue) {
-                validateAgainst.Value.Error = $"{nameof(validateAgainst.Value)} should be greater than {MaxValue}";
+            } else if (validateAgainst.Value.Value > MaxValue) {
+                validateAgainst.Value.Error = $"{nameof(validateAgainst.Value)} should be less than {MaxValue}";
                 failure = true;
             }
 

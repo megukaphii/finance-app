@@ -4,7 +4,7 @@ using FinanceApp.Data.RequestPatterns;
 
 namespace FinanceApp.Data.Requests;
 
-public class CreateTransaction : ISingleTransaction
+public class TransactionCreate : ISingleTransaction
 {
     public static string Flag => "<CreateTransaction>";
 
@@ -37,7 +37,7 @@ public class CreateTransaction : ISingleTransaction
 
     private async Task SendResponse(Stream stream, Transaction transaction)
     {
-        CreateTransactionResponse response = new() {
+        TransactionCreateResponse response = new() {
             Id = transaction.Id,
             Success = true
         };

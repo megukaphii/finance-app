@@ -30,6 +30,7 @@ public interface IRequest
             PropertyInfo? property = t.GetProperty(nameof(Flag));
             string flag = (string)property?.GetValue(null)!;
             if (flag != string.Empty && message.StartsWith(flag)) {
+                // TODO - Implement error handling
                 IRequest? request = (IRequest)JsonConvert.DeserializeObject(message.Replace(flag, ""), t)!;
                 if (request == null) {
                     throw new Exception($"Message {message} does not contain valid {t.Name} properties");

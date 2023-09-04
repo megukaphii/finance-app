@@ -24,7 +24,7 @@ public class TransactionTest
         }
     };
 
-    private static readonly CreateTransaction TestRequest = new()
+    private static readonly TransactionCreate TestCreateRequest = new()
     {
         Value = new RequestField<long>
         {
@@ -36,7 +36,38 @@ public class TransactionTest
         }
     };
 
-    private static readonly string Message = $"<CreateTransaction>{JsonConvert.SerializeObject(TestRequest)}";
+    private static readonly string MessageCreteRequest = $"{TransactionCreate.Flag}{JsonConvert.SerializeObject(TestCreateRequest)}";
+
+    private static readonly TransactionIndex TestIndexRequest = new()
+    {
+        Page = new RequestField<long>
+        {
+            Value = 0
+        }
+    };
+
+    private static readonly string MessageIndexRequest = $"{Data.Requests.TransactionIndex.Flag}{JsonConvert.SerializeObject(TestIndexRequest)}";
+
+    private static readonly Counterparty SeedCounterparty1 = new() { Name = "John Doe" };
+    private static readonly Counterparty SeedCounterparty2 = new() { Name = "Megumin" };
+    private static readonly List<Transaction> SeedTransactions = new()
+    {
+        new Transaction
+        {
+            Counterparty = SeedCounterparty1,
+            Value = 10
+        },
+        new Transaction
+        {
+            Counterparty = SeedCounterparty1,
+            Value = -50
+        },
+        new Transaction
+        {
+            Counterparty = SeedCounterparty2,
+            Value = 420
+        }
+    };
 
     [OneTimeSetUp]
     public async Task PerformMigrations()
@@ -57,9 +88,9 @@ public class TransactionTest
     }
 
     [Test]
-    public async Task CreateTransactionHandle()
+    public async Task TransactionCreateHandle()
     {
-        IRequest request = IRequest.GetRequest(Message);
+        IRequest request = IRequest.GetRequest(MessageCreteRequest);
         byte[] buffer = new byte[2048];
         MemoryStream stream = new(buffer);
         await request.Handle(_db, stream);
@@ -73,21 +104,44 @@ public class TransactionTest
     }
 
     [Test]
-    public async Task CreateTransactionResponse()
+    public async Task TransactionCreateResponse()
     {
-        IRequest request = IRequest.GetRequest(Message);
+        IRequest request = IRequest.GetRequest(MessageCreteRequest);
         byte[] buffer = new byte[2048];
         MemoryStream stream = new(buffer);
         await request.Handle(_db, stream);
 
-        CreateTransactionResponse expected = new()
+        TransactionCreateResponse expected = new()
         {
             Id = 1,
             Success = true
         };
         string message = Encoding.UTF8.GetString(stream.ToArray()).Replace("<EOF>", "");
-        CreateTransactionResponse? result = JsonConvert.DeserializeObject<CreateTransactionResponse>(message);
+        TransactionCreateResponse? result = JsonConvert.DeserializeObject<TransactionCreateResponse>(message);
 
         Assert.AreEqual(expected, result);
+    }
+
+    [Test]
+    public async Task TransactionIndex()
+    {
+        await SeedDB();
+
+        IRequest request = IRequest.GetRequest(MessageIndexRequest);
+        byte[] buffer = new byte[2048];
+        MemoryStream stream = new(buffer);
+        await request.Handle(_db, stream);
+
+        string message = Encoding.UTF8.GetString(stream.ToArray()).Replace("<EOF>", "");
+        TransactionIndexResponse? result = JsonConvert.DeserializeObject<TransactionIndexResponse>(message);
+
+        Assert.True(result?.Success);
+        Assert.AreEqual(SeedTransactions, result?.Transactions);
+    }
+
+    private async Task SeedDB()
+    {
+        await _db.Transactions.AddRangeAsync(SeedTransactions);
+        await _db.SaveChangesAsync();
     }
 }
