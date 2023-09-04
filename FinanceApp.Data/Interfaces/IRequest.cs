@@ -19,7 +19,7 @@ public interface IRequest
         }
 
         throw new Exception(
-            $"Validator [{Validator.Name}] for {GetType().Name} is not a child of {nameof(IValidator)}.");
+            $"Validator {Validator.Name} for {GetType().Name} is not a child of {nameof(IValidator)}.");
     }
 
     public static IRequest GetRequest(string message)

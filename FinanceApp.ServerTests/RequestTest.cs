@@ -13,10 +13,16 @@ public class RequestTest
 {
     private static readonly CreateTransaction TestRequest = new()
     {
-        Value = 100,
-        Counterparty = new Counterparty
+        Value = new RequestField<int>
         {
-            Name = "John"
+            Value = 100
+        },
+        Counterparty = new RequestField<Counterparty>
+        {
+            Value = new Counterparty
+            {
+                Name = "John"
+            }
         }
     };
     private static readonly string Message = $"<CreateTransaction>{JsonConvert.SerializeObject(TestRequest)}";

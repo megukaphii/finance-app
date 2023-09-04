@@ -2,6 +2,7 @@ using System.Text;
 using FinanceApp.Data;
 using FinanceApp.Data.Interfaces;
 using FinanceApp.Data.Models;
+using FinanceApp.Data.RequestPatterns;
 using FinanceApp.Data.Requests;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -25,8 +26,14 @@ public class TransactionTest
 
     private static readonly CreateTransaction TestRequest = new()
     {
-        Value = TestTransaction.Value,
-        Counterparty = TestTransaction.Counterparty
+        Value = new RequestField<int>
+        {
+            Value = TestTransaction.Value
+        },
+        Counterparty = new RequestField<Counterparty>
+        {
+            Value = TestTransaction.Counterparty
+        }
     };
 
     private static readonly string Message = $"<CreateTransaction>{JsonConvert.SerializeObject(TestRequest)}";

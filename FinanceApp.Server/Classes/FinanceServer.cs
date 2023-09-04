@@ -91,14 +91,13 @@ public class FinanceServer : IServer
     {
         try {
             while (_isRunning) {
-                string message = await ReadMessage(stream);
+                string strRequest = await ReadMessage(stream);
 
-                IRequest request = IRequest.GetRequest(message);
+                IRequest request = IRequest.GetRequest(strRequest);
                 if (request.Validate()) {
                     await request.Handle(_db, stream);
                 } else {
-                    // TODO - Send validation error!
-                    RemoveClient(stream);
+                    await SendErrorResponse(stream, request);
                 }
             }
         } catch (Exception e) {
@@ -127,13 +126,12 @@ public class FinanceServer : IServer
         return messageData.ToString().Replace("<EOF>", "");
     }
 
-    private void Close()
+    private static async Task SendErrorResponse(Stream stream, IRequest validatedRequest)
     {
-        foreach (Stream stream in _clients) {
-            stream.Close();
-        }
-
-        _clients.Clear();
+        string strResponse = Newtonsoft.Json.JsonConvert.SerializeObject(validatedRequest);
+        byte[] message = Encoding.UTF8.GetBytes(strResponse + "<EOF>");
+        await stream.WriteAsync(message);
+        await stream.FlushAsync();
     }
 
     private void RemoveClient(Stream stream)
@@ -141,6 +139,15 @@ public class FinanceServer : IServer
         stream.Close();
         _clients.Remove(stream);
         Console.WriteLine("Client connection closed.");
+    }
+
+    private void Close()
+    {
+        foreach (Stream stream in _clients) {
+            stream.Close();
+        }
+
+        _clients.Clear();
     }
 
     static void DisplaySecurityLevel(SslStream stream)

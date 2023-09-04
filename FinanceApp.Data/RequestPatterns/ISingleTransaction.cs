@@ -8,6 +8,6 @@ public interface ISingleTransaction : IRequest
 {
     public static readonly Type? Validator = typeof(TransactionValidator);
 
-    public int Value { get; }
-    public Counterparty Counterparty { get; }
+    public RequestField<int> Value { get; }
+    public RequestField<Counterparty> Counterparty { get; }
 }

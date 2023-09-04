@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using FinanceApp.Data.Models;
+using FinanceApp.Data.RequestPatterns;
 using FinanceApp.Data.Requests;
 using Newtonsoft.Json;
 
@@ -42,7 +43,6 @@ public class FinanceClient : IClient
 
 		try
 		{
-			// TODO - Crashes when ipStr is "localhost"
 			await _client.ConnectAsync(ipEndPoint);
 			Console.WriteLine("Connected!");
 
@@ -70,10 +70,16 @@ public class FinanceClient : IClient
 					{
 						CreateTransaction transaction = new()
 						{
-							Value = value,
-                            Counterparty = new Counterparty
+                            Value = new RequestField<int>
                             {
-                                Name = "John"
+                                Value = value
+                            },
+                            Counterparty = new RequestField<Counterparty>
+                            {
+                                Value = new Counterparty
+                                {
+                                    Name = "John"
+                                }
                             }
 						};
 

@@ -8,26 +8,26 @@ public class CreateTransaction : ISingleTransaction
 {
     public static string Flag => "<CreateTransaction>";
 
-    public required int Value { get; init; }
-    public required Counterparty Counterparty { get; init; }
+    public required RequestField<int> Value { get; init; }
+    public required RequestField<Counterparty> Counterparty { get; init; }
 
     public override string ToString()
     {
-        return $"{Flag}: {nameof(Value)}: {Value}";
+        return $"{Flag}: [{nameof(Value)}: {Value}], [{nameof(Counterparty)}: {Counterparty}]";
     }
 
     public async Task Handle(FinanceAppContext database, Stream stream)
     {
         Console.WriteLine(this);
 
-        if (Counterparty.Id == 0) {
-            await database.Counterparties.AddAsync(Counterparty);
+        if (Counterparty.Value.Id == 0) {
+            await database.Counterparties.AddAsync(Counterparty.Value);
         }
 
         Transaction created = new()
         {
-            Value = Value,
-            Counterparty = Counterparty
+            Value = Value.Value,
+            Counterparty = Counterparty.Value
         };
         await database.Transactions.AddAsync(created);
         await database.SaveChangesAsync();
