@@ -1,5 +1,4 @@
-﻿using FinanceApp.MauiClient.Data;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using MudBlazor.Services;
 
 namespace FinanceApp.MauiClient;

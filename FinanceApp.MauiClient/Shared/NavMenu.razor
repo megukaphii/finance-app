@@ -1,19 +1,17 @@
-﻿<MudAppBar Elevation="1" Style="margin-left: var(--mud-drawer-width-mini-left); width: calc(100% - var(--mud-drawer-width-mini-left));">
-	<MudIconButton Icon="@Icons.Material.Filled.Menu" OnClick="@ToggleDrawer" />
-</MudAppBar>
-<MudDrawer @bind-Open="@_open" Elevation="1" Variant="@DrawerVariant.Mini" Style="z-index: calc(var(--mud-zindex-appbar) + 2);">
-	<MudNavMenu>
-		<MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Add" Href="">Quick Add</MudNavLink>
-		<MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.CalendarToday" Href="calendar">Calendar</MudNavLink>
-		<MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.List" Href="list">List</MudNavLink>
-	</MudNavMenu>
+﻿<MudDrawer @bind-Open="_open" Elevation="1" Variant="@DrawerVariant.Mini" Style="z-index: calc(var(--mud-zindex-appbar) + 2);">
+    <MudNavMenu>
+        <MudNavLink Icon="@Icons.Material.Filled.Menu" OnClick="@ToggleDrawer"></MudNavLink>
+        <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Add" Href="quick-add">Quick Add</MudNavLink>
+        <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.CalendarToday" Href="calendar">Calendar</MudNavLink>
+        <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.List" Href="list">List</MudNavLink>
+    </MudNavMenu>
 </MudDrawer>
 
 @code {
-	bool _open = false;
+    private bool _open = true;
 
-	void ToggleDrawer()
-	{
-		_open = !_open;
-	}
+    private void ToggleDrawer()
+    {
+        _open = !_open;
+    }
 }

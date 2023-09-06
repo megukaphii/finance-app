@@ -1,0 +1,42 @@
+﻿@page "/"
+@layout EmptyLayout
+
+<MudPaper Class="pa-4">
+    <MudStack Class="spacing-">
+        <MudText Typo="Typo.h4" Align="Align.Center">Login</MudText>
+        <MudForm @ref="_form">
+            <MudTextField @bind-value="_ipAddressStr" T="string" Label="IP Address" Required="true"/>
+            <MudTextField @bind-value="_portStr" T="string" Label="Port" Mask="@(new RegexMask(@"^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$"))"/>
+            <MudTextField @bind-Value="_password" T="string" Label="Password" InputType="@_passwordInput" Adornment="Adornment.End" AdornmentIcon="@_passwordInputIcon" OnAdornmentClick="ToggleShowPassword" AdornmentAriaLabel="Show Password"/>
+            <MudButton OnClick="@PerformLogin" Variant="Variant.Filled" Color="Color.Primary" DisableElevation="true">Login</MudButton>
+        </MudForm>
+    </MudStack>
+</MudPaper>
+
+@code {
+    private MudForm _form = new();
+    private string _ipAddressStr = "";
+    private string _portStr = "";
+    private string _password = "";
+
+    private bool _isShow;
+    private InputType _passwordInput = InputType.Password;
+    private string _passwordInputIcon = Icons.Material.Filled.VisibilityOff;
+
+    private void ToggleShowPassword()
+    {
+        if (_isShow) {
+            _passwordInputIcon = Icons.Material.Filled.VisibilityOff;
+            _passwordInput = InputType.Password;
+        } else {
+            _passwordInputIcon = Icons.Material.Filled.Visibility;
+            _passwordInput = InputType.Text;
+        }
+        _isShow = !_isShow;
+    }
+
+    private async void PerformLogin()
+    {
+        // TODO HOW DOES ONE DO THIS
+    }
+}
