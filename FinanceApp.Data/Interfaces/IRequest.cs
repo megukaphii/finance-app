@@ -23,6 +23,8 @@ public interface IRequest
 
 	public bool IsValid()
     {
+        if (this is InvalidRequest) return false;
+
         if (Validator is null) return true;
 
         if (Validator.BaseType == typeof(IValidator)) {
