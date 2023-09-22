@@ -6,8 +6,8 @@ namespace FinanceApp.Data.RequestPatterns;
 
 public interface ISingleTransaction : IRequest
 {
-    public static readonly Type? Validator = typeof(TransactionValidator);
+    public new static readonly Type? Validator = typeof(TransactionValidator);
 
-    public RequestField<long> Value { get; }
+    public RequestField<double> Value { get; }
     public RequestField<Counterparty> Counterparty { get; }
 }

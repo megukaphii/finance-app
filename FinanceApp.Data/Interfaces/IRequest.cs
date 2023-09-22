@@ -9,7 +9,19 @@ public interface IRequest
     public static readonly string Flag = string.Empty;
     public static readonly Type? Validator = null;
 
-    public bool Validate()
+	private class InvalidRequest : IRequest
+	{
+        public Exception Exception { get; }
+
+        public InvalidRequest(Exception exception) => Exception = exception;
+
+		public Task Handle(FinanceAppContext database, Stream stream)
+		{
+			throw new NotImplementedException();
+		}
+	}
+
+	public bool IsValid()
     {
         if (Validator is null) return true;
 
@@ -30,12 +42,19 @@ public interface IRequest
             PropertyInfo? property = t.GetProperty(nameof(Flag));
             string flag = (string)property?.GetValue(null)!;
             if (flag != string.Empty && message.StartsWith(flag)) {
-                // TODO - Implement error handling
-                IRequest? request = (IRequest)JsonConvert.DeserializeObject(message.Replace(flag, ""), t)!;
-                if (request == null) {
-                    throw new Exception($"Message {message} does not contain valid {t.Name} properties");
+                try
+                {
+                    IRequest? request = (IRequest)JsonConvert.DeserializeObject(message.Replace(flag, ""), t)!;
+                    if (request == null) {
+                        throw new Exception($"Message {message} does not contain valid {t.Name} properties");
+                    }
+
+                    return request;
                 }
-                return request;
+                catch (Exception e)
+                {
+                    return new InvalidRequest(e);
+                }
             }
         }
 

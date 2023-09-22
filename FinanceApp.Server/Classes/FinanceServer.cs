@@ -24,7 +24,11 @@ public class FinanceServer : IServer
     {
         IPEndPoint ipEndPoint = new(IPAddress.Any, 42069);
         _listener.Bind(ipEndPoint);
-        _serverCertificate = X509Certificate.CreateFromCertFile("../certificate.pfx");
+        if (File.Exists("../certificate.pfx")) {
+            _serverCertificate = X509Certificate.CreateFromCertFile("../certificate.pfx");
+        } else {
+            _serverCertificate = X509Certificate.CreateFromCertFile("/app/certificate.pfx");
+        }
     }
 
     public async Task Start()
@@ -94,7 +98,7 @@ public class FinanceServer : IServer
                 string strRequest = await ReadMessage(stream);
 
                 IRequest request = IRequest.GetRequest(strRequest);
-                if (request.Validate()) {
+                if (request.IsValid()) {
                     await request.Handle(_db, stream);
                 } else {
                     await SendErrorResponse(stream, request);
