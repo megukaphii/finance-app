@@ -6,9 +6,7 @@ WORKDIR /app
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
 COPY ["FinanceApp.Server/FinanceApp.Server.csproj", "FinanceApp.Server/"]
-COPY ["FinanceApp.Abstractions/FinanceApp.Abstractions.csproj", "FinanceApp.Abstractions/"]
 COPY ["FinanceApp.Data/FinanceApp.Data.csproj", "FinanceApp.Data/"]
-COPY ["FinanceApp.Extensions.Sqlite/FinanceApp.Extensions.Sqlite.csproj", "FinanceApp.Extensions.Sqlite/"]
 RUN dotnet restore "FinanceApp.Server/FinanceApp.Server.csproj"
 COPY . .
 WORKDIR "/src/FinanceApp.Server"
