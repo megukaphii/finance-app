@@ -1,7 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using FinanceApp.MauiNativeClient.Services;
+using FinanceApp.MauiClient.Services;
 
-namespace FinanceApp.MauiNativeClient.ViewModel;
+namespace FinanceApp.MauiClient.ViewModel;
 
 public partial class BaseViewModel(ServerConnection serverConnection) : ObservableObject
 {

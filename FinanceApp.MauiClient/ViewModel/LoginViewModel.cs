@@ -1,9 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
-using FinanceApp.MauiNativeClient.Services;
-using FinanceApp.MauiNativeClient.View;
+using FinanceApp.MauiClient.Services;
+using FinanceApp.MauiClient.View;
 
-namespace FinanceApp.MauiNativeClient.ViewModel;
+namespace FinanceApp.MauiClient.ViewModel;
 
 public partial class LoginViewModel : BaseViewModel
 {

@@ -7,7 +7,7 @@ using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
-namespace FinanceApp.MauiNativeClient.Services;
+namespace FinanceApp.MauiClient.Services;
 public class ServerConnection
 {
     public bool IsConnected => _socket.Connected;

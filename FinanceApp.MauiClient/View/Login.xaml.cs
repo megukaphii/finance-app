@@ -1,6 +1,6 @@
-using FinanceApp.MauiNativeClient.ViewModel;
+using FinanceApp.MauiClient.ViewModel;
 
-namespace FinanceApp.MauiNativeClient.View;
+namespace FinanceApp.MauiClient.View;
 
 public partial class Login : ContentPage
 {
@@ -8,5 +8,6 @@ public partial class Login : ContentPage
 	{
 		InitializeComponent();
 		BindingContext = viewModel;
+		viewModel.Title = "Login";
 	}
 }

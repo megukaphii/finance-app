@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+			 xmlns:viewmodel="clr-namespace:FinanceApp.MauiClient.ViewModel"
+			 x:DataType="viewmodel:LoginViewModel"
+             x:Class="FinanceApp.MauiClient.View.Login"
+             Title="{Binding Title}">
+
+	<VerticalStackLayout>
+		<Entry Text="{Binding IpAddress}" Placeholder="IP Address..."  Keyboard="Url"/>
+		<Button Text="Login" Command="{Binding EstablishConnectionCommand}" IsEnabled="{Binding IsNotBusy}"
+				IsVisible="{Binding IsNotConnected}"/>
+		<Button Text="Disconnect" Command="{Binding DisconnectCommand}" IsEnabled="{Binding IsNotBusy}"
+				IsVisible="{Binding IsConnected}"/>
+	</VerticalStackLayout>
+	
+</ContentPage>

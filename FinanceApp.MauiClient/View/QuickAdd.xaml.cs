@@ -1,6 +1,6 @@
-using FinanceApp.MauiNativeClient.ViewModel;
+using FinanceApp.MauiClient.ViewModel;
 
-namespace FinanceApp.MauiNativeClient.View;
+namespace FinanceApp.MauiClient.View;
 
 public partial class QuickAdd : ContentPage
 {
@@ -8,5 +8,6 @@ public partial class QuickAdd : ContentPage
 	{
 		InitializeComponent();
 		BindingContext = viewModel;
+		viewModel.Title = "Quick Add";
 	}
 }

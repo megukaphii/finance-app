@@ -1,15 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using FinanceApp.Data.Interfaces;
 using FinanceApp.Data.Models;
 using FinanceApp.Data.RequestPatterns;
 using FinanceApp.Data.Requests.Transaction;
-using FinanceApp.MauiNativeClient.Services;
-using Newtonsoft.Json;
-using System.Net.Security;
-using System.Text;
+using FinanceApp.MauiClient.Services;
 
-namespace FinanceApp.MauiNativeClient.ViewModel;
+namespace FinanceApp.MauiClient.ViewModel;
 
 public partial class QuickAddViewModel : BaseViewModel
 {
