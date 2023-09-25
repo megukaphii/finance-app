@@ -28,7 +28,7 @@ public class TransactionTest
 
     private static readonly Create TestCreateRequest = new()
     {
-        Value = new RequestField<long>
+        Value = new RequestField<double>
         {
             Value = TestTransaction.Value
         },

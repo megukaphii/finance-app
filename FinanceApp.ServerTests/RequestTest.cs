@@ -14,7 +14,7 @@ public class RequestTest
 {
     private static readonly Create TestRequest = new()
     {
-        Value = new RequestField<long>
+        Value = new RequestField<double>
         {
             Value = 100
         },
@@ -41,7 +41,7 @@ public class RequestTest
     {
         IRequest request = IRequest.GetRequest(Message);
 
-        Assert.DoesNotThrow(() => request.Validate());
+        Assert.DoesNotThrow(() => request.IsValid());
         Assert.IsTrue(request is ISingleTransaction);
         Assert.AreEqual(typeof(TransactionValidator), ISingleTransaction.Validator);
     }

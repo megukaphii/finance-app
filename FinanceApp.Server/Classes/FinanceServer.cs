@@ -24,9 +24,10 @@ public class FinanceServer : IServer
     {
         IPEndPoint ipEndPoint = new(IPAddress.Any, 42069);
         _listener.Bind(ipEndPoint);
-        if (File.Exists("../certificate.pfx")) {
-            _serverCertificate = X509Certificate.CreateFromCertFile("../certificate.pfx");
+        if (File.Exists("certificate.pfx")) {
+            _serverCertificate = X509Certificate.CreateFromCertFile("certificate.pfx");
         } else {
+            Console.WriteLine(Directory.GetCurrentDirectory());
             _serverCertificate = X509Certificate.CreateFromCertFile("/app/certificate.pfx");
         }
     }

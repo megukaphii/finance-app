@@ -5,12 +5,11 @@
 			 x:DataType="viewmodel:QuickAddViewModel"
              x:Class="FinanceApp.MauiClient.View.QuickAdd"
              Title="{Binding Title}">
-	
-    <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
-    </VerticalStackLayout>
-	
+
+	<VerticalStackLayout>
+		<Entry Text="{Binding Value}" Placeholder="Value..." Keyboard="Numeric"/>
+		<Entry Text="{Binding Counterparty}" Placeholder="Counterparty..."/>
+		<Button Text="Quick Add" Command="{Binding SendTransactionCommand}" IsEnabled="{Binding IsNotBusy}"/>
+	</VerticalStackLayout>
+
 </ContentPage>
