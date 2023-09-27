@@ -25,9 +25,11 @@ public static class MauiProgram
 
 		builder.Services.AddSingleton<LoginViewModel>();
 		builder.Services.AddSingleton<QuickAddViewModel>();
+		builder.Services.AddSingleton<TransactionListViewModel>();
 
 		builder.Services.AddSingleton<Login>();
 		builder.Services.AddSingleton<QuickAdd>();
+		builder.Services.AddSingleton<TransactionList>();
 
 		return builder.Build();
 	}
