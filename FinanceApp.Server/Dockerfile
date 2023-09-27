@@ -18,4 +18,6 @@ RUN dotnet publish "FinanceApp.Server.csproj" -c Release -o /app/publish /p:UseA
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+EXPOSE 42069/tcp
+
 ENTRYPOINT ["dotnet", "FinanceApp.Server.dll"]
