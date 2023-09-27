@@ -27,8 +27,7 @@ public class FinanceServer : IServer
         if (File.Exists("certificate.pfx")) {
             _serverCertificate = X509Certificate.CreateFromCertFile("certificate.pfx");
         } else {
-            Console.WriteLine(Directory.GetCurrentDirectory());
-            _serverCertificate = X509Certificate.CreateFromCertFile("/app/certificate.pfx");
+            _serverCertificate = X509Certificate.CreateFromCertFile("/Certificates/certificate.pfx");
         }
     }
 

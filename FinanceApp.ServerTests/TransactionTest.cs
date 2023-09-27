@@ -3,7 +3,6 @@ using FinanceApp.Data;
 using FinanceApp.Data.Interfaces;
 using FinanceApp.Data.Models;
 using FinanceApp.Data.RequestPatterns;
-using FinanceApp.Data.Requests;
 using FinanceApp.Data.Requests.Transaction;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;

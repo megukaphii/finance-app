@@ -1,7 +1,6 @@
 ﻿using FinanceApp.Data.Interfaces;
 using FinanceApp.Data.Models;
 using FinanceApp.Data.RequestPatterns;
-using FinanceApp.Data.Requests;
 using FinanceApp.Data.Requests.Transaction;
 using FinanceApp.Data.Validators;
 using NUnit.Framework;
