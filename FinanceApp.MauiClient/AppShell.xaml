@@ -4,10 +4,14 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:views="clr-namespace:FinanceApp.MauiClient.View"
-    Title="FinanceApp.MauiClient">
+    Title="FinanceApp.MauiClient"
+	Shell.FlyoutBehavior="Flyout"
+	Shell.TabBarIsVisible="{OnPlatform iOS=True, Default=False}">
 
-	<ShellContent Title="Login" ContentTemplate="{DataTemplate views:Login}" IsEnabled="False"/>
-	<ShellContent Title="Quick Add" ContentTemplate="{DataTemplate views:QuickAdd}"/>
-	<ShellContent Title="List" ContentTemplate="{DataTemplate views:TransactionList}"/>
+	<FlyoutItem Title="Dashboard" FlyoutDisplayOptions="AsMultipleItems">
+		<ShellContent Title="Login" ContentTemplate="{DataTemplate views:Login}" Route="Login"/>
+		<ShellContent Title="Quick Add" ContentTemplate="{DataTemplate views:QuickAdd}" Route="QuickAdd"/>
+		<ShellContent Title="List" ContentTemplate="{DataTemplate views:TransactionList}" Route="TransactionList"/>
+	</FlyoutItem>
 
 </Shell>

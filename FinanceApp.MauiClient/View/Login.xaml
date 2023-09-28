@@ -4,11 +4,10 @@
 			 xmlns:viewmodel="clr-namespace:FinanceApp.MauiClient.ViewModel"
 			 x:DataType="viewmodel:LoginViewModel"
              x:Class="FinanceApp.MauiClient.View.Login"
-             Title="{Binding Title}"
-			 Shell.FlyoutBehavior="Disabled">
+             Title="{Binding Title}">
 
 	<VerticalStackLayout>
-		<Entry Text="{Binding IpAddress}" Placeholder="IP Address..."  Keyboard="Url"/>
+		<Entry Text="{Binding IpAddress}" Placeholder="IP Address..." Keyboard="Url"/>
 		<Button Text="Login" Command="{Binding EstablishConnectionCommand}" IsEnabled="{Binding IsNotBusy}"
 				IsVisible="{Binding IsNotConnected}"/>
 		<Button Text="Disconnect" Command="{Binding DisconnectCommand}" IsEnabled="{Binding IsNotBusy}"

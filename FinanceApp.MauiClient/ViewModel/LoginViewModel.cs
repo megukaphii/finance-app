@@ -20,7 +20,7 @@ public partial class LoginViewModel : BaseViewModel
 			await _serverConnection.EstablishConnection(IpAddress);
 			IsConnected = _serverConnection.IsConnected;
 			await Shell.Current.DisplayAlert("Connection Established", $"Successfully connected to {IpAddress}!", "OK");
-			await Shell.Current.GoToAsync($"{nameof(QuickAdd)}", true);
+			await Shell.Current.GoToAsync($"//{nameof(QuickAdd)}", true);
 		} catch (Exception ex) {
 			await Shell.Current.DisplayAlert("Error", ex.Message + " | Inner exception: " + ex.InnerException?.Message, "OK");
 		} finally {
