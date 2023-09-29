@@ -65,7 +65,7 @@ public class ServerConnection
     {
         NetworkStream networkStream = new(_socket);
         _sslStream = new SslStream(networkStream, false, ValidateServerCertificate, null);
-        await _sslStream.AuthenticateAsClientAsync("Cory Macdonald");
+        await _sslStream.AuthenticateAsClientAsync("CoryMacdonald");
     }
 
     private static bool ValidateServerCertificate(

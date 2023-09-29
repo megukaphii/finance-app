@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.IO;
+using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Reflection;
@@ -88,7 +89,9 @@ public class FinanceServer : IServer
         sslStream.WriteTimeout = TimeoutInMs;
         Console.WriteLine("SSL connection established.");
 
-        return sslStream;
+		DisplaySslInfo(sslStream);
+
+		return sslStream;
     }
 
     private async Task HandleConnection(Stream stream)
@@ -153,6 +156,16 @@ public class FinanceServer : IServer
 
         _clients.Clear();
     }
+
+    static void DisplaySslInfo(SslStream stream)
+    {
+		Console.WriteLine("------START OF SSL INFO--------");
+		DisplaySecurityLevel(stream);
+		DisplaySecurityServices(stream);
+		DisplayStreamProperties(stream);
+        DisplayCertificateInformation(stream);
+		Console.WriteLine("------END OF SSL INFO--------");
+	}
 
     static void DisplaySecurityLevel(SslStream stream)
     {
