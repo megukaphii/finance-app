@@ -24,10 +24,10 @@ public class FinanceServer : IServer
     {
         IPEndPoint ipEndPoint = new(IPAddress.Any, 42069);
         _listener.Bind(ipEndPoint);
-        if (File.Exists("certificate.pfx")) {
-            _serverCertificate = X509Certificate.CreateFromCertFile("certificate.pfx");
+        if (File.Exists("certificate.key")) {
+            _serverCertificate = X509Certificate2.CreateFromPemFile("certificate.crt", "certificate.key");
         } else {
-            _serverCertificate = X509Certificate.CreateFromCertFile("/Certificates/certificate.pfx");
+			_serverCertificate = X509Certificate2.CreateFromPemFile("/Certificates/certificate.crt", "/Certificates/certificate.key");
         }
     }
 
