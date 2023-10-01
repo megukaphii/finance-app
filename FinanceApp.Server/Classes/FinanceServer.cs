@@ -159,7 +159,7 @@ public class FinanceServer : IServer
             char[] chars = new char[decoder.GetCharCount(buffer, 0, bytes)];
             decoder.GetChars(buffer, 0, bytes, chars, 0);
             messageData.Append(chars);
-            if (messageData.ToString().IndexOf("<EOF>", StringComparison.Ordinal) != -1) {
+            if (messageData.ToString().Contains("<EOF>")) {
                 break;
             }
         } while (bytes != 0);

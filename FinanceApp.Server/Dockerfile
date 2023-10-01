@@ -7,6 +7,7 @@ FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
 COPY ["FinanceApp.Server/FinanceApp.Server.csproj", "FinanceApp.Server/"]
 COPY ["FinanceApp.Data/FinanceApp.Data.csproj", "FinanceApp.Data/"]
+COPY [".git", "FinanceApp.Server/"]
 RUN dotnet restore "FinanceApp.Server/FinanceApp.Server.csproj"
 COPY . .
 WORKDIR "/src/FinanceApp.Server"

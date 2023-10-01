@@ -117,8 +117,10 @@ public class FinanceClient : IClient
 				}
 			}
 
+#pragma warning disable CS0162 // Unreachable code detected
 			_client.Close();
 			Console.WriteLine("Client closed.");
+#pragma warning restore CS0162 // Unreachable code detected
 		} catch (Exception e)
 		{
 			Console.WriteLine(e);
