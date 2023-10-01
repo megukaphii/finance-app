@@ -1,4 +1,5 @@
 ﻿using FinanceApp.Data.Interfaces;
+using FinanceApp.Data.Requests;
 using FinanceApp.Data.Requests.Transaction;
 using Newtonsoft.Json;
 using System.Net;
@@ -10,17 +11,25 @@ using System.Text;
 namespace FinanceApp.MauiClient.Services;
 public class ServerConnection
 {
+    public const string DEFAULT_ADDRESS = "127.0.0.1";
+
     public bool IsConnected => _socket.Connected;
 
     private Socket _socket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
     private SslStream _sslStream;
 
-    public async Task EstablishConnection(string ipAddressStr = "")
+    public async Task<bool> EstablishConnection(string ipAddressStr = "")
     {
-        if (string.IsNullOrEmpty(ipAddressStr)) ipAddressStr = "127.0.0.1";
+        if (string.IsNullOrEmpty(ipAddressStr)) ipAddressStr = DEFAULT_ADDRESS;
 
         await ConnectToIP(ipAddressStr);
         await EstablishStream();
+        bool isCompatible = await IsServerCompatible();
+        if (!isCompatible) {
+            await _socket.DisconnectAsync(false);
+			_socket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+		}
+        return isCompatible;
 	}
 
     public async Task<CreateResponse> SendButWithStrongCoupling(Create request)
@@ -82,6 +91,34 @@ public class ServerConnection
         // Do not allow this client to communicate with unauthenticated servers.
         return false;*/
         return true;
+    }
+
+    private async Task<bool> IsServerCompatible()
+    {
+        try {
+			string messageReceived = await ReadMessage(_sslStream);
+			CompareVersion request = JsonConvert.DeserializeObject<CompareVersion>(messageReceived);
+
+			CompareVersion response = new()
+			{
+				SemanticVersion = AppInfo.Version
+			};
+			string strRequest = JsonConvert.SerializeObject(response);
+
+			byte[] message = Encoding.UTF8.GetBytes(strRequest + "<EOF>");
+			await _sslStream.WriteAsync(message);
+			await _sslStream.FlushAsync();
+
+			if (request.SemanticVersion.IsCompatible(AppInfo.Version)) {
+				return true;
+			} else {
+				await Shell.Current.DisplayAlert("Version Issue", $"Server version {request.SemanticVersion} is not compatible with {response.SemanticVersion}", "OK");
+				return false;
+            }
+		} catch {
+			await Shell.Current.DisplayAlert("Version Issue", "Could not compare version against server.", "OK");
+			return false;
+        }
     }
 
     private async Task StartAsync(string ipAddressString = "")

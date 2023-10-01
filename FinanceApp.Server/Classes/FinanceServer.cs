@@ -1,5 +1,4 @@
-﻿using System.IO;
-using System.Net;
+﻿using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Reflection;
@@ -7,7 +6,9 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using FinanceApp.Data;
 using FinanceApp.Data.Interfaces;
+using FinanceApp.Data.Requests;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace FinanceApp.Server.Classes;
 
@@ -45,9 +46,14 @@ public class FinanceServer : IServer
             while (_isRunning) {
                 Socket handle = await _listener.AcceptAsync();
                 Console.WriteLine("Connection found.");
-                await using SslStream sslStream = await EstablishSslStream(handle);
-                _clients.Add(sslStream);
-                await HandleConnection(sslStream);
+                using SslStream sslStream = await EstablishSslStream(handle);
+                if (await IsClientCompatible(sslStream)) {
+                    _clients.Add(sslStream);
+                    await HandleConnection(sslStream);
+                } else {
+                    await handle.DisconnectAsync(false);
+                    Console.WriteLine("Client disconnected");
+                }
             }
 
             Close();
@@ -92,6 +98,34 @@ public class FinanceServer : IServer
 		DisplaySslInfo(sslStream);
 
 		return sslStream;
+    }
+
+    private async Task<bool> IsClientCompatible(Stream stream)
+    {
+        try {
+            CompareVersion request = new()
+            {
+                SemanticVersion = ThisAssembly.Git.SemVer.Version
+            };
+            string strRequest = JsonConvert.SerializeObject(request);
+
+            byte[] message = Encoding.UTF8.GetBytes(strRequest + "<EOF>");
+            await stream.WriteAsync(message);
+            await stream.FlushAsync();
+
+            string messageReceived = await ReadMessage(stream);
+            CompareVersion? response = JsonConvert.DeserializeObject<CompareVersion>(messageReceived) ?? throw new Exception($"No {nameof(CompareVersion)} message received");
+
+            if (response.SemanticVersion.IsCompatible(request.SemanticVersion)) {
+                return true;
+            } else {
+                Console.WriteLine($"Client has incompatible version - {response.SemanticVersion}");
+                return false;
+            }
+		} catch {
+            Console.WriteLine($"Client did not send appropriate {nameof(CompareVersion)} request, disconnecting.");
+            return false;
+        }
     }
 
     private async Task HandleConnection(Stream stream)

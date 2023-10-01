@@ -8,7 +8,7 @@ namespace FinanceApp.MauiClient.ViewModel;
 public partial class LoginViewModel : BaseViewModel
 {
 	[ObservableProperty]
-	private string _ipAddress = "macdonald9999.synology.me";
+	private string _ipAddress = ServerConnection.DEFAULT_ADDRESS;
 
 	public LoginViewModel(ServerConnection serverConnection) : base(serverConnection) { }
 
@@ -17,10 +17,11 @@ public partial class LoginViewModel : BaseViewModel
 	{
 		try {
 			IsBusy = true;
-			await _serverConnection.EstablishConnection(IpAddress);
-			IsConnected = _serverConnection.IsConnected;
-			await Shell.Current.DisplayAlert("Connection Established", $"Successfully connected to {IpAddress}!", "OK");
-			await Shell.Current.GoToAsync($"//{nameof(QuickAdd)}", true);
+			if (await _serverConnection.EstablishConnection(IpAddress)) {
+				IsConnected = _serverConnection.IsConnected;
+				await Shell.Current.DisplayAlert("Connection Established", $"Successfully connected to {IpAddress}!", "OK");
+				await Shell.Current.GoToAsync($"//{nameof(QuickAdd)}", true);
+			}
 		} catch (Exception ex) {
 			await Shell.Current.DisplayAlert("Error", ex.Message + " | Inner exception: " + ex.InnerException?.Message, "OK");
 		} finally {
