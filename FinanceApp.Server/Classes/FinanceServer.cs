@@ -175,7 +175,7 @@ public class FinanceServer : IServer
         await stream.FlushAsync();
     }
 
-    private void RemoveClient(SslStream stream)
+    private void RemoveClient(Stream stream)
     {
         stream.Close();
         _clients.Remove(stream);
