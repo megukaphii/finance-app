@@ -34,7 +34,7 @@ public partial class LoginViewModel : BaseViewModel
 	{
 		try {
 			IsBusy = true;
-			_serverConnection.Disconnect();
+			await _serverConnection.Disconnect();
 			IsConnected = _serverConnection.IsConnected;
 			await Shell.Current.DisplayAlert("Disconnected", "Successfully disconnected from server!", "OK");
 		} catch (Exception ex) {

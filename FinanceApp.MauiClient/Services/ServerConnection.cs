@@ -16,7 +16,7 @@ public class ServerConnection
     public bool IsConnected => _socket.Connected;
 
     private Socket _socket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-    private SslStream _sslStream;
+    private SslStream _sslStream = (SslStream) Stream.Null;
 
     public async Task<bool> EstablishConnection(string ipAddressStr = "")
     {
@@ -56,9 +56,9 @@ public class ServerConnection
         return callback(messageReceived);
 	}
 
-    public void Disconnect()
+    public async Task Disconnect()
     {
-        _socket.Close();
+        await _socket.DisconnectAsync(false);
         _socket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 	}
 
@@ -79,8 +79,8 @@ public class ServerConnection
 
     private static bool ValidateServerCertificate(
         object sender,
-        X509Certificate certificate,
-        X509Chain chain,
+        X509Certificate? certificate,
+        X509Chain? chain,
         SslPolicyErrors sslPolicyErrors)
     {
         /*if (sslPolicyErrors == SslPolicyErrors.None)
@@ -97,7 +97,7 @@ public class ServerConnection
     {
         try {
 			string messageReceived = await ReadMessage(_sslStream);
-			CompareVersion request = JsonConvert.DeserializeObject<CompareVersion>(messageReceived);
+			CompareVersion request = JsonConvert.DeserializeObject<CompareVersion>(messageReceived) ?? throw new Exception($"Server {nameof(CompareVersion)} request is malformed");
 
 			CompareVersion response = new()
 			{
@@ -206,7 +206,7 @@ public class ServerConnection
                 }
             }
 
-            _clientSocket.Close();
+            _clientSocket.Disconnect();
             Console.WriteLine("Client closed.");*/
         }
         catch (Exception e)
@@ -215,14 +215,14 @@ public class ServerConnection
         }
     }
 
-    private static async Task<string> ReadMessage(Stream sslStream)
+    private static async Task<string> ReadMessage(Stream stream)
     {
         byte[] buffer = new byte[2048];
         StringBuilder messageData = new();
         int bytes;
         do
         {
-            bytes = await sslStream.ReadAsync(buffer, 0, buffer.Length);
+            bytes = await stream.ReadAsync(buffer, 0, buffer.Length);
 
             Decoder decoder = Encoding.UTF8.GetDecoder();
             char[] chars = new char[decoder.GetCharCount(buffer, 0, bytes)];

@@ -114,7 +114,7 @@ public class FinanceServer : IServer
             await stream.FlushAsync();
 
             string messageReceived = await ReadMessage(stream);
-            CompareVersion? response = JsonConvert.DeserializeObject<CompareVersion>(messageReceived) ?? throw new Exception($"No {nameof(CompareVersion)} message received");
+            CompareVersion response = JsonConvert.DeserializeObject<CompareVersion>(messageReceived) ?? throw new Exception($"No {nameof(CompareVersion)} message received");
 
             if (response.SemanticVersion.IsCompatible(request.SemanticVersion)) {
                 return true;
@@ -169,13 +169,13 @@ public class FinanceServer : IServer
 
     private static async Task SendErrorResponse(Stream stream, IRequest validatedRequest)
     {
-        string strResponse = Newtonsoft.Json.JsonConvert.SerializeObject(validatedRequest);
+        string strResponse = JsonConvert.SerializeObject(validatedRequest);
         byte[] message = Encoding.UTF8.GetBytes(strResponse + "<EOF>");
         await stream.WriteAsync(message);
         await stream.FlushAsync();
     }
 
-    private void RemoveClient(Stream stream)
+    private void RemoveClient(SslStream stream)
     {
         stream.Close();
         _clients.Remove(stream);
