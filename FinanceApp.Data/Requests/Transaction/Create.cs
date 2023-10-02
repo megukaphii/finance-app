@@ -8,6 +8,7 @@ public class Create : ISingleTransaction
 {
     public static string Flag => "<CreateTransaction>";
 
+    // TODO - Replace fields with single Transaction field?
     public required RequestField<double> Value { get; init; }
     public required RequestField<Counterparty> Counterparty { get; init; }
 

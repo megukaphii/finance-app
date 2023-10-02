@@ -47,7 +47,7 @@ public interface IRequest
                 try
                 {
                     IRequest? request = (IRequest)JsonConvert.DeserializeObject(message.Replace(flag, ""), t)!;
-                    if (request == null) {
+                    if (request is null) {
                         throw new Exception($"Message {message} does not contain valid {t.Name} properties");
                     }
 

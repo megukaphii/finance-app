@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
@@ -16,7 +17,7 @@ public class ServerConnection
     public bool IsConnected => _socket.Connected;
 
     private Socket _socket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-    private SslStream _sslStream = (SslStream) Stream.Null;
+    private SslStream _sslStream;
 
     public async Task<bool> EstablishConnection(string ipAddressStr = "")
     {
@@ -32,26 +33,18 @@ public class ServerConnection
         return isCompatible;
 	}
 
-    public async Task<CreateResponse> SendButWithStrongCoupling(Create request)
-    {
-		string json = JsonConvert.SerializeObject(request);
-		byte[] message = Encoding.UTF8.GetBytes(Create.Flag + json + "<EOF>");
-
-		_sslStream.Write(message);
-		_sslStream.Flush();
-
-		string messageReceived = await ReadMessage(_sslStream);
-        return JsonConvert.DeserializeObject<CreateResponse>(messageReceived);
-	}
-
-    public async Task<IRequest> SendMessage(IRequest request, Func<string, IRequest> callback)
+    // TODO - Rework responses, figure out error handling within response
+    public async Task<object?> SendMessage(IRequest request, Func<string, object?> callback)
 	{
 		string json = JsonConvert.SerializeObject(request);
-		byte[] message = Encoding.UTF8.GetBytes(Create.Flag + json + "<EOF>");
+        // TODO - Can we simplify the null-y bits at all?
+        string requestFlag = (string) request.GetType().GetProperty(nameof(IRequest.Flag))!.GetValue(null)!;
+		byte[] message = Encoding.UTF8.GetBytes(requestFlag + json + "<EOF>");
 
 		_sslStream.Write(message);
 		_sslStream.Flush();
 
+        // TODO - Handle no valid flag exists for and other errors resulting in disconnection
 		string messageReceived = await ReadMessage(_sslStream);
         return callback(messageReceived);
 	}
@@ -97,7 +90,7 @@ public class ServerConnection
     {
         try {
 			string messageReceived = await ReadMessage(_sslStream);
-			CompareVersion request = JsonConvert.DeserializeObject<CompareVersion>(messageReceived) ?? throw new Exception($"Server {nameof(CompareVersion)} request is malformed");
+			CompareVersion request = JsonConvert.DeserializeObject<CompareVersion>(messageReceived) ?? throw new Exception($"Malformed {nameof(CompareVersion)} request from server");
 
 			CompareVersion response = new()
 			{

@@ -7,7 +7,7 @@ using FinanceApp.Data.Requests.Transaction;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using NUnit.Framework;
-using Index = FinanceApp.Data.Requests.Transaction.Index;
+using GetPage = FinanceApp.Data.Requests.Transaction.GetPage;
 
 namespace FinanceApp.ServerTests;
 
@@ -39,7 +39,7 @@ public class TransactionTest
 
     private static readonly string MessageCreteRequest = $"{Create.Flag}{JsonConvert.SerializeObject(TestCreateRequest)}";
 
-    private static readonly Index TestIndexRequest = new()
+    private static readonly GetPage TestIndexRequest = new()
     {
         Page = new RequestField<long>
         {
@@ -47,7 +47,7 @@ public class TransactionTest
         }
     };
 
-    private static readonly string MessageIndexRequest = $"{Index.Flag}{JsonConvert.SerializeObject(TestIndexRequest)}";
+    private static readonly string MessageIndexRequest = $"{GetPage.Flag}{JsonConvert.SerializeObject(TestIndexRequest)}";
 
     private static readonly Counterparty SeedCounterparty1 = new() { Name = "John Doe" };
     private static readonly Counterparty SeedCounterparty2 = new() { Name = "Megumin" };
@@ -134,7 +134,7 @@ public class TransactionTest
         await request.Handle(_db, stream);
 
         string message = Encoding.UTF8.GetString(stream.ToArray()).Replace("<EOF>", "");
-        IndexResponse? result = JsonConvert.DeserializeObject<IndexResponse>(message);
+        GetPageResponse? result = JsonConvert.DeserializeObject<GetPageResponse>(message);
 
         Assert.True(result?.Success);
         Assert.AreEqual(SeedTransactions, result?.Transactions);

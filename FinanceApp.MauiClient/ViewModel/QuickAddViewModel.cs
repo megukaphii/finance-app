@@ -4,6 +4,7 @@ using FinanceApp.Data.Models;
 using FinanceApp.Data.RequestPatterns;
 using FinanceApp.Data.Requests.Transaction;
 using FinanceApp.MauiClient.Services;
+using Newtonsoft.Json;
 
 namespace FinanceApp.MauiClient.ViewModel;
 
@@ -13,7 +14,7 @@ public partial class QuickAddViewModel : BaseViewModel
 	private double _value;
 
 	[ObservableProperty]
-	private string _counterparty;
+	private string _counterparty = string.Empty;
 
 	public QuickAddViewModel(ServerConnection serverConnection) : base(serverConnection) { }
 
@@ -22,7 +23,7 @@ public partial class QuickAddViewModel : BaseViewModel
 	{
 		try {
 			IsBusy = true;
-			Create transaction = new()
+			Create request = new()
 			{
 				Value = new RequestField<double>
 				{
@@ -37,11 +38,9 @@ public partial class QuickAddViewModel : BaseViewModel
 				}
 			};
 
-			CreateResponse test = await _serverConnection.SendButWithStrongCoupling(transaction);
-			await Shell.Current.DisplayAlert("Created Transaction", $"Successfully created transaction {test}", "OK");
-
-			/*CreateResponse response = (CreateResponse) await _serverConnection.SendMessage(transaction, (message) => (IRequest) JsonConvert.DeserializeObject<CreateResponse>(message));
-			await Shell.Current.DisplayAlert("Created Transaction", $"Successfully created transaction {response}", "OK");*/
+			CreateResponse? response = (CreateResponse?) await _serverConnection.SendMessage(request, JsonConvert.DeserializeObject<CreateResponse>) ??
+				throw new Exception($"Malformed {nameof(CreateResponse)} from server");
+			await Shell.Current.DisplayAlert("Created Transaction", $"Successfully created transaction {response}", "OK");
 		} catch (Exception ex) {
 			await Shell.Current.DisplayAlert("Error", ex.Message + " | Inner exception: " + ex.InnerException?.Message, "OK");
 		} finally {

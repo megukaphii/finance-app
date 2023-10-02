@@ -8,7 +8,7 @@ using FinanceApp.Data.RequestPatterns;
 using FinanceApp.Data.Requests;
 using FinanceApp.Data.Requests.Transaction;
 using Newtonsoft.Json;
-using Index = FinanceApp.Data.Requests.Transaction.Index;
+using GetPage = FinanceApp.Data.Requests.Transaction.GetPage;
 
 namespace FinanceApp.Client.Classes;
 
@@ -97,7 +97,7 @@ public class FinanceClient : IClient
 						Console.WriteLine(response);
 					}
 				} else if (choice == 2) {
-					Index request = new()
+					GetPage request = new()
 					{
 						Page = new RequestField<long>
                         {
@@ -107,12 +107,12 @@ public class FinanceClient : IClient
 
 					string json = JsonConvert.SerializeObject(request);
 
-					byte[] message = Encoding.UTF8.GetBytes(Index.Flag + json + "<EOF>");
+					byte[] message = Encoding.UTF8.GetBytes(GetPage.Flag + json + "<EOF>");
 					sslStream.Write(message);
 					sslStream.Flush();
 
 					string messageReceived = await ReadMessage(sslStream);
-					IndexResponse? response = JsonConvert.DeserializeObject<IndexResponse>(messageReceived);
+					GetPageResponse? response = JsonConvert.DeserializeObject<GetPageResponse>(messageReceived);
 					Console.WriteLine(response);
 				}
 			}

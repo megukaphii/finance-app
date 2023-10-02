@@ -2,7 +2,7 @@
 
 namespace FinanceApp.Data.Requests.Transaction;
 
-public class IndexResponse
+public class GetPageResponse
 {
 	public required bool Success { get; init; }
 	public required List<Models.Transaction> Transactions { get; init; }

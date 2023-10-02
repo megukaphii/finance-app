@@ -5,9 +5,9 @@ using Newtonsoft.Json;
 
 namespace FinanceApp.Data.Requests.Transaction;
 
-public class Index : IPageNumber
+public class GetPage : IPageNumber
 {
-    public static string Flag => "<ViewTransactions>";
+    public static string Flag => "<GetPageTransactions>";
 
     public required RequestField<long> Page { get; init; }
 
@@ -25,7 +25,7 @@ public class Index : IPageNumber
 
     private async Task SendResponse(Stream stream, List<Models.Transaction> transactions)
     {
-        IndexResponse indexResponse = new()
+        GetPageResponse indexResponse = new()
         {
             Transactions = transactions,
             Success = true,
