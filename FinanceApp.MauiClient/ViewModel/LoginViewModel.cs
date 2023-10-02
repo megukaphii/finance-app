@@ -13,6 +13,18 @@ public partial class LoginViewModel : BaseViewModel
 	public LoginViewModel(ServerConnection serverConnection) : base(serverConnection) { }
 
 	[RelayCommand]
+	private void SetLocalIp()
+	{
+		IpAddress = "127.0.0.1";
+	}
+
+	[RelayCommand]
+	private void SetNasIp()
+	{
+		IpAddress = "macdonald9999.synology.me";
+	}
+
+	[RelayCommand]
 	private async Task EstablishConnection()
 	{
 		try {
