@@ -1,7 +1,6 @@
 ﻿using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
-using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using FinanceApp.Data;
@@ -17,7 +16,7 @@ public class FinanceServer : IServer
     private const int TimeoutInMs = 60000;
     private readonly Socket _listener = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
     private readonly X509Certificate _serverCertificate;
-    private readonly List<Socket> _sockets = new();
+    private readonly List<SocketStream> _clients = new();
     private readonly FinanceAppContext _db = new();
 
     private bool _isRunning;
@@ -36,7 +35,6 @@ public class FinanceServer : IServer
     public async Task Start()
     {
         await PerformMigrations();
-        LoadAssemblies();
 
         try {
             _listener.Listen(10);
@@ -52,21 +50,27 @@ public class FinanceServer : IServer
         } catch (Exception e) {
             Console.WriteLine($"[{e.GetType()}]: {e.Message}");
         }
-    }
+	}
 
-    private async Task HandleConnection(Socket socket)
+	private async Task PerformMigrations()
 	{
-		_sockets.Add(socket);
+		if ((await _db.Database.GetPendingMigrationsAsync()).Any()) {
+			await _db.Database.MigrateAsync();
+		}
+	}
+
+	private async Task HandleConnection(Socket socket)
+	{
+        SocketStream client = new() { Socket = socket, Stream = Stream.Null };
+        _clients.Add(client);
 		try {
             Console.WriteLine($"[{socket.GetIpStr()}] Connection found.");
             using SslStream sslStream = await EstablishSslStream(socket);
-            if (await IsClientCompatible(sslStream)) {
+            client.Stream = sslStream;
+            if (await IsClientCompatible(client)) {
                 while (_isRunning) {
-                    string strRequest = await ReadMessage(sslStream);
-                    if (strRequest.Length == 0) {
-                        await RemoveClient(socket);
-                        break;
-                    }
+                    string strRequest = await ReadMessage(client);
+                    if (strRequest.Equals(string.Empty)) break;
 
                     IRequest request = IRequest.GetRequest(strRequest);
                     if (request.IsValid()) {
@@ -76,31 +80,21 @@ public class FinanceServer : IServer
                     }
                 }
             } else {
-				await RemoveClient(socket);
+				await RemoveClient(client);
             }
         } catch (Exception e) {
 			Console.WriteLine($"[{socket.GetIpStr()}] {e}");
-			await RemoveClient(socket);
+			await RemoveClient(client);
 		}
 	}
-
-    private async Task PerformMigrations()
-    {
-        if ((await _db.Database.GetPendingMigrationsAsync()).Any()) {
-            await _db.Database.MigrateAsync();
-        }
-    }
-
-    private static void LoadAssemblies()
-    {
-        Assembly.Load("FinanceApp.Data");
-    }
 
     private async Task<SslStream> EstablishSslStream(Socket socket)
     {
         SslStream sslStream = GetSslStream(socket);
-        return await SetupSslStream(sslStream);
-    }
+        SslStream result = await SetupSslStream(sslStream);
+		Console.WriteLine($"[{socket.GetIpStr()}] SSL connection established.");
+        return result;
+	}
 
     private static SslStream GetSslStream(Socket socket)
     {
@@ -113,14 +107,10 @@ public class FinanceServer : IServer
         await sslStream.AuthenticateAsServerAsync(_serverCertificate, false, true);
         sslStream.ReadTimeout = TimeoutInMs;
         sslStream.WriteTimeout = TimeoutInMs;
-        Console.WriteLine("SSL connection established.");
-
-		DisplaySslInfo(sslStream);
-
 		return sslStream;
     }
 
-    private async Task<bool> IsClientCompatible(Stream stream)
+    private async Task<bool> IsClientCompatible(SocketStream client)
     {
         try {
             CompareVersion request = new()
@@ -130,10 +120,10 @@ public class FinanceServer : IServer
             string strRequest = JsonConvert.SerializeObject(request);
 
             byte[] message = Encoding.UTF8.GetBytes(strRequest + "<EOF>");
-            await stream.WriteAsync(message);
-            await stream.FlushAsync();
+            await client.Stream.WriteAsync(message);
+            await client.Stream.FlushAsync();
 
-            string messageReceived = await ReadMessage(stream);
+            string messageReceived = await ReadMessage(client);
             CompareVersion response = JsonConvert.DeserializeObject<CompareVersion>(messageReceived) ?? throw new Exception($"No {nameof(CompareVersion)} message received");
 
             if (response.SemanticVersion.IsCompatible(request.SemanticVersion)) {
@@ -146,29 +136,34 @@ public class FinanceServer : IServer
             Console.WriteLine($"Client did not send appropriate {nameof(CompareVersion)} request, disconnecting.");
             return false;
         }
-    }
+	}
 
-    private static async Task<string> ReadMessage(Stream stream)
-    {
-        byte[] buffer = new byte[2048];
-        StringBuilder messageData = new();
-        int bytes;
-        do {
-            bytes = await stream.ReadAsync(buffer, 0, buffer.Length);
+	private async Task<string> ReadMessage(SocketStream client)
+	{
+		byte[] buffer = new byte[2048];
+		StringBuilder messageData = new();
+		int bytes;
+		do {
+			bytes = await client.Stream.ReadAsync(buffer, 0, buffer.Length);
 
-            // TODO - Can we add a timeout or something? Because if a message has no <EOF> tag, the server will just hang here
-
-            Decoder decoder = Encoding.UTF8.GetDecoder();
-            char[] chars = new char[decoder.GetCharCount(buffer, 0, bytes)];
-            decoder.GetChars(buffer, 0, bytes, chars, 0);
-            messageData.Append(chars);
-            if (messageData.ToString().Contains("<EOF>")) {
+            if (bytes <= 0) {
+				await RemoveClient(client);
                 break;
             }
-        } while (bytes != 0);
 
-        return messageData.ToString().Replace("<EOF>", "");
-    }
+			// TODO - Can we add a timeout or something? Because if a message has no <EOF> tag, the server will just hang here
+
+			Decoder decoder = Encoding.UTF8.GetDecoder();
+			char[] chars = new char[decoder.GetCharCount(buffer, 0, bytes)];
+			decoder.GetChars(buffer, 0, bytes, chars, 0);
+			messageData.Append(chars);
+			if (messageData.ToString().Contains("<EOF>")) {
+				break;
+			}
+		} while (bytes != 0);
+
+		return messageData.ToString().Replace("<EOF>", "");
+	}
 
     private static async Task SendErrorResponse(Stream stream, IRequest validatedRequest)
     {
@@ -178,77 +173,20 @@ public class FinanceServer : IServer
         await stream.FlushAsync();
 	}
 
-	private async Task RemoveClient(Socket socket)
+	private async Task RemoveClient(SocketStream client)
 	{
-        string socketIp = socket.GetIpStr();
-        await socket.DisconnectAsync(false);
-		_sockets.Remove(socket);
-		Console.WriteLine($"[{socketIp}] Client connection closed.");
+        string clientIp = client.IPAddress;
+		await client.Socket.DisconnectAsync(false);
+        _clients.Remove(client);
+		Console.WriteLine($"[{clientIp}] Client connection closed.");
 	}
 
     private async Task Close()
     {
-        foreach (Socket socket in _sockets) {
-            await socket.DisconnectAsync(false);
+        foreach (SocketStream client in _clients) {
+            await client.Socket.DisconnectAsync(false);
         }
 
-        _sockets.Clear();
-    }
-
-    static void DisplaySslInfo(SslStream stream)
-    {
-		Console.WriteLine("------START OF SSL INFO--------");
-		DisplaySecurityLevel(stream);
-		DisplaySecurityServices(stream);
-		DisplayStreamProperties(stream);
-        DisplayCertificateInformation(stream);
-		Console.WriteLine("------END OF SSL INFO--------");
-	}
-
-    static void DisplaySecurityLevel(SslStream stream)
-    {
-        Console.WriteLine("Cipher: {0} strength {1}", stream.CipherAlgorithm, stream.CipherStrength);
-        Console.WriteLine("Hash: {0} strength {1}", stream.HashAlgorithm, stream.HashStrength);
-        Console.WriteLine("Key exchange: {0} strength {1}", stream.KeyExchangeAlgorithm, stream.KeyExchangeStrength);
-        Console.WriteLine("Protocol: {0}", stream.SslProtocol);
-    }
-
-    static void DisplaySecurityServices(SslStream stream)
-    {
-        Console.WriteLine("Is authenticated: {0} as server? {1}", stream.IsAuthenticated, stream.IsServer);
-        Console.WriteLine("IsSigned: {0}", stream.IsSigned);
-        Console.WriteLine("Is Encrypted: {0}", stream.IsEncrypted);
-    }
-
-    static void DisplayStreamProperties(SslStream stream)
-    {
-        Console.WriteLine("Can read: {0}, write {1}", stream.CanRead, stream.CanWrite);
-        Console.WriteLine("Can timeout: {0}", stream.CanTimeout);
-    }
-
-    static void DisplayCertificateInformation(SslStream stream)
-    {
-        Console.WriteLine("Certificate revocation list checked: {0}", stream.CheckCertRevocationStatus);
-
-        X509Certificate? localCertificate = stream.LocalCertificate;
-        if (localCertificate is not null) {
-            Console.WriteLine("Local cert was issued to {0} and is valid from {1} until {2}.",
-                localCertificate.Subject,
-                localCertificate.GetEffectiveDateString(),
-                localCertificate.GetExpirationDateString());
-        } else {
-            Console.WriteLine("Local certificate is null.");
-        }
-
-        // Display the properties of the client's certificate.
-        X509Certificate? remoteCertificate = stream.RemoteCertificate;
-        if (remoteCertificate is not null) {
-            Console.WriteLine("Remote cert was issued to {0} and is valid from {1} until {2}.",
-                remoteCertificate.Subject,
-                remoteCertificate.GetEffectiveDateString(),
-                remoteCertificate.GetExpirationDateString());
-        } else {
-            Console.WriteLine("Remote certificate is null.");
-        }
+        _clients.Clear();
     }
 }
