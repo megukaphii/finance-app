@@ -63,6 +63,10 @@ public class FinanceServer : IServer
             if (await IsClientCompatible(sslStream)) {
                 while (_isRunning) {
                     string strRequest = await ReadMessage(sslStream);
+                    if (strRequest.Length == 0) {
+                        await RemoveClient(socket);
+                        break;
+                    }
 
                     IRequest request = IRequest.GetRequest(strRequest);
                     if (request.IsValid()) {
@@ -152,7 +156,7 @@ public class FinanceServer : IServer
         do {
             bytes = await stream.ReadAsync(buffer, 0, buffer.Length);
 
-            // TODO - Deal with unexpected disconnection?
+            // TODO - Can we add a timeout or something? Because if a message has no <EOF> tag, the server will just hang here
 
             Decoder decoder = Encoding.UTF8.GetDecoder();
             char[] chars = new char[decoder.GetCharCount(buffer, 0, bytes)];
