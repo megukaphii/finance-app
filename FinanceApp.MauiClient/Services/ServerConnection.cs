@@ -26,6 +26,8 @@ public class ServerConnection
         await ConnectToIP(ipAddressStr);
         await EstablishStream();
         bool isCompatible = await IsServerCompatible();
+        // TODO - Doesn't seem to actually wait for this? Should be more obvious in UI if it is waiting.
+        // Introduce delay in FinanceServer.ReadMessage() to test this properly (or I guess in the compatible test thing server-side)
         if (!isCompatible) {
             await _socket.DisconnectAsync(false);
 			_socket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);

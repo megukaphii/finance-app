@@ -14,7 +14,8 @@ namespace FinanceApp.Server.Classes;
 
 public class FinanceServer : IServer
 {
-    private const int TimeoutInMs = 60000;
+    private const int READ_TIMEOUT = 10000;
+
     private readonly Socket _listener = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
     private readonly X509Certificate _serverCertificate;
     private readonly List<SocketStream> _clients = new();
@@ -82,36 +83,24 @@ public class FinanceServer : IServer
                         await SendErrorResponse(sslStream, request);
                     }
                 }
-            } else {
-				await RemoveClient(client);
             }
-        } catch (Exception e) {
+        } catch (OperationCanceledException) {
+			Console.WriteLine($"[{socket.GetIpStr()}] Client timed out.");
+		} catch (Exception e) {
 			Console.WriteLine($"[{socket.GetIpStr()}] {e}");
-			await RemoveClient(client);
-		}
+		} finally {
+            await RemoveClient(client);
+        }
 	}
 
     private async Task<SslStream> EstablishSslStream(Socket socket)
     {
-        SslStream sslStream = GetSslStream(socket);
-        SslStream result = await SetupSslStream(sslStream);
-		Console.WriteLine($"[{socket.GetIpStr()}] SSL connection established.");
-        return result;
-	}
-
-    private static SslStream GetSslStream(Socket socket)
-    {
         NetworkStream networkStream = new(socket);
-        return new SslStream(networkStream, false);
-    }
-
-    private async Task<SslStream> SetupSslStream(SslStream sslStream)
-    {
-        await sslStream.AuthenticateAsServerAsync(_serverCertificate, false, true);
-        sslStream.ReadTimeout = TimeoutInMs;
-        sslStream.WriteTimeout = TimeoutInMs;
-		return sslStream;
-    }
+        SslStream sslStream = new(networkStream, false);
+		await sslStream.AuthenticateAsServerAsync(_serverCertificate, false, true);
+		Console.WriteLine($"[{socket.GetIpStr()}] SSL connection established.");
+        return sslStream;
+	}
 
     private async Task<bool> IsClientCompatible(SocketStream client)
     {
@@ -145,27 +134,41 @@ public class FinanceServer : IServer
 	{
 		byte[] buffer = new byte[2048];
 		StringBuilder messageData = new();
+        CancellationTokenSource source = new();
+        bool readFirstBlock = false;
 		int bytes;
 		do {
-			bytes = await client.Stream.ReadAsync(buffer, 0, buffer.Length);
+            if (readFirstBlock)
+                source.CancelAfter(READ_TIMEOUT);
 
-            if (bytes <= 0) {
+			bytes = await client.Stream.ReadAsync(buffer, source.Token);
+            readFirstBlock = true;
+
+			if (bytes <= 0) {
+                Console.WriteLine($"[{client.IPAddress}] Client disconnected.");
 				await RemoveClient(client);
                 break;
             }
 
-			// TODO - Can we add a timeout or something? Because if a message has no <EOF> tag, the server will just hang here
-
-			Decoder decoder = Encoding.UTF8.GetDecoder();
-			char[] chars = new char[decoder.GetCharCount(buffer, 0, bytes)];
-			decoder.GetChars(buffer, 0, bytes, chars, 0);
-			messageData.Append(chars);
+			messageData.Append(DecodeBuffer(buffer, bytes));
 			if (messageData.ToString().Contains("<EOF>")) {
 				break;
-			}
+			} else {
+                source.Dispose();
+                source = new();
+            }
 		} while (bytes != 0);
 
+        source.Dispose();
 		return messageData.ToString().Replace("<EOF>", "");
+	}
+
+    private static char[] DecodeBuffer(byte[] buffer, int bytes)
+    {
+		Decoder decoder = Encoding.UTF8.GetDecoder();
+		char[] chars = new char[decoder.GetCharCount(buffer, 0, bytes)];
+		decoder.GetChars(buffer, 0, bytes, chars, 0);
+        return chars;
 	}
 
     private static async Task SendErrorResponse(Stream stream, IRequest validatedRequest)
