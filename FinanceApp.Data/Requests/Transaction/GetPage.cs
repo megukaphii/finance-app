@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using FinanceApp.Data.RequestPatterns;
+using FinanceApp.Data.Utility;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
@@ -16,14 +17,14 @@ public class GetPage : IPageNumber
         return $"{Flag}: {nameof(Page)}: {Page}";
     }
 
-    public async Task Handle(FinanceAppContext database, Stream stream)
+    public async Task Handle(FinanceAppContext database, SocketStream client)
     {
         List<Models.Transaction> transactions =
             await database.Transactions.Include(transaction => transaction.Counterparty).ToListAsync();
-        await SendResponse(stream, transactions);
+        await SendResponse(client, transactions);
     }
 
-    private async Task SendResponse(Stream stream, List<Models.Transaction> transactions)
+    private async Task SendResponse(SocketStream client, List<Models.Transaction> transactions)
     {
         GetPageResponse indexResponse = new()
         {
@@ -39,7 +40,7 @@ public class GetPage : IPageNumber
         );
 
         byte[] message = Encoding.UTF8.GetBytes(strResponse + "<EOF>");
-        await stream.WriteAsync(message);
-        await stream.FlushAsync();
+        await client.Stream.WriteAsync(message);
+        await client.Stream.FlushAsync();
     }
 }

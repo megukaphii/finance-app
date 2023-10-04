@@ -6,6 +6,7 @@ using System.Text;
 using FinanceApp.Data;
 using FinanceApp.Data.Interfaces;
 using FinanceApp.Data.Requests;
+using FinanceApp.Data.Utility;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
@@ -43,8 +44,10 @@ public class FinanceServer : IServer
 
             while (_isRunning) {
                 Socket handle = await _listener.AcceptAsync();
-                HandleConnection(handle);
-            }
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+				HandleConnection(handle);
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+			}
 
             await Close();
         } catch (Exception e) {
@@ -74,7 +77,7 @@ public class FinanceServer : IServer
 
                     IRequest request = IRequest.GetRequest(strRequest);
                     if (request.IsValid()) {
-                        await request.Handle(_db, sslStream);
+                        await request.Handle(_db, client);
                     } else {
                         await SendErrorResponse(sslStream, request);
                     }

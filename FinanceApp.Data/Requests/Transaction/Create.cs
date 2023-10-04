@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using FinanceApp.Data.Models;
 using FinanceApp.Data.RequestPatterns;
+using FinanceApp.Data.Utility;
 
 namespace FinanceApp.Data.Requests.Transaction;
 
@@ -8,7 +9,6 @@ public class Create : ISingleTransaction
 {
     public static string Flag => "<CreateTransaction>";
 
-    // TODO - Replace fields with single Transaction field?
     public required RequestField<double> Value { get; init; }
     public required RequestField<Counterparty> Counterparty { get; init; }
 
@@ -17,7 +17,7 @@ public class Create : ISingleTransaction
         return $"{Flag}: [{nameof(Value)}: {Value}], [{nameof(Counterparty)}: {Counterparty}]";
     }
 
-    public async Task Handle(FinanceAppContext database, Stream stream)
+    public async Task Handle(FinanceAppContext database, SocketStream client)
     {
         Console.WriteLine(this);
 
@@ -33,19 +33,20 @@ public class Create : ISingleTransaction
         await database.Transactions.AddAsync(created);
         await database.SaveChangesAsync();
 
-        await SendResponse(stream, created);
+        await SendResponse(client, created);
     }
 
-    private async Task SendResponse(Stream stream, Models.Transaction transaction)
+    private async Task SendResponse(SocketStream client, Models.Transaction transaction)
     {
         CreateResponse response = new() {
             Id = transaction.Id,
             Success = true
         };
+        // TODO - Extract the following 4 lines into a service or something?
         string strResponse = Newtonsoft.Json.JsonConvert.SerializeObject(response);
 
         byte[] message = Encoding.UTF8.GetBytes(strResponse + "<EOF>");
-        await stream.WriteAsync(message);
-        await stream.FlushAsync();
+        await client.Stream.WriteAsync(message);
+        await client.Stream.FlushAsync();
     }
 }

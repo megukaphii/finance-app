@@ -5,7 +5,6 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using FinanceApp.Data.Models;
 using FinanceApp.Data.RequestPatterns;
-using FinanceApp.Data.Requests;
 using FinanceApp.Data.Requests.Transaction;
 using Newtonsoft.Json;
 using GetPage = FinanceApp.Data.Requests.Transaction.GetPage;

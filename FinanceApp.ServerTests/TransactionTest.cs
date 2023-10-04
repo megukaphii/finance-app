@@ -1,9 +1,11 @@
+using System.Net.Sockets;
 using System.Text;
 using FinanceApp.Data;
 using FinanceApp.Data.Interfaces;
 using FinanceApp.Data.Models;
 using FinanceApp.Data.RequestPatterns;
 using FinanceApp.Data.Requests.Transaction;
+using FinanceApp.Data.Utility;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using NUnit.Framework;
@@ -14,7 +16,8 @@ namespace FinanceApp.ServerTests;
 [TestFixture]
 public class TransactionTest
 {
-    private readonly FinanceAppContext _db = new();
+	private static readonly FinanceAppContext _db = new();
+	private static readonly Socket EmptySocket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
     private static readonly Transaction TestTransaction = new()
     {
@@ -94,7 +97,8 @@ public class TransactionTest
         IRequest request = IRequest.GetRequest(MessageCreteRequest);
         byte[] buffer = new byte[2048];
         MemoryStream stream = new(buffer);
-        await request.Handle(_db, stream);
+        SocketStream client = new SocketStream() { Socket = EmptySocket, Stream =  stream };
+        await request.Handle(_db, client);
 
         Transaction? result = await _db.Transactions
             .Include(transaction => transaction.Counterparty)
@@ -110,9 +114,10 @@ public class TransactionTest
         IRequest request = IRequest.GetRequest(MessageCreteRequest);
         byte[] buffer = new byte[2048];
         MemoryStream stream = new(buffer);
-        await request.Handle(_db, stream);
+		SocketStream client = new SocketStream() { Socket = EmptySocket, Stream = stream };
+		await request.Handle(_db, client);
 
-        CreateResponse expected = new()
+		CreateResponse expected = new()
         {
             Id = 1,
             Success = true
@@ -131,9 +136,10 @@ public class TransactionTest
         IRequest request = IRequest.GetRequest(MessageIndexRequest);
         byte[] buffer = new byte[2048];
         MemoryStream stream = new(buffer);
-        await request.Handle(_db, stream);
+		SocketStream client = new SocketStream() { Socket = EmptySocket, Stream = stream };
+		await request.Handle(_db, client);
 
-        string message = Encoding.UTF8.GetString(stream.ToArray()).Replace("<EOF>", "");
+		string message = Encoding.UTF8.GetString(stream.ToArray()).Replace("<EOF>", "");
         GetPageResponse? result = JsonConvert.DeserializeObject<GetPageResponse>(message);
 
         Assert.True(result?.Success);

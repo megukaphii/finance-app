@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using FinanceApp.Data.Utility;
 using Newtonsoft.Json;
 
 namespace FinanceApp.Data.Interfaces;
@@ -15,7 +16,7 @@ public interface IRequest
 
         public InvalidRequest(Exception exception) => Exception = exception;
 
-		public Task Handle(FinanceAppContext database, Stream stream)
+		public Task Handle(FinanceAppContext database, SocketStream client)
 		{
 			throw new NotImplementedException();
 		}
@@ -80,5 +81,5 @@ public interface IRequest
         }
     }
 
-    public Task Handle(FinanceAppContext database, Stream stream);
+    public Task Handle(FinanceAppContext database, SocketStream client);
 }
