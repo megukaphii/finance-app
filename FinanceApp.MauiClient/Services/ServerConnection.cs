@@ -16,14 +16,8 @@ public class ServerConnection
 
     public bool IsConnected => _socket.Connected;
 
-    private readonly SslStream _sslStream;
+    private SslStream? _sslStream;
     private Socket _socket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
-    public ServerConnection()
-    {
-        NetworkStream networkStream = new(_socket);
-        _sslStream = new SslStream(networkStream, false, ValidateServerCertificate, null);
-    }
 
     public async Task<bool> EstablishConnection(string ipAddressStr = "")
     {
@@ -46,6 +40,9 @@ public class ServerConnection
 	{
         string json = JsonSerializer.Serialize(request);
 		byte[] message = Encoding.UTF8.GetBytes(TRequest.Flag + json + "<EOF>");
+        
+        if (_sslStream == null) throw new InvalidOperationException("Cannot send a message without a valid SSL stream.");
+
 		_sslStream.Write(message);
 		_sslStream.Flush();
 
@@ -71,6 +68,9 @@ public class ServerConnection
 
     private async Task EstablishStreamAsync()
     {
+        NetworkStream networkStream = new(_socket);
+        _sslStream = new SslStream(networkStream, false, ValidateServerCertificate, null);
+
         await _sslStream.AuthenticateAsClientAsync("CoryMacdonald");
     }
 
@@ -93,6 +93,8 @@ public class ServerConnection
     private async Task<bool> IsServerCompatible()
     {
         try {
+			if (_sslStream == null) throw new InvalidOperationException("Cannot send a message without a valid SSL stream.");
+
 			string messageReceived = await ReadMessageAsync(_sslStream);
             CompareVersion request = JsonSerializer.Deserialize<CompareVersion>(messageReceived) ?? throw new Exception($"Malformed {nameof(CompareVersion)} request from server");
 
