@@ -5,8 +5,6 @@ VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FinanceApp.Server", "FinanceApp.Server\FinanceApp.Server.csproj", "{E259D224-F939-4E95-A6A0-A12FD18A4B02}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FinanceApp.Client", "FinanceApp.Client\FinanceApp.Client.csproj", "{F0180038-AEF7-4711-A2F2-108E9511CDE5}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FinanceApp.ServerTests", "FinanceApp.ServerTests\FinanceApp.ServerTests.csproj", "{30DC7D73-9832-4D56-8A7B-F81378620821}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FinanceApp.Data", "FinanceApp.Data\FinanceApp.Data.csproj", "{51B848D5-ED0E-4433-8758-14B881F10B18}"
