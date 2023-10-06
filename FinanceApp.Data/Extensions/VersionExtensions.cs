@@ -1,4 +1,6 @@
-﻿public static class VersionExtensions
+﻿namespace FinanceApp.Data.Extensions;
+
+public static class VersionExtensions
 {
 	public static bool IsCompatible(this Version version, Version other)
 	{

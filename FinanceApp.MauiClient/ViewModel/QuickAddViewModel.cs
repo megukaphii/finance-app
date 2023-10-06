@@ -4,7 +4,6 @@ using FinanceApp.Data.Models;
 using FinanceApp.Data.RequestPatterns;
 using FinanceApp.Data.Requests.Transaction;
 using FinanceApp.MauiClient.Services;
-using Newtonsoft.Json;
 
 namespace FinanceApp.MauiClient.ViewModel;
 
@@ -38,8 +37,7 @@ public partial class QuickAddViewModel : BaseViewModel
 				}
 			};
 
-			CreateResponse? response = (CreateResponse?) await _serverConnection.SendMessage(request, JsonConvert.DeserializeObject<CreateResponse>) ??
-				throw new Exception($"Malformed {nameof(CreateResponse)} from server");
+			CreateResponse response = await _serverConnection.SendMessageAsync<Create, CreateResponse>(request);
 			await Shell.Current.DisplayAlert("Created Transaction", $"Successfully created transaction {response}", "OK");
 		} catch (Exception ex) {
 			await Shell.Current.DisplayAlert("Error", ex.Message + " | Inner exception: " + ex.InnerException?.Message, "OK");

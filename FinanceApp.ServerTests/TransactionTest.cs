@@ -7,7 +7,7 @@ using FinanceApp.Data.RequestPatterns;
 using FinanceApp.Data.Requests.Transaction;
 using FinanceApp.Data.Utility;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
+using System.Text.Json;
 using NUnit.Framework;
 using GetPage = FinanceApp.Data.Requests.Transaction.GetPage;
 
@@ -40,7 +40,7 @@ public class TransactionTest
         }
     };
 
-    private static readonly string MessageCreteRequest = $"{Create.Flag}{JsonConvert.SerializeObject(TestCreateRequest)}";
+	private static readonly string MessageCreteRequest = $"{Create.Flag}{JsonSerializer.Serialize(TestCreateRequest)}";
 
     private static readonly GetPage TestIndexRequest = new()
     {
@@ -50,7 +50,7 @@ public class TransactionTest
         }
     };
 
-    private static readonly string MessageIndexRequest = $"{GetPage.Flag}{JsonConvert.SerializeObject(TestIndexRequest)}";
+	private static readonly string MessageIndexRequest = $"{GetPage.Flag}{JsonSerializer.Serialize(TestIndexRequest)}";
 
     private static readonly Counterparty SeedCounterparty1 = new() { Name = "John Doe" };
     private static readonly Counterparty SeedCounterparty2 = new() { Name = "Megumin" };
@@ -98,7 +98,7 @@ public class TransactionTest
         byte[] buffer = new byte[2048];
         MemoryStream stream = new(buffer);
         SocketStream client = new SocketStream() { Socket = EmptySocket, Stream =  stream };
-        await request.Handle(_db, client);
+        await request.HandleAsync(_db, client);
 
         Transaction? result = await _db.Transactions
             .Include(transaction => transaction.Counterparty)
@@ -114,16 +114,17 @@ public class TransactionTest
         IRequest request = IRequest.GetRequest(MessageCreteRequest);
         byte[] buffer = new byte[2048];
         MemoryStream stream = new(buffer);
-		SocketStream client = new SocketStream() { Socket = EmptySocket, Stream = stream };
-		await request.Handle(_db, client);
+		SocketStream client = new() { Socket = EmptySocket, Stream = stream };
+		await request.HandleAsync(_db, client);
 
 		CreateResponse expected = new()
         {
             Id = 1,
             Success = true
         };
-        string message = Encoding.UTF8.GetString(stream.ToArray()).Replace("<EOF>", "");
-        CreateResponse? result = JsonConvert.DeserializeObject<CreateResponse>(message);
+        string message = Encoding.UTF8.GetString(stream.ToArray());
+		message = Helpers.RemoveFromEof(message);
+		CreateResponse? result = JsonSerializer.Deserialize<CreateResponse>(message);
 
         Assert.AreEqual(expected, result);
     }
@@ -136,11 +137,12 @@ public class TransactionTest
         IRequest request = IRequest.GetRequest(MessageIndexRequest);
         byte[] buffer = new byte[2048];
         MemoryStream stream = new(buffer);
-		SocketStream client = new SocketStream() { Socket = EmptySocket, Stream = stream };
-		await request.Handle(_db, client);
+		SocketStream client = new() { Socket = EmptySocket, Stream = stream };
+		await request.HandleAsync(_db, client);
 
-		string message = Encoding.UTF8.GetString(stream.ToArray()).Replace("<EOF>", "");
-        GetPageResponse? result = JsonConvert.DeserializeObject<GetPageResponse>(message);
+		string message = Encoding.UTF8.GetString(stream.ToArray());
+        message = Helpers.RemoveFromEof(message);
+		GetPageResponse? result = JsonSerializer.Deserialize<GetPageResponse>(message);
 
         Assert.True(result?.Success);
         Assert.AreEqual(SeedTransactions, result?.Transactions);

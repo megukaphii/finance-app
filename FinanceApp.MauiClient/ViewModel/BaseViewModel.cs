@@ -12,7 +12,7 @@ public partial class BaseViewModel(ServerConnection serverConnection) : Observab
 	[NotifyPropertyChangedFor(nameof(IsNotBusy))]
 	private bool _isBusy;
 	[ObservableProperty]
-	private string _title;
+	private string _title = string.Empty;
 
 	public bool IsNotBusy => !IsBusy;
 	public bool IsNotConnected => !IsConnected;

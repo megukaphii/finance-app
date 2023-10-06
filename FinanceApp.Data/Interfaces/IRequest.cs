@@ -1,58 +1,59 @@
 ﻿using System.Reflection;
 using FinanceApp.Data.Utility;
-using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace FinanceApp.Data.Interfaces;
 
 public interface IRequest
 {
-    private static IEnumerable<Type> _requestTypes = Array.Empty<Type>();
-    public static readonly string Flag = string.Empty;
-    public static readonly Type? Validator = null;
+    private static List<Type> RequestTypes { get; } = new();
+    public static virtual string Flag { get; } = string.Empty;
+    public static virtual Type? Validator { get; } = null;
 
 	private class InvalidRequest : IRequest
 	{
         public Exception Exception { get; }
 
-        public InvalidRequest(Exception exception) => Exception = exception;
+		public static string Flag => throw new NotImplementedException();
+        public static Type? Validator => throw new NotImplementedException();
 
-		public Task Handle(FinanceAppContext database, SocketStream client)
+		public InvalidRequest(Exception exception) => Exception = exception;
+
+		public Task HandleAsync(FinanceAppContext database, SocketStream client)
 		{
 			throw new NotImplementedException();
 		}
 	}
 
-	public bool IsValid()
+	public static bool IsValid<TRequest>(TRequest request) where TRequest : IRequest
     {
-        if (this is InvalidRequest) return false;
+        if (typeof(TRequest) == typeof(InvalidRequest)) return false;
 
-        if (Validator is null) return true;
+        if (TRequest.Validator is null) return true;
 
-        if (Validator.BaseType == typeof(IValidator)) {
-            IValidator validator = (IValidator)Activator.CreateInstance(Validator)!;
-            return validator.Validate(this);
+        if (TRequest.Validator.BaseType == typeof(IValidator)) {
+            IValidator validator = (IValidator)Activator.CreateInstance(TRequest.Validator)!;
+            return validator.Validate(request);
         }
 
         throw new Exception(
-            $"Validator {Validator.Name} for {GetType().Name} is not a child of {nameof(IValidator)}.");
+            $"Validator {TRequest.Validator.Name} for {typeof(TRequest).Name} is not a child of {nameof(IValidator)}.");
     }
 
     public static IRequest GetRequest(string message)
     {
         CacheRequestTypes();
 
-        foreach (Type t in _requestTypes) {
+        foreach (Type t in RequestTypes) {
             PropertyInfo? property = t.GetProperty(nameof(Flag));
             string flag = (string)property?.GetValue(null)!;
             if (flag != string.Empty && message.StartsWith(flag)) {
                 try
                 {
-                    IRequest? request = (IRequest)JsonConvert.DeserializeObject(message.Replace(flag, ""), t)!;
-                    if (request is null) {
+                    IRequest? request = (IRequest?) JsonSerializer.Deserialize(message.Replace(flag, ""), t) ??
                         throw new Exception($"Message {message} does not contain valid {t.Name} properties");
-                    }
 
-                    return request;
+					return request;
                 }
                 catch (Exception e)
                 {
@@ -66,8 +67,8 @@ public interface IRequest
 
     private static void CacheRequestTypes()
     {
-        if (_requestTypes == Array.Empty<Type>()) {
-            _requestTypes = AppDomain.CurrentDomain.GetAssemblies()
+        if (RequestTypes.Count == 0) {
+            RequestTypes.AddRange(AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(assembly => assembly.GetTypes())
                 .Where(t =>
                 {
@@ -77,9 +78,9 @@ public interface IRequest
                     return typeof(IRequest).IsAssignableFrom(t) &&
                            t != typeof(IRequest) &&
                            !immediateInterfaces.Contains(typeof(IRequest));
-                });
+                }));
         }
     }
 
-    public Task Handle(FinanceAppContext database, SocketStream client);
+    public Task HandleAsync(FinanceAppContext database, SocketStream client);
 }

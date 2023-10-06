@@ -1,13 +1,13 @@
 ﻿using FinanceApp.Data.Interfaces;
 using FinanceApp.Data.Requests;
-using FinanceApp.Data.Requests.Transaction;
-using Newtonsoft.Json;
+using FinanceApp.Data.Extensions;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
-using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Text.Json;
+using FinanceApp.Data.Requests.Transaction;
 
 namespace FinanceApp.MauiClient.Services;
 public class ServerConnection
@@ -16,15 +16,21 @@ public class ServerConnection
 
     public bool IsConnected => _socket.Connected;
 
+    private readonly SslStream _sslStream;
     private Socket _socket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-    private SslStream _sslStream;
+
+    public ServerConnection()
+    {
+        NetworkStream networkStream = new(_socket);
+        _sslStream = new SslStream(networkStream, false, ValidateServerCertificate, null);
+    }
 
     public async Task<bool> EstablishConnection(string ipAddressStr = "")
     {
         if (string.IsNullOrEmpty(ipAddressStr)) ipAddressStr = DEFAULT_ADDRESS;
 
-        await ConnectToIP(ipAddressStr);
-        await EstablishStream();
+        await ConnectToIPAsync(ipAddressStr);
+        await EstablishStreamAsync();
         bool isCompatible = await IsServerCompatible();
         // TODO - Doesn't seem to actually wait for this? Should be more obvious in UI if it is waiting.
         // Introduce delay in FinanceServer.ReadMessage() to test this properly (or I guess in the compatible test thing server-side)
@@ -36,28 +42,26 @@ public class ServerConnection
 	}
 
     // TODO - Rework responses, figure out error handling within response
-    public async Task<object?> SendMessage(IRequest request, Func<string, object?> callback)
+    public async Task<TResponse> SendMessageAsync<TRequest, TResponse>(TRequest request) where TRequest : IRequest
 	{
-		string json = JsonConvert.SerializeObject(request);
-        // TODO - Can we simplify the null-y bits at all?
-        string requestFlag = (string) request.GetType().GetProperty(nameof(IRequest.Flag))!.GetValue(null)!;
-		byte[] message = Encoding.UTF8.GetBytes(requestFlag + json + "<EOF>");
-
+        string json = JsonSerializer.Serialize(request);
+		byte[] message = Encoding.UTF8.GetBytes(TRequest.Flag + json + "<EOF>");
 		_sslStream.Write(message);
 		_sslStream.Flush();
 
         // TODO - Handle no valid flag exists for and other errors resulting in disconnection
-		string messageReceived = await ReadMessage(_sslStream);
-        return callback(messageReceived);
+		string messageReceived = await ReadMessageAsync(_sslStream);
+        return JsonSerializer.Deserialize<TResponse>(messageReceived) ??
+            throw new Exception($"Malformed {nameof(CreateResponse)} from server");
 	}
 
-    public async Task Disconnect()
+    public async Task DisconnectAsync()
     {
         await _socket.DisconnectAsync(false);
         _socket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 	}
 
-    private async Task ConnectToIP(string ipAddressStr)
+    private async Task ConnectToIPAsync(string ipAddressStr)
     {
         IPHostEntry hostEntry = await Dns.GetHostEntryAsync(ipAddressStr);
         IPAddress ip = hostEntry.AddressList[0] ?? throw new Exception($"Unable to find IP address for {ipAddressStr}");
@@ -65,10 +69,8 @@ public class ServerConnection
         await _socket.ConnectAsync(ipEndPoint);
     }
 
-    private async Task EstablishStream()
+    private async Task EstablishStreamAsync()
     {
-        NetworkStream networkStream = new(_socket);
-        _sslStream = new SslStream(networkStream, false, ValidateServerCertificate, null);
         await _sslStream.AuthenticateAsClientAsync("CoryMacdonald");
     }
 
@@ -91,15 +93,15 @@ public class ServerConnection
     private async Task<bool> IsServerCompatible()
     {
         try {
-			string messageReceived = await ReadMessage(_sslStream);
-			CompareVersion request = JsonConvert.DeserializeObject<CompareVersion>(messageReceived) ?? throw new Exception($"Malformed {nameof(CompareVersion)} request from server");
+			string messageReceived = await ReadMessageAsync(_sslStream);
+            CompareVersion request = JsonSerializer.Deserialize<CompareVersion>(messageReceived) ?? throw new Exception($"Malformed {nameof(CompareVersion)} request from server");
 
 			CompareVersion response = new()
 			{
 				SemanticVersion = AppInfo.Version
 			};
-			string strRequest = JsonConvert.SerializeObject(response);
 
+            string strRequest = JsonSerializer.Serialize(response);
 			byte[] message = Encoding.UTF8.GetBytes(strRequest + "<EOF>");
 			await _sslStream.WriteAsync(message);
 			await _sslStream.FlushAsync();
@@ -210,7 +212,7 @@ public class ServerConnection
         }
     }
 
-    private static async Task<string> ReadMessage(Stream stream)
+    private static async Task<string> ReadMessageAsync(Stream stream)
     {
         byte[] buffer = new byte[2048];
         StringBuilder messageData = new();

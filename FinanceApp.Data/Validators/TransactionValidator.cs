@@ -1,5 +1,7 @@
 ﻿using FinanceApp.Data.Interfaces;
+using FinanceApp.Data.Models;
 using FinanceApp.Data.RequestPatterns;
+using FinanceApp.Data.Extensions;
 
 namespace FinanceApp.Data.Validators;
 
@@ -7,8 +9,7 @@ public class TransactionValidator : IValidator
 {
     private const double MinValue = double.MinValue;
     private const double MaxValue = double.MaxValue;
-    // TODO - Get max length from Counterparty directly via reflection
-    private const int MaxCounterpartyNameLength = 255;
+    private static readonly int MaxCounterpartyNameLength = Helpers.GetPropertyMaxLength((Counterparty c) => c.Name);
 
     public bool Validate(IRequest request)
     {

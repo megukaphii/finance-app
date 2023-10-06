@@ -4,7 +4,7 @@ using FinanceApp.Data.RequestPatterns;
 using FinanceApp.Data.Requests.Transaction;
 using FinanceApp.Data.Validators;
 using NUnit.Framework;
-using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace FinanceApp.ServerTests;
 
@@ -25,7 +25,7 @@ public class RequestTest
             }
         }
     };
-    private static readonly string Message = $"<CreateTransaction>{JsonConvert.SerializeObject(TestRequest)}";
+	private static readonly string Message = $"<CreateTransaction>{JsonSerializer.Serialize(TestRequest)}";
 
     [Test]
     public void GetRequest()
@@ -40,7 +40,7 @@ public class RequestTest
     {
         IRequest request = IRequest.GetRequest(Message);
 
-        Assert.DoesNotThrow(() => request.IsValid());
+        Assert.DoesNotThrow(() => IRequest.IsValid(request));
         Assert.IsTrue(request is ISingleTransaction);
         Assert.AreEqual(typeof(TransactionValidator), ISingleTransaction.Validator);
     }

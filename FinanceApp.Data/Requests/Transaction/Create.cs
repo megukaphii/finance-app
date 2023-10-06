@@ -1,23 +1,27 @@
-﻿using System.Text;
-using FinanceApp.Data.Models;
+﻿using FinanceApp.Data.Models;
 using FinanceApp.Data.RequestPatterns;
 using FinanceApp.Data.Utility;
+using FinanceApp.Data.Validators;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace FinanceApp.Data.Requests.Transaction;
 
 public class Create : ISingleTransaction
 {
     public static string Flag => "<CreateTransaction>";
+    public static Type? Validator { get; set; } = typeof(TransactionValidator);
 
     public required RequestField<double> Value { get; init; }
     public required RequestField<Counterparty> Counterparty { get; init; }
 
-    public override string ToString()
+	public override string ToString()
     {
         return $"{Flag}: [{nameof(Value)}: {Value}], [{nameof(Counterparty)}: {Counterparty}]";
     }
 
-    public async Task Handle(FinanceAppContext database, SocketStream client)
+    public async Task HandleAsync(FinanceAppContext database, SocketStream client)
     {
         Console.WriteLine(this);
 
@@ -33,20 +37,23 @@ public class Create : ISingleTransaction
         await database.Transactions.AddAsync(created);
         await database.SaveChangesAsync();
 
-        await SendResponse(client, created);
+        await SendResponseAsync(client, created);
     }
 
-    private async Task SendResponse(SocketStream client, Models.Transaction transaction)
+    private async Task SendResponseAsync(SocketStream client, Models.Transaction transaction)
     {
         CreateResponse response = new() {
             Id = transaction.Id,
             Success = true
         };
-        // TODO - Extract the following 4 lines into a service or something?
-        string strResponse = Newtonsoft.Json.JsonConvert.SerializeObject(response);
 
+        // TODO - Extract the following 7 lines into a service or something?
+        string strResponse = JsonSerializer.Serialize(response, new JsonSerializerOptions()
+        {
+            ReferenceHandler = ReferenceHandler.IgnoreCycles
+        });
         byte[] message = Encoding.UTF8.GetBytes(strResponse + "<EOF>");
-        await client.Stream.WriteAsync(message);
-        await client.Stream.FlushAsync();
-    }
+		await client.Stream.WriteAsync(message);
+		await client.Stream.FlushAsync();
+	}
 }

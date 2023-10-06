@@ -4,7 +4,6 @@ using FinanceApp.Data.Requests.Transaction;
 using FinanceApp.Data.RequestPatterns;
 using FinanceApp.MauiClient.Services;
 using System.Collections.ObjectModel;
-using Newtonsoft.Json;
 
 namespace FinanceApp.MauiClient.ViewModel;
 
@@ -26,8 +25,7 @@ public partial class TransactionListViewModel : BaseViewModel
 				Page = new RequestField<long> { Value = 0 }
 			};
 
-			GetPageResponse? response = (GetPageResponse?) await _serverConnection.SendMessage(request, JsonConvert.DeserializeObject<GetPageResponse>) ??
-				throw new Exception($"Malformed {nameof(GetPageResponse)} from server");
+			GetPageResponse response = await _serverConnection.SendMessageAsync<GetPage, GetPageResponse>(request);
 
 			Transactions.Clear();
 			foreach (Transaction transaction in response.Transactions) {

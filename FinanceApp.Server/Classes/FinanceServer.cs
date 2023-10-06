@@ -4,11 +4,12 @@ using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using FinanceApp.Data;
+using FinanceApp.Data.Extensions;
 using FinanceApp.Data.Interfaces;
 using FinanceApp.Data.Requests;
 using FinanceApp.Data.Utility;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace FinanceApp.Server.Classes;
 
@@ -50,7 +51,7 @@ public class FinanceServer : IServer
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 			}
 
-            await Close();
+            await CloseAsync();
         } catch (Exception e) {
             Console.WriteLine($"[{e.GetType()}]: {e.Message}");
         }
@@ -69,18 +70,18 @@ public class FinanceServer : IServer
         _clients.Add(client);
 		try {
             Console.WriteLine($"[{socket.GetIpStr()}] Connection found.");
-            using SslStream sslStream = await EstablishSslStream(socket);
+            using SslStream sslStream = await EstablishSslStreamAsync(socket);
             client.Stream = sslStream;
-            if (await IsClientCompatible(client)) {
+            if (await IsClientCompatibleAsync(client)) {
                 while (_isRunning) {
-                    string strRequest = await ReadMessage(client);
+                    string strRequest = await ReadMessageAsync(client);
                     if (strRequest.Equals(string.Empty)) break;
 
                     IRequest request = IRequest.GetRequest(strRequest);
-                    if (request.IsValid()) {
-                        await request.Handle(_db, client);
+                    if (IRequest.IsValid(request)) {
+                        await request.HandleAsync(_db, client);
                     } else {
-                        await SendErrorResponse(sslStream, request);
+                        await SendErrorResponseAsync(sslStream, request);
                     }
                 }
             }
@@ -89,11 +90,11 @@ public class FinanceServer : IServer
 		} catch (Exception e) {
 			Console.WriteLine($"[{socket.GetIpStr()}] {e}");
 		} finally {
-            await RemoveClient(client);
+            await RemoveClientAsync(client);
         }
 	}
 
-    private async Task<SslStream> EstablishSslStream(Socket socket)
+    private async Task<SslStream> EstablishSslStreamAsync(Socket socket)
     {
         NetworkStream networkStream = new(socket);
         SslStream sslStream = new(networkStream, false);
@@ -102,21 +103,21 @@ public class FinanceServer : IServer
         return sslStream;
 	}
 
-    private async Task<bool> IsClientCompatible(SocketStream client)
+    private async Task<bool> IsClientCompatibleAsync(SocketStream client)
     {
         try {
             CompareVersion request = new()
             {
                 SemanticVersion = ThisAssembly.Git.SemVer.Version
             };
-            string strRequest = JsonConvert.SerializeObject(request);
+            string strRequest = JsonSerializer.Serialize(request);
 
             byte[] message = Encoding.UTF8.GetBytes(strRequest + "<EOF>");
             await client.Stream.WriteAsync(message);
             await client.Stream.FlushAsync();
 
-            string messageReceived = await ReadMessage(client);
-            CompareVersion response = JsonConvert.DeserializeObject<CompareVersion>(messageReceived) ?? throw new Exception($"No {nameof(CompareVersion)} message received");
+            string messageReceived = await ReadMessageAsync(client);
+            CompareVersion response = JsonSerializer.Deserialize<CompareVersion>(messageReceived) ?? throw new Exception($"No {nameof(CompareVersion)} message received");
 
             if (response.SemanticVersion.IsCompatible(request.SemanticVersion)) {
                 return true;
@@ -130,7 +131,7 @@ public class FinanceServer : IServer
         }
 	}
 
-	private async Task<string> ReadMessage(SocketStream client)
+	private async Task<string> ReadMessageAsync(SocketStream client)
 	{
 		byte[] buffer = new byte[2048];
 		StringBuilder messageData = new();
@@ -146,7 +147,7 @@ public class FinanceServer : IServer
 
 			if (bytes <= 0) {
                 Console.WriteLine($"[{client.IPAddress}] Client disconnected.");
-				await RemoveClient(client);
+				await RemoveClientAsync(client);
                 break;
             }
 
@@ -171,15 +172,15 @@ public class FinanceServer : IServer
         return chars;
 	}
 
-    private static async Task SendErrorResponse(Stream stream, IRequest validatedRequest)
+    private static async Task SendErrorResponseAsync<TRequest>(Stream stream, TRequest validatedRequest) where TRequest : IRequest
     {
-        string strResponse = JsonConvert.SerializeObject(validatedRequest);
+        string strResponse = JsonSerializer.Serialize(validatedRequest);
         byte[] message = Encoding.UTF8.GetBytes(strResponse + "<EOF>");
         await stream.WriteAsync(message);
         await stream.FlushAsync();
 	}
 
-	private async Task RemoveClient(SocketStream client)
+	private async Task RemoveClientAsync(SocketStream client)
 	{
         string clientIp = client.IPAddress;
 		await client.Socket.DisconnectAsync(false);
@@ -187,7 +188,7 @@ public class FinanceServer : IServer
 		Console.WriteLine($"[{clientIp}] Client connection closed.");
 	}
 
-    private async Task Close()
+    private async Task CloseAsync()
     {
         foreach (SocketStream client in _clients) {
             await client.Socket.DisconnectAsync(false);
