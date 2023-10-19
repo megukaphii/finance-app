@@ -69,8 +69,8 @@ public class FinanceServer : IServer
         SocketStream client = new() { Socket = socket, Stream = Stream.Null };
         _clients.Add(client);
 		try {
-            Console.WriteLine($"[{socket.GetIpStr()}] Connection found.");
-            using SslStream sslStream = await EstablishSslStreamAsync(socket);
+            Console.WriteLine($"[{client.Id}] Connection found.");
+            await using SslStream sslStream = await EstablishSslStreamAsync(client);
             client.Stream = sslStream;
             if (await IsClientCompatibleAsync(client)) {
                 while (_isRunning) {
@@ -86,20 +86,20 @@ public class FinanceServer : IServer
                 }
             }
         } catch (OperationCanceledException) {
-			Console.WriteLine($"[{socket.GetIpStr()}] Client timed out.");
+			Console.WriteLine($"[{client.Id}] Client timed out.");
 		} catch (Exception e) {
-			Console.WriteLine($"[{socket.GetIpStr()}] {e}");
+			Console.WriteLine($"[{client.Id}] {e}");
 		} finally {
             await RemoveClientAsync(client);
         }
 	}
 
-    private async Task<SslStream> EstablishSslStreamAsync(Socket socket)
+    private async Task<SslStream> EstablishSslStreamAsync(SocketStream client)
     {
-        NetworkStream networkStream = new(socket);
+        NetworkStream networkStream = new(client.Socket);
         SslStream sslStream = new(networkStream, false);
 		await sslStream.AuthenticateAsServerAsync(_serverCertificate, false, true);
-		Console.WriteLine($"[{socket.GetIpStr()}] SSL connection established.");
+		Console.WriteLine($"[{client.Id}] SSL connection established.");
         return sslStream;
 	}
 
@@ -146,7 +146,7 @@ public class FinanceServer : IServer
             readFirstBlock = true;
 
 			if (bytes <= 0) {
-                Console.WriteLine($"[{client.IPAddress}] Client disconnected.");
+                Console.WriteLine($"[{client.Id}] Client disconnected.");
 				await RemoveClientAsync(client);
                 break;
             }
@@ -182,10 +182,10 @@ public class FinanceServer : IServer
 
 	private async Task RemoveClientAsync(SocketStream client)
 	{
-        string clientIp = client.IPAddress;
+        string clientId = client.Id;
 		await client.Socket.DisconnectAsync(false);
         _clients.Remove(client);
-		Console.WriteLine($"[{clientIp}] Client connection closed.");
+		Console.WriteLine($"[{clientId}] Client connection closed.");
 	}
 
     private async Task CloseAsync()
