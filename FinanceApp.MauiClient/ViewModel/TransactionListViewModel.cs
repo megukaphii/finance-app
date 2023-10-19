@@ -4,6 +4,7 @@ using FinanceApp.Data.Requests.Transaction;
 using FinanceApp.Data.RequestPatterns;
 using FinanceApp.MauiClient.Services;
 using System.Collections.ObjectModel;
+using FinanceApp.MauiClient.View;
 
 namespace FinanceApp.MauiClient.ViewModel;
 
@@ -31,7 +32,9 @@ public partial class TransactionListViewModel(ServerConnection serverConnection)
 				Transactions.Add(transaction);
 			}
 		} catch (Exception ex) {
-			await Shell.Current.DisplayAlert("Error", ex.Message, "OK");
+            await _serverConnection.DisconnectAsync();
+            await Shell.Current.DisplayAlert("Error", ex.Message, "OK");
+            await Shell.Current.GoToAsync($"//{nameof(Login)}", true);
 		} finally {
 			IsBusy = false;
 		}

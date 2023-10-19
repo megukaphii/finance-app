@@ -7,7 +7,7 @@ using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.Json;
-using FinanceApp.Data.Requests.Transaction;
+using FinanceApp.MauiClient.View;
 
 namespace FinanceApp.MauiClient.Services;
 public class ServerConnection
@@ -45,11 +45,10 @@ public class ServerConnection
 		_sslStream.Write(message);
 		_sslStream.Flush();
 
-        // TODO - Handle no valid flag exists for and other errors resulting in disconnection
 		string messageReceived = await ReadMessageAsync(_sslStream);
         return JsonSerializer.Deserialize<TResponse>(messageReceived) ??
-            throw new($"Malformed {nameof(CreateResponse)} from server");
-	}
+               throw new($"Malformed {typeof(TResponse).Name} from server");
+    }
 
     public async Task DisconnectAsync()
     {
@@ -118,7 +117,7 @@ public class ServerConnection
         }
     }
 
-    private static async Task<string> ReadMessageAsync(Stream stream)
+    private async Task<string> ReadMessageAsync(Stream stream)
     {
         byte[] buffer = new byte[2048];
         StringBuilder messageData = new();
@@ -132,7 +131,7 @@ public class ServerConnection
             readFirstBlock = true;
 
             if (bytes <= 0) {
-                // TODO - Handle disconnection!
+                throw new("Server connection timed out");
             }
 
             messageData.Append(DecodeBuffer(buffer, bytes));

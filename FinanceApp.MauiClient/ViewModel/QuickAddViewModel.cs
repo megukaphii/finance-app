@@ -4,10 +4,11 @@ using FinanceApp.Data.Models;
 using FinanceApp.Data.RequestPatterns;
 using FinanceApp.Data.Requests.Transaction;
 using FinanceApp.MauiClient.Services;
+using FinanceApp.MauiClient.View;
 
 namespace FinanceApp.MauiClient.ViewModel;
 
-public partial class QuickAddViewModel : BaseViewModel
+public partial class QuickAddViewModel(ServerConnection serverConnection) : BaseViewModel(serverConnection)
 {
 	[ObservableProperty]
 	private double _value;
@@ -15,23 +16,21 @@ public partial class QuickAddViewModel : BaseViewModel
 	[ObservableProperty]
 	private string _counterparty = string.Empty;
 
-	public QuickAddViewModel(ServerConnection serverConnection) : base(serverConnection) { }
-
-	[RelayCommand]
+    [RelayCommand]
 	private async Task SendTransaction()
 	{
 		try {
 			IsBusy = true;
 			Create request = new()
 			{
-				Value = new RequestField<double>
-				{
+				Value = new()
+                {
 					Value = Value
 				},
-				Counterparty = new RequestField<Counterparty>
-				{
-					Value = new Counterparty
-					{
+				Counterparty = new()
+                {
+					Value = new()
+                    {
 						Name = Counterparty
 					}
 				}
@@ -40,6 +39,8 @@ public partial class QuickAddViewModel : BaseViewModel
 			CreateResponse response = await _serverConnection.SendMessageAsync<Create, CreateResponse>(request);
 			await Shell.Current.DisplayAlert("Created Transaction", $"Successfully created transaction {response}", "OK");
 		} catch (Exception ex) {
+            await _serverConnection.DisconnectAsync();
+            await Shell.Current.GoToAsync($"//{nameof(Login)}", true);
 			await Shell.Current.DisplayAlert("Error", ex.Message + " | Inner exception: " + ex.InnerException?.Message, "OK");
 		} finally {
 			IsBusy = false;
