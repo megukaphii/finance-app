@@ -106,6 +106,9 @@ public class FinanceServer : IServer
     private async Task<bool> IsClientCompatibleAsync(SocketStream client)
     {
         try {
+            string messageReceived = await ReadMessageAsync(client);
+            CompareVersion response = JsonSerializer.Deserialize<CompareVersion>(messageReceived) ?? throw new($"Malformed {nameof(CompareVersion)} request received");
+
             CompareVersion request = new()
             {
                 SemanticVersion = ThisAssembly.Git.SemVer.Version
@@ -116,17 +119,14 @@ public class FinanceServer : IServer
             await client.Stream.WriteAsync(message);
             await client.Stream.FlushAsync();
 
-            string messageReceived = await ReadMessageAsync(client);
-            CompareVersion response = JsonSerializer.Deserialize<CompareVersion>(messageReceived) ?? throw new Exception($"No {nameof(CompareVersion)} message received");
-
             if (response.SemanticVersion.IsCompatible(request.SemanticVersion)) {
                 return true;
             } else {
-                Console.WriteLine($"Client has incompatible version - {response.SemanticVersion}");
+                Console.WriteLine($"[{client.Id}] Client has incompatible version - {response.SemanticVersion}");
                 return false;
             }
 		} catch {
-            Console.WriteLine($"Client did not send appropriate {nameof(CompareVersion)} request, disconnecting.");
+            Console.WriteLine($"[{client.Id}] Client did not send appropriate {nameof(CompareVersion)} request, disconnecting.");
             return false;
         }
 	}
@@ -137,12 +137,11 @@ public class FinanceServer : IServer
 		StringBuilder messageData = new();
         CancellationTokenSource source = new();
         bool readFirstBlock = false;
-		int bytes;
 		do {
             if (readFirstBlock)
                 source.CancelAfter(READ_TIMEOUT);
 
-			bytes = await client.Stream.ReadAsync(buffer, source.Token);
+			int bytes = await client.Stream.ReadAsync(buffer, source.Token);
             readFirstBlock = true;
 
 			if (bytes <= 0) {
@@ -158,7 +157,7 @@ public class FinanceServer : IServer
                 source.Dispose();
                 source = new();
             }
-		} while (bytes != 0);
+		} while (true);
 
         source.Dispose();
 		return messageData.ToString().Replace("<EOF>", "");

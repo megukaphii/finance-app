@@ -5,14 +5,12 @@ using FinanceApp.MauiClient.View;
 
 namespace FinanceApp.MauiClient.ViewModel;
 
-public partial class LoginViewModel : BaseViewModel
+public partial class LoginViewModel(ServerConnection serverConnection) : BaseViewModel(serverConnection)
 {
 	[ObservableProperty]
 	private string _ipAddress = ServerConnection.DEFAULT_ADDRESS;
 
-	public LoginViewModel(ServerConnection serverConnection) : base(serverConnection) { }
-
-	[RelayCommand]
+    [RelayCommand]
 	private void SetLocalIp()
 	{
 		IpAddress = "127.0.0.1";

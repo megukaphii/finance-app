@@ -13,6 +13,7 @@ namespace FinanceApp.MauiClient.Services;
 public class ServerConnection
 {
     public const string DEFAULT_ADDRESS = "127.0.0.1";
+    private const int READ_TIMEOUT = 10000;
 
     public bool IsConnected => _socket.Connected;
 
@@ -23,11 +24,9 @@ public class ServerConnection
     {
         if (string.IsNullOrEmpty(ipAddressStr)) ipAddressStr = DEFAULT_ADDRESS;
 
-        await ConnectToIPAsync(ipAddressStr);
+        await ConnectToIpAsync(ipAddressStr);
         await EstablishStreamAsync();
         bool isCompatible = await IsServerCompatible();
-        // TODO - Doesn't seem to actually wait for this? Should be more obvious in UI if it is waiting.
-        // Introduce delay in FinanceServer.ReadMessage() to test this properly (or I guess in the compatible test thing server-side)
         if (!isCompatible) {
             await _socket.DisconnectAsync(false);
 			_socket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -49,7 +48,7 @@ public class ServerConnection
         // TODO - Handle no valid flag exists for and other errors resulting in disconnection
 		string messageReceived = await ReadMessageAsync(_sslStream);
         return JsonSerializer.Deserialize<TResponse>(messageReceived) ??
-            throw new Exception($"Malformed {nameof(CreateResponse)} from server");
+            throw new($"Malformed {nameof(CreateResponse)} from server");
 	}
 
     public async Task DisconnectAsync()
@@ -58,20 +57,19 @@ public class ServerConnection
         _socket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 	}
 
-    private async Task ConnectToIPAsync(string ipAddressStr)
+    private async Task ConnectToIpAsync(string ipAddressStr)
     {
         IPHostEntry hostEntry = await Dns.GetHostEntryAsync(ipAddressStr);
-        IPAddress ip = hostEntry.AddressList[0] ?? throw new Exception($"Unable to find IP address for {ipAddressStr}");
+        IPAddress ip = hostEntry.AddressList[0] ?? throw new($"Unable to find IP address for {ipAddressStr}");
         IPEndPoint ipEndPoint = new(ip, 42069);
         await _socket.ConnectAsync(ipEndPoint);
     }
 
-    private async Task EstablishStreamAsync()
+    private Task EstablishStreamAsync()
     {
         NetworkStream networkStream = new(_socket);
-        _sslStream = new SslStream(networkStream, false, ValidateServerCertificate, null);
-
-        await _sslStream.AuthenticateAsClientAsync("CoryMacdonald");
+        _sslStream = new(networkStream, false, ValidateServerCertificate, null);
+        return _sslStream.AuthenticateAsClientAsync("CoryMacdonald");
     }
 
     private static bool ValidateServerCertificate(
@@ -93,20 +91,20 @@ public class ServerConnection
     private async Task<bool> IsServerCompatible()
     {
         try {
-			if (_sslStream == null) throw new InvalidOperationException("Cannot send a message without a valid SSL stream.");
+            if (_sslStream == null) throw new InvalidOperationException("Cannot send a message without a valid SSL stream.");
 
-			string messageReceived = await ReadMessageAsync(_sslStream);
-            CompareVersion request = JsonSerializer.Deserialize<CompareVersion>(messageReceived) ?? throw new Exception($"Malformed {nameof(CompareVersion)} request from server");
-
-			CompareVersion response = new()
-			{
-				SemanticVersion = AppInfo.Version
-			};
+            CompareVersion response = new()
+            {
+                SemanticVersion = AppInfo.Version
+            };
 
             string strRequest = JsonSerializer.Serialize(response);
-			byte[] message = Encoding.UTF8.GetBytes(strRequest + "<EOF>");
-			await _sslStream.WriteAsync(message);
-			await _sslStream.FlushAsync();
+            byte[] message = Encoding.UTF8.GetBytes(strRequest + "<EOF>");
+            await _sslStream.WriteAsync(message);
+            await _sslStream.FlushAsync();
+
+			string messageReceived = await ReadMessageAsync(_sslStream);
+            CompareVersion request = JsonSerializer.Deserialize<CompareVersion>(messageReceived) ?? throw new($"Malformed {nameof(CompareVersion)} request received");
 
 			if (request.SemanticVersion.IsCompatible(AppInfo.Version)) {
 				return true;
@@ -120,119 +118,41 @@ public class ServerConnection
         }
     }
 
-    private async Task StartAsync(string ipAddressString = "")
-    {
-        // TODO: Replace Console.WriteLine() with Serilog stuff and perhaps remove EventService
-        if (string.IsNullOrEmpty(ipAddressString))
-        {
-            ipAddressString = "127.0.0.1";
-        }
-
-        IPAddress ip = (await Dns.GetHostEntryAsync(ipAddressString)).AddressList[0] ?? throw new Exception($"Unable to find IP address for {ipAddressString}");
-        IPEndPoint ipEndPoint = new(ip, 42069);
-
-        try
-        {
-            /*// TODO - Crashes when ipStr is "localhost"
-            await _clientSocket.ConnectAsync(ipEndPoint);
-            Console.WriteLine("Connected!");
-
-            NetworkStream networkStream = new(_clientSocket);
-            SslStream sslStream = new(
-                networkStream,
-                false,
-                ValidateServerCertificate,
-                null
-            );
-
-            await sslStream.AuthenticateAsClientAsync("Cory Macdonald");
-
-            while (true)
-            {
-                int choice = int.Parse(Console.ReadLine() ?? "0");
-                if (choice == 1)
-                {
-                    int value = int.Parse(Console.ReadLine() ?? "0");
-
-                    if (value > 0)
-                    {
-                        Create transaction = new()
-                        {
-                            Value = new RequestField<long>
-                            {
-                                Value = value
-                            },
-                            Counterparty = new RequestField<Counterparty>
-                            {
-                                Value = new Counterparty
-                                {
-                                    Name = "John"
-                                }
-                            }
-                        };
-
-                        string json = JsonConvert.SerializeObject(transaction);
-
-                        byte[] message = Encoding.UTF8.GetBytes(Create.Flag + json + "<EOF>");
-                        sslStream.Write(message);
-                        sslStream.Flush();
-
-                        string messageReceived = await ReadMessage(sslStream);
-                        CreateResponse? response =
-                            JsonConvert.DeserializeObject<CreateResponse>(messageReceived);
-                        Console.WriteLine(response);
-                    }
-                }
-                else if (choice == 2)
-                {
-                    Index request = new()
-                    {
-                        Page = new RequestField<long>
-                        {
-                            Value = 0
-                        }
-                    };
-
-                    string json = JsonConvert.SerializeObject(request);
-
-                    byte[] message = Encoding.UTF8.GetBytes(Index.Flag + json + "<EOF>");
-                    sslStream.Write(message);
-                    sslStream.Flush();
-
-                    string messageReceived = await ReadMessage(sslStream);
-                    IndexResponse? response = JsonConvert.DeserializeObject<IndexResponse>(messageReceived);
-                    Console.WriteLine(response);
-                }
-            }
-
-            _clientSocket.Disconnect();
-            Console.WriteLine("Client closed.");*/
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-        }
-    }
-
     private static async Task<string> ReadMessageAsync(Stream stream)
     {
         byte[] buffer = new byte[2048];
         StringBuilder messageData = new();
-        int bytes;
-        do
-        {
-            bytes = await stream.ReadAsync(buffer, 0, buffer.Length);
+        CancellationTokenSource source = new();
+        bool readFirstBlock = false;
+        do {
+            if (readFirstBlock)
+                source.CancelAfter(READ_TIMEOUT);
 
-            Decoder decoder = Encoding.UTF8.GetDecoder();
-            char[] chars = new char[decoder.GetCharCount(buffer, 0, bytes)];
-            decoder.GetChars(buffer, 0, bytes, chars, 0);
-            messageData.Append(chars);
-            if (messageData.ToString().IndexOf("<EOF>", StringComparison.Ordinal) != -1)
-            {
-                break;
+            int bytes = await stream.ReadAsync(buffer, source.Token);
+            readFirstBlock = true;
+
+            if (bytes <= 0) {
+                // TODO - Handle disconnection!
             }
-        } while (bytes != 0);
 
+            messageData.Append(DecodeBuffer(buffer, bytes));
+            if (messageData.ToString().Contains("<EOF>")) {
+                break;
+            } else {
+                source.Dispose();
+                source = new();
+            }
+        } while (true);
+
+        source.Dispose();
         return messageData.ToString().Replace("<EOF>", "");
+    }
+
+    private static char[] DecodeBuffer(byte[] buffer, int bytes)
+    {
+        Decoder decoder = Encoding.UTF8.GetDecoder();
+        char[] chars = new char[decoder.GetCharCount(buffer, 0, bytes)];
+        decoder.GetChars(buffer, 0, bytes, chars, 0);
+        return chars;
     }
 }
