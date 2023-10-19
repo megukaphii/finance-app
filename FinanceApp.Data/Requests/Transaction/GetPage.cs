@@ -13,7 +13,6 @@ public class GetPage : IPageNumber
 
     public required RequestField<long> Page { get; init; }
 
-
 	public override string ToString()
     {
         return $"{Flag}: {nameof(Page)}: {Page}";

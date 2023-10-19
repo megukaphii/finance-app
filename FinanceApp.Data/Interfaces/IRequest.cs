@@ -7,23 +7,8 @@ namespace FinanceApp.Data.Interfaces;
 public interface IRequest
 {
     private static List<Type> RequestTypes { get; } = new();
-    public static virtual string Flag { get; } = string.Empty;
-    public static virtual Type? Validator { get; } = null;
-
-	private class InvalidRequest : IRequest
-	{
-        public Exception Exception { get; }
-
-		public static string Flag => throw new NotImplementedException();
-        public static Type? Validator => throw new NotImplementedException();
-
-		public InvalidRequest(Exception exception) => Exception = exception;
-
-		public Task HandleAsync(FinanceAppContext database, SocketStream client)
-		{
-			throw new NotImplementedException();
-		}
-	}
+    public static virtual string Flag => string.Empty;
+    public static virtual Type? Validator => null;
 
 	public static bool IsValid<TRequest>(TRequest request) where TRequest : IRequest
     {
@@ -36,7 +21,7 @@ public interface IRequest
             return validator.Validate(request);
         }
 
-        throw new Exception(
+        throw new(
             $"Validator {TRequest.Validator.Name} for {typeof(TRequest).Name} is not a child of {nameof(IValidator)}.");
     }
 
@@ -50,8 +35,8 @@ public interface IRequest
             if (flag != string.Empty && message.StartsWith(flag)) {
                 try
                 {
-                    IRequest? request = (IRequest?) JsonSerializer.Deserialize(message.Replace(flag, ""), t) ??
-                        throw new Exception($"Message {message} does not contain valid {t.Name} properties");
+                    IRequest request = (IRequest?) JsonSerializer.Deserialize(message.Replace(flag, ""), t) ??
+                        throw new($"Message {message} does not contain valid {t.Name} properties");
 
 					return request;
                 }
@@ -83,4 +68,19 @@ public interface IRequest
     }
 
     public Task HandleAsync(FinanceAppContext database, SocketStream client);
+}
+
+public class InvalidRequest : IRequest
+{
+    public Exception Exception { get; }
+
+    public static string Flag => throw new InvalidDataException();
+    public static Type? Validator => throw new InvalidDataException();
+
+    public InvalidRequest(Exception exception) => Exception = exception;
+
+    public Task HandleAsync(FinanceAppContext database, SocketStream client)
+    {
+        throw new InvalidDataException();
+    }
 }

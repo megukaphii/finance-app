@@ -7,13 +7,11 @@ using System.Collections.ObjectModel;
 
 namespace FinanceApp.MauiClient.ViewModel;
 
-public partial class TransactionListViewModel : BaseViewModel
+public partial class TransactionListViewModel(ServerConnection serverConnection) : BaseViewModel(serverConnection)
 {
 	public ObservableCollection<Transaction> Transactions { get; } = new();
 
-	public TransactionListViewModel(ServerConnection serverConnection) : base(serverConnection) { }
-
-	[RelayCommand]
+    [RelayCommand]
 	private async Task LoadTransactions()
 	{
 		if (IsBusy) return;
@@ -22,14 +20,14 @@ public partial class TransactionListViewModel : BaseViewModel
 			IsBusy = true;
 			GetPage request = new()
 			{
-				Page = new RequestField<long> { Value = 0 }
+				Page = new() { Value = 0 }
 			};
 
 			GetPageResponse response = await _serverConnection.SendMessageAsync<GetPage, GetPageResponse>(request);
 
 			Transactions.Clear();
 			foreach (Transaction transaction in response.Transactions) {
-				// TODO - this fires off an event with each add, figure out how to add range instead (refer to MonkeyFinder James Montemagno tutorial)
+				// TODO - This fires off an event with each add, figure out how to add range instead (refer to MonkeyFinder James Montemagno tutorial)
 				Transactions.Add(transaction);
 			}
 		} catch (Exception ex) {

@@ -11,7 +11,6 @@ namespace FinanceApp.Data.Requests.Transaction;
 public class Create : ISingleTransaction
 {
     public static string Flag => "<CreateTransaction>";
-    public static Type? Validator { get; set; } = typeof(TransactionValidator);
 
     public required RequestField<double> Value { get; init; }
     public required RequestField<Counterparty> Counterparty { get; init; }
