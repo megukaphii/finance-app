@@ -1,6 +1,8 @@
-﻿namespace FinanceApp.Data.Requests.Transaction;
+﻿using FinanceApp.Data.Interfaces;
 
-public class CreateResponse
+namespace FinanceApp.Data.Requests.Transaction;
+
+public class CreateResponse : IResponse
 {
     public required bool Success { get; init; }
     public required long Id { get; init; }

@@ -7,7 +7,6 @@ using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.Json;
-using FinanceApp.MauiClient.View;
 
 namespace FinanceApp.MauiClient.Services;
 public class ServerConnection

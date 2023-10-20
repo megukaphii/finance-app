@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace FinanceApp.Data.Extensions;
 
-public class Helpers
+public static class Helpers
 {
 	public static int GetPropertyMaxLength<TModel, TProperty>(Expression<Func<TModel, TProperty>> property)
 	{

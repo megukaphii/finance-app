@@ -1,8 +1,9 @@
 ﻿using System.Text;
+using FinanceApp.Data.Interfaces;
 
 namespace FinanceApp.Data.Requests.Transaction;
 
-public class GetPageResponse
+public class GetPageResponse : IResponse
 {
 	public required bool Success { get; init; }
 	public required List<Models.Transaction> Transactions { get; init; }
