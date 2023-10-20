@@ -7,9 +7,9 @@ namespace FinanceApp.Data.Interfaces;
 
 public interface IResponse
 {
-    public async Task Send(SocketStream client)
+    public async Task Send<T>(SocketStream client) where T : IResponse
     {
-        string strResponse = JsonSerializer.Serialize(this, new JsonSerializerOptions
+        string strResponse = JsonSerializer.Serialize((T)this, new JsonSerializerOptions
         {
             ReferenceHandler = ReferenceHandler.IgnoreCycles
         });

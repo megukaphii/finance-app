@@ -28,7 +28,7 @@ public abstract class TransactionController : IController
             Success = true
         };
 
-        await response.Send(client);
+        await response.Send<CreateResponse>(client);
     }
 
     public static async Task Index(FinanceAppContext database, SocketStream client)
@@ -42,6 +42,6 @@ public abstract class TransactionController : IController
             Success = true,
         };
 
-        await response.Send(client);
+        await response.Send<GetPageResponse>(client);
     }
 }
