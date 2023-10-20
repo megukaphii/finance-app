@@ -12,33 +12,46 @@ public partial class QuickAddViewModel(ServerConnection serverConnection) : Base
 {
 	[ObservableProperty]
 	private double _value;
+    [ObservableProperty]
+    private string _valueError = string.Empty;
 
 	[ObservableProperty]
 	private string _counterparty = string.Empty;
+    [ObservableProperty]
+    private string _counterpartyError = string.Empty;
 
     [RelayCommand]
 	private async Task SendTransaction()
 	{
-		try {
-			IsBusy = true;
-			Create request = new()
-			{
-				Value = new()
+        try {
+            IsBusy = true;
+            Create request = new()
+            {
+                Value = new()
                 {
-					Value = Value
-				},
-				Counterparty = new()
+                    Value = Value
+                },
+                Counterparty = new()
                 {
-					Value = new()
+                    Value = new()
                     {
-						Name = Counterparty
-					}
-				}
-			};
+                        Name = Counterparty
+                    }
+                }
+            };
 
-			CreateResponse response = await _serverConnection.SendMessageAsync<Create, CreateResponse>(request);
-			await Shell.Current.DisplayAlert("Created Transaction", $"Successfully created transaction {response}", "OK");
-		} catch (Exception ex) {
+            CreateResponse response = await _serverConnection.SendMessageAsync<Create, CreateResponse>(request);
+            await Shell.Current.DisplayAlert("Created Transaction", $"Successfully created transaction {response}",
+                "OK");
+        } catch (ResponseException<Create> ex) {
+            if (!string.IsNullOrEmpty(ex.Response.Value.Error)) {
+                ValueError = ex.Response.Value.Error;
+            }
+
+            if (!string.IsNullOrEmpty(ex.Response.Counterparty.Error)) {
+                CounterpartyError = ex.Response.Counterparty.Error;
+            }
+        } catch (Exception ex) {
             await _serverConnection.DisconnectAsync();
             await Shell.Current.GoToAsync($"//{nameof(Login)}", true);
 			await Shell.Current.DisplayAlert("Error", ex.Message + " | Inner exception: " + ex.InnerException?.Message, "OK");

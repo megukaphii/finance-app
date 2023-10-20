@@ -33,7 +33,6 @@ public class ServerConnection
         return isCompatible;
 	}
 
-    // TODO - Rework responses, figure out error handling within response
     public async Task<TResponse> SendMessageAsync<TRequest, TResponse>(TRequest request) where TRequest : IRequest
 	{
         string json = JsonSerializer.Serialize(request);
@@ -45,8 +44,15 @@ public class ServerConnection
 		_sslStream.Flush();
 
 		string messageReceived = await ReadMessageAsync(_sslStream);
-        return JsonSerializer.Deserialize<TResponse>(messageReceived) ??
-               throw new($"Malformed {typeof(TResponse).Name} from server");
+        TResponse? response = JsonSerializer.Deserialize<TResponse>(messageReceived);
+        // TODO - Better ways to do this? Feels kinda jank
+        if (response is null) {
+            TRequest errorResponse = JsonSerializer.Deserialize<TRequest>(messageReceived) ??
+                throw new($"Malformed {typeof(TResponse).Name} from server");
+            throw new ResponseException<TRequest> { Response = errorResponse };
+        }
+
+        return response;
     }
 
     public async Task DisconnectAsync()

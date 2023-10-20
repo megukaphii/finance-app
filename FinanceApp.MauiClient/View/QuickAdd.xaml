@@ -8,7 +8,9 @@
 
 	<VerticalStackLayout>
 		<Entry Text="{Binding Value}" Placeholder="Value..." Keyboard="Numeric"/>
+        <Label Text="{Binding ValueError}"/>
 		<Entry Text="{Binding Counterparty}" Placeholder="Counterparty..."/>
+        <Label Text="{Binding CounterpartyError}"/>
 		<Button Text="Quick Add" Command="{Binding SendTransactionCommand}" IsEnabled="{Binding IsNotBusy}"/>
 	</VerticalStackLayout>
 
