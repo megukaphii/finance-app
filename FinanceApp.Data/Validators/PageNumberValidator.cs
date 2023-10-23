@@ -21,6 +21,6 @@ public class PageNumberValidator
             }
         }
 
-        return failure;
+        return !failure;
     }
 }

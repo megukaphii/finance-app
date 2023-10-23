@@ -5,7 +5,7 @@ namespace FinanceApp.Data.RequestPatterns;
 
 public interface IPageNumber : IRequest
 {
-    public new static Type? Validator { get; } = typeof(PageNumberValidator);
+    public new static Type Validator => typeof(PageNumberValidator);
 
     public RequestField<long> Page { get; }
 }

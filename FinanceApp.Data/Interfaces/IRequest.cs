@@ -10,19 +10,22 @@ public interface IRequest
     public static virtual string Flag => string.Empty;
     public static virtual Type? Validator => null;
 
-	public static bool IsValid<TRequest>(TRequest request) where TRequest : IRequest
+	public static bool IsValid(IRequest request)
     {
-        if (typeof(TRequest) == typeof(InvalidRequest)) return false;
+        Type requestType = request.GetType();
+        if (requestType == typeof(InvalidRequest)) return false;
 
-        if (TRequest.Validator is null) return true;
+        Type? requestValidator = (Type?)requestType.GetInterfaces().First(type => type != typeof(IRequest))
+            .GetProperty(nameof(Validator))?.GetValue(null);
+        if (requestValidator is null) return true;
 
-        if (TRequest.Validator.BaseType == typeof(IValidator)) {
-            IValidator validator = (IValidator)Activator.CreateInstance(TRequest.Validator)!;
+        if (requestValidator.IsAssignableTo(typeof(IValidator))) {
+            IValidator validator = (IValidator)Activator.CreateInstance(requestValidator)!;
             return validator.Validate(request);
         }
 
         throw new(
-            $"Validator {TRequest.Validator.Name} for {typeof(TRequest).Name} is not a child of {nameof(IValidator)}.");
+            $"{nameof(Validator)} <{requestValidator.Name}> for <{requestType.Name}> is not a child of {nameof(IValidator)}.");
     }
 
     public static IRequest GetRequest(string message)
@@ -33,8 +36,7 @@ public interface IRequest
             PropertyInfo? property = t.GetProperty(nameof(Flag));
             string flag = (string)property?.GetValue(null)!;
             if (flag != string.Empty && message.StartsWith(flag)) {
-                try
-                {
+                try {
                     IRequest request = (IRequest?) JsonSerializer.Deserialize(message.Replace(flag, ""), t) ??
                         throw new($"Message {message} does not contain valid {t.Name} properties");
 

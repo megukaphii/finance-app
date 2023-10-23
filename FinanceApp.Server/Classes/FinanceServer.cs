@@ -173,7 +173,9 @@ public class FinanceServer : IServer
 
     private static async Task SendErrorResponseAsync<TRequest>(Stream stream, TRequest validatedRequest) where TRequest : IRequest
     {
+        Console.WriteLine($"Request: {validatedRequest}");
         string strResponse = JsonSerializer.Serialize(validatedRequest);
+        Console.WriteLine($"Request string: {strResponse}");
         byte[] message = Encoding.UTF8.GetBytes(strResponse + "<EOF>");
         await stream.WriteAsync(message);
         await stream.FlushAsync();
