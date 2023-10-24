@@ -47,7 +47,7 @@ public class ServerConnection
         // TODO - Better ways to do this? Feels kinda jank
         try {
             return JsonSerializer.Deserialize<TResponse>(messageReceived) ?? throw new();
-        } catch (Exception ex) {
+        } catch (Exception) {
             TRequest errorResponse = JsonSerializer.Deserialize<TRequest>(messageReceived) ??
                                      throw new($"Malformed {typeof(TResponse).Name} from server");
             throw new ResponseException<TRequest> { Response = errorResponse };

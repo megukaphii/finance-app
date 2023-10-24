@@ -7,8 +7,13 @@ namespace FinanceApp.MauiClient.ViewModel;
 
 public partial class LoginViewModel(ServerConnection serverConnection) : BaseViewModel(serverConnection)
 {
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsNotConnected))]
+    private bool _isConnected;
 	[ObservableProperty]
 	private string _ipAddress = ServerConnection.DEFAULT_ADDRESS;
+
+    public bool IsNotConnected => !IsConnected;
 
     [RelayCommand]
 	private void SetLocalIp()
@@ -27,8 +32,8 @@ public partial class LoginViewModel(ServerConnection serverConnection) : BaseVie
 	{
 		try {
 			IsBusy = true;
-			if (await _serverConnection.EstablishConnection(IpAddress)) {
-				IsConnected = _serverConnection.IsConnected;
+			if (await ServerConnection.EstablishConnection(IpAddress)) {
+				IsConnected = ServerConnection.IsConnected;
 				await Shell.Current.DisplayAlert("Connection Established", $"Successfully connected to {IpAddress}!", "OK");
 				await Shell.Current.GoToAsync($"//{nameof(QuickAdd)}", true);
 			}
@@ -44,8 +49,8 @@ public partial class LoginViewModel(ServerConnection serverConnection) : BaseVie
 	{
 		try {
 			IsBusy = true;
-			await _serverConnection.DisconnectAsync();
-			IsConnected = _serverConnection.IsConnected;
+			await ServerConnection.DisconnectAsync();
+			IsConnected = ServerConnection.IsConnected;
 			await Shell.Current.DisplayAlert("Disconnected", "Successfully disconnected from server!", "OK");
 		} catch (Exception ex) {
 			await Shell.Current.DisplayAlert("Error", ex.Message + " | Inner exception: " + ex.InnerException?.Message, "OK");
@@ -53,4 +58,9 @@ public partial class LoginViewModel(ServerConnection serverConnection) : BaseVie
 			IsBusy = false;
 		}
 	}
+
+    public void CheckConnection()
+    {
+        IsConnected = ServerConnection.IsConnected;
+    }
 }

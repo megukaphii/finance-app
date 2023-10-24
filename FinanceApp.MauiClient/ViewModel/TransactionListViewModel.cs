@@ -27,7 +27,7 @@ public partial class TransactionListViewModel(ServerConnection serverConnection)
                 Page = new() { Value = 0 }
             };
 
-            GetPageResponse response = await _serverConnection.SendMessageAsync<GetPage, GetPageResponse>(request);
+            GetPageResponse response = await ServerConnection.SendMessageAsync<GetPage, GetPageResponse>(request);
 
             Transactions.Clear();
             foreach (Transaction transaction in response.Transactions) {
@@ -39,7 +39,7 @@ public partial class TransactionListViewModel(ServerConnection serverConnection)
                 PageError = ex.Response.Page.Error;
             }
         } catch (Exception ex) {
-            await _serverConnection.DisconnectAsync();
+            await ServerConnection.DisconnectAsync();
             await Shell.Current.DisplayAlert("Error", ex.Message, "OK");
             await Shell.Current.GoToAsync($"//{nameof(Login)}", true);
 		} finally {

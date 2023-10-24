@@ -38,7 +38,7 @@ public partial class QuickAddViewModel(ServerConnection serverConnection) : Base
                 }
             };
 
-            CreateResponse response = await _serverConnection.SendMessageAsync<Create, CreateResponse>(request);
+            CreateResponse response = await ServerConnection.SendMessageAsync<Create, CreateResponse>(request);
             await Shell.Current.DisplayAlert("Created Transaction", $"Successfully created transaction {response}",
                 "OK");
         } catch (ResponseException<Create> ex) {
@@ -50,7 +50,7 @@ public partial class QuickAddViewModel(ServerConnection serverConnection) : Base
                 CounterpartyError = ex.Response.Counterparty.Error;
             }
         } catch (Exception ex) {
-            await _serverConnection.DisconnectAsync();
+            await ServerConnection.DisconnectAsync();
             await Shell.Current.GoToAsync($"//{nameof(Login)}", true);
 			await Shell.Current.DisplayAlert("Error", ex.Message + " | Inner exception: " + ex.InnerException?.Message, "OK");
 		} finally {
