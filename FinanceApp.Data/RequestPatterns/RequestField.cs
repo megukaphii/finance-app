@@ -8,6 +8,10 @@ public class RequestField<T>
     public override string ToString()
     {
         string errorStr = Error == string.Empty ? "" : $", {nameof(Error)}: {Error}";
-        return $"({typeof(T).Name}){nameof(Value)}: {Value}{errorStr}";
+        string valueStr = Value?.ToString() ?? string.Empty;
+        if (!typeof(T).IsPrimitive) {
+            valueStr = "[" + valueStr + "]";
+        }
+        return $"<{typeof(T).Name}>{nameof(Value)}: {valueStr}{errorStr}";
     }
 }

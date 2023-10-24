@@ -14,7 +14,7 @@ public class Create : ISingleTransaction
 
     public override string ToString()
     {
-        return $"{Flag}: [{nameof(Value)}: {Value}], [{nameof(Counterparty)}: {Counterparty}]";
+        return $"{Flag}[{nameof(Value)}: {Value}], [{nameof(Counterparty)}: {Counterparty}]";
     }
 
     public Task HandleAsync(FinanceAppContext database, SocketStream client)

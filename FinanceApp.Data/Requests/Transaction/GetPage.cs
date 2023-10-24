@@ -12,7 +12,7 @@ public class GetPage : IPageNumber
 
 	public override string ToString()
     {
-        return $"{Flag}: {nameof(Page)}: {Page}";
+        return $"{Flag}[{nameof(Page)}: {Page}]";
     }
 
     public Task HandleAsync(FinanceAppContext database, SocketStream client)

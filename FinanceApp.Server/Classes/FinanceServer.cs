@@ -77,7 +77,7 @@ public class FinanceServer : IServer
                     string strRequest = await ReadMessageAsync(client);
                     if (strRequest.Equals(string.Empty)) break;
 
-                    IRequest request = IRequest.GetRequest(strRequest);
+                    dynamic request = IRequest.GetRequest(strRequest);
                     if (IRequest.IsValid(request)) {
                         await request.HandleAsync(_db, client);
                     } else {
@@ -173,10 +173,8 @@ public class FinanceServer : IServer
 
     private static async Task SendErrorResponseAsync<TRequest>(Stream stream, TRequest validatedRequest) where TRequest : IRequest
     {
-        Console.WriteLine($"Request: {validatedRequest}");
         string strResponse = JsonSerializer.Serialize(validatedRequest);
-        Console.WriteLine($"Request string: {strResponse}");
-        byte[] message = Encoding.UTF8.GetBytes(strResponse + "<EOF>");
+        byte[] message = Encoding.UTF8.GetBytes("<ERROR>" + strResponse + "<EOF>");
         await stream.WriteAsync(message);
         await stream.FlushAsync();
 	}

@@ -33,23 +33,21 @@ public interface IRequest
         CacheRequestTypes();
 
         foreach (Type t in RequestTypes) {
-            PropertyInfo? property = t.GetProperty(nameof(Flag));
-            string flag = (string)property?.GetValue(null)!;
+            PropertyInfo? flagProperty = t.GetProperty(nameof(Flag));
+            string flag = (string)flagProperty?.GetValue(null)!;
             if (flag != string.Empty && message.StartsWith(flag)) {
                 try {
                     IRequest request = (IRequest?) JsonSerializer.Deserialize(message.Replace(flag, ""), t) ??
                         throw new($"Message {message} does not contain valid {t.Name} properties");
 
 					return request;
-                }
-                catch (Exception e)
-                {
+                } catch (Exception e) {
                     return new InvalidRequest(e);
                 }
             }
         }
 
-        throw new Exception($"No valid flag exists for message {message}");
+        throw new($"No valid flag exists for message {message}");
     }
 
     private static void CacheRequestTypes()

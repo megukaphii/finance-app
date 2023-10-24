@@ -44,13 +44,13 @@ public class ServerConnection
 		_sslStream.Flush();
 
 		string messageReceived = await ReadMessageAsync(_sslStream);
-        // TODO - Better ways to do this? Feels kinda jank
-        try {
-            return JsonSerializer.Deserialize<TResponse>(messageReceived) ?? throw new();
-        } catch (Exception) {
+        if (messageReceived.Contains("<ERROR>")) {
+            messageReceived = messageReceived.Replace("<ERROR>", "");
             TRequest errorResponse = JsonSerializer.Deserialize<TRequest>(messageReceived) ??
                                      throw new($"Malformed {typeof(TResponse).Name} from server");
             throw new ResponseException<TRequest> { Response = errorResponse };
+        } else {
+            return JsonSerializer.Deserialize<TResponse>(messageReceived) ?? throw new($"Message {messageReceived}");
         }
     }
 
