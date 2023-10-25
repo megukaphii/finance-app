@@ -1,9 +1,11 @@
-﻿namespace FinanceApp.ServerTests;
+﻿using FinanceApp.Data.Utility;
 
-public class Helpers
+namespace FinanceApp.ServerTests;
+
+public static class Helpers
 {
 	public static string RemoveFromEof(string input)
 	{
-		return input.Remove(input.LastIndexOf('>') + 1).Replace("<EOF>", "");
+		return input.Remove(input.LastIndexOf('>') + 1).Replace(Serialization.Eof, "");
 	}
 }

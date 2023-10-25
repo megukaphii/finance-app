@@ -11,7 +11,7 @@ public partial class LoginViewModel(ServerConnection serverConnection) : BaseVie
     [NotifyPropertyChangedFor(nameof(IsNotConnected))]
     private bool _isConnected;
 	[ObservableProperty]
-	private string _ipAddress = ServerConnection.DEFAULT_ADDRESS;
+	private string _ipAddress = ServerConnection.DefaultAddress;
 
     public bool IsNotConnected => !IsConnected;
 

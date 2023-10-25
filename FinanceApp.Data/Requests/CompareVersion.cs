@@ -1,4 +1,6 @@
-﻿namespace FinanceApp.Data.Requests;
+﻿using FinanceApp.Data.Interfaces;
+
+namespace FinanceApp.Data.Requests;
 
 public class CompareVersion
 {

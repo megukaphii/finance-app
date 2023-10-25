@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using FinanceApp.Data.Exceptions;
 using FinanceApp.Data.Requests.Transaction;
 using FinanceApp.MauiClient.Services;
 using FinanceApp.MauiClient.View;

@@ -7,12 +7,14 @@ using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.Json;
+using FinanceApp.Data.Exceptions;
+using FinanceApp.Data.Utility;
 
 namespace FinanceApp.MauiClient.Services;
 public class ServerConnection
 {
-    public const string DEFAULT_ADDRESS = "127.0.0.1";
-    private const int READ_TIMEOUT = 10000;
+    public const string DefaultAddress = "127.0.0.1";
+    private const int ReadTimeout = 10000;
 
     public bool IsConnected => _socket.Connected;
 
@@ -21,7 +23,7 @@ public class ServerConnection
 
     public async Task<bool> EstablishConnection(string ipAddressStr = "")
     {
-        if (string.IsNullOrEmpty(ipAddressStr)) ipAddressStr = DEFAULT_ADDRESS;
+        if (string.IsNullOrEmpty(ipAddressStr)) ipAddressStr = DefaultAddress;
 
         await ConnectToIpAsync(ipAddressStr);
         await EstablishStreamAsync();
@@ -36,21 +38,21 @@ public class ServerConnection
     public async Task<TResponse> SendMessageAsync<TRequest, TResponse>(TRequest request) where TRequest : IRequest
 	{
         string json = JsonSerializer.Serialize(request);
-		byte[] message = Encoding.UTF8.GetBytes(TRequest.Flag + json + "<EOF>");
-        
+		byte[] message = Encoding.UTF8.GetBytes(TRequest.Flag + json + Serialization.Eof);
+
         if (_sslStream == null) throw new InvalidOperationException("Cannot send a message without a valid SSL stream.");
 
 		_sslStream.Write(message);
 		_sslStream.Flush();
 
 		string messageReceived = await ReadMessageAsync(_sslStream);
-        if (messageReceived.Contains("<ERROR>")) {
-            messageReceived = messageReceived.Replace("<ERROR>", "");
+        if (messageReceived.Contains(Serialization.Error)) {
+            messageReceived = messageReceived.Replace(Serialization.Error, "");
             TRequest errorResponse = JsonSerializer.Deserialize<TRequest>(messageReceived) ??
-                                     throw new($"Malformed {typeof(TResponse).Name} from server");
+                                     throw new($"Malformed {typeof(TRequest).Name} from server");
             throw new ResponseException<TRequest> { Response = errorResponse };
         } else {
-            return JsonSerializer.Deserialize<TResponse>(messageReceived) ?? throw new($"Message {messageReceived}");
+            return JsonSerializer.Deserialize<TResponse>(messageReceived) ?? throw new($"Malformed {typeof(TResponse).Name} from server");
         }
     }
 
@@ -102,7 +104,7 @@ public class ServerConnection
             };
 
             string strRequest = JsonSerializer.Serialize(response);
-            byte[] message = Encoding.UTF8.GetBytes(strRequest + "<EOF>");
+            byte[] message = Encoding.UTF8.GetBytes(strRequest + Serialization.Eof);
             await _sslStream.WriteAsync(message);
             await _sslStream.FlushAsync();
 
@@ -129,7 +131,7 @@ public class ServerConnection
         bool readFirstBlock = false;
         do {
             if (readFirstBlock)
-                source.CancelAfter(READ_TIMEOUT);
+                source.CancelAfter(ReadTimeout);
 
             int bytes = await stream.ReadAsync(buffer, source.Token);
             readFirstBlock = true;
@@ -139,7 +141,7 @@ public class ServerConnection
             }
 
             messageData.Append(DecodeBuffer(buffer, bytes));
-            if (messageData.ToString().Contains("<EOF>")) {
+            if (messageData.ToString().Contains(Serialization.Eof)) {
                 break;
             } else {
                 source.Dispose();
@@ -148,7 +150,7 @@ public class ServerConnection
         } while (true);
 
         source.Dispose();
-        return messageData.ToString().Replace("<EOF>", "");
+        return messageData.ToString().Replace(Serialization.Eof, "");
     }
 
     private static char[] DecodeBuffer(byte[] buffer, int bytes)

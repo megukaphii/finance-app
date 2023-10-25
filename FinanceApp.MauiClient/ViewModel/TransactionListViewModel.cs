@@ -4,6 +4,7 @@ using FinanceApp.Data.Requests.Transaction;
 using FinanceApp.MauiClient.Services;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
+using FinanceApp.Data.Exceptions;
 using FinanceApp.MauiClient.View;
 
 namespace FinanceApp.MauiClient.ViewModel;

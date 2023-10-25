@@ -13,7 +13,7 @@ public interface IResponse
         {
             ReferenceHandler = ReferenceHandler.IgnoreCycles
         });
-        byte[] message = Encoding.UTF8.GetBytes(strResponse + "<EOF>");
+        byte[] message = Encoding.UTF8.GetBytes(strResponse + Serialization.Eof);
         await client.Stream.WriteAsync(message);
         await client.Stream.FlushAsync();
     }

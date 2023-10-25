@@ -114,8 +114,7 @@ public class FinanceServer : IServer
                 SemanticVersion = ThisAssembly.Git.SemVer.Version
             };
             string strRequest = JsonSerializer.Serialize(request);
-
-            byte[] message = Encoding.UTF8.GetBytes(strRequest + "<EOF>");
+            byte[] message = Encoding.UTF8.GetBytes(strRequest + Serialization.Eof);
             await client.Stream.WriteAsync(message);
             await client.Stream.FlushAsync();
 
@@ -151,7 +150,7 @@ public class FinanceServer : IServer
             }
 
 			messageData.Append(DecodeBuffer(buffer, bytes));
-			if (messageData.ToString().Contains("<EOF>")) {
+			if (messageData.ToString().Contains(Serialization.Eof)) {
 				break;
 			} else {
                 source.Dispose();
@@ -160,7 +159,7 @@ public class FinanceServer : IServer
 		} while (true);
 
         source.Dispose();
-		return messageData.ToString().Replace("<EOF>", "");
+		return messageData.ToString().Replace(Serialization.Eof, "");
 	}
 
     private static char[] DecodeBuffer(byte[] buffer, int bytes)
@@ -174,7 +173,7 @@ public class FinanceServer : IServer
     private static async Task SendErrorResponseAsync<TRequest>(Stream stream, TRequest validatedRequest) where TRequest : IRequest
     {
         string strResponse = JsonSerializer.Serialize(validatedRequest);
-        byte[] message = Encoding.UTF8.GetBytes("<ERROR>" + strResponse + "<EOF>");
+        byte[] message = Encoding.UTF8.GetBytes(Serialization.Error + strResponse + Serialization.Eof);
         await stream.WriteAsync(message);
         await stream.FlushAsync();
 	}

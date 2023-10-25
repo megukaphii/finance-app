@@ -1,6 +1,6 @@
 ﻿using FinanceApp.Data.Interfaces;
 
-namespace FinanceApp.MauiClient;
+namespace FinanceApp.Data.Exceptions;
 
 public class ResponseException<T> : Exception where T : IRequest
 {
