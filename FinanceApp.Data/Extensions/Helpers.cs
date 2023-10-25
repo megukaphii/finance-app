@@ -6,6 +6,12 @@ namespace FinanceApp.Data.Extensions;
 
 public static class Helpers
 {
+    public static int GetPropertyMinLength<TModel, TProperty>(Expression<Func<TModel, TProperty>> property)
+    {
+        Type type = property.Parameters.First().Type;
+        return type.GetProperty(GetPropertyName(property))?.GetCustomAttribute<MinLengthAttribute>()?.Length ?? 0;
+    }
+
 	public static int GetPropertyMaxLength<TModel, TProperty>(Expression<Func<TModel, TProperty>> property)
 	{
 		Type type = property.Parameters.First().Type;

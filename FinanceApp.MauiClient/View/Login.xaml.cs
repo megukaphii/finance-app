@@ -13,7 +13,6 @@ public partial class Login : ContentPage
 
     protected override void OnAppearing()
     {
-        // TODO - This seems weird? But apparently lifecycle events shouldn't go on the view model, so?
         ((LoginViewModel)BindingContext).CheckConnection();
     }
 }

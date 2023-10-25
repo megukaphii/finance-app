@@ -1,10 +1,12 @@
-﻿namespace FinanceApp.Data.Models;
+﻿using FinanceApp.Data.Utility;
+
+namespace FinanceApp.Data.Models;
 
 public class Transaction
 {
-    public long Id { get; set; }
-    public required Counterparty Counterparty { get; set; }
-    public required double Value { get; set; }
+    public long Id { get; init; }
+    public required Counterparty Counterparty { get; init; }
+    public required double Value { get; init; }
 
     public override string ToString()
     {
@@ -21,7 +23,7 @@ public class Transaction
 
     private bool Equals(Transaction other)
     {
-        return (Id == other.Id || Id == 0 || other.Id == 0) && Counterparty.Equals(other.Counterparty) && Value == other.Value;
+        return (Id == other.Id || Id == 0 || other.Id == 0) && Counterparty.Equals(other.Counterparty) && Math.Abs(Value - other.Value) < FloatCompare.Tolerance;
     }
 
     public override int GetHashCode()

@@ -24,6 +24,8 @@ public partial class QuickAddViewModel(ServerConnection serverConnection) : Base
 	{
         try {
             IsBusy = true;
+            ClearErrors();
+
             Create request = new()
             {
                 Value = new()
@@ -38,7 +40,6 @@ public partial class QuickAddViewModel(ServerConnection serverConnection) : Base
                     }
                 }
             };
-
             CreateResponse response = await ServerConnection.SendMessageAsync<Create, CreateResponse>(request);
             await Shell.Current.DisplayAlert("Created Transaction", $"Successfully created transaction {response}",
                 "OK");
@@ -58,4 +59,10 @@ public partial class QuickAddViewModel(ServerConnection serverConnection) : Base
 			IsBusy = false;
 		}
 	}
+
+    private void ClearErrors()
+    {
+        ValueError = string.Empty;
+        CounterpartyError = string.Empty;
+    }
 }

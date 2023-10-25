@@ -4,10 +4,11 @@ namespace FinanceApp.Data.Models;
 
 public class Counterparty
 {
-    public long Id { get; set; }
-    public List<Transaction> Transactions { get; set; } = new();
-    [MaxLength(255)]
-    public required string Name { get; set; }
+    public long Id { get; init; }
+    public List<Transaction> Transactions { get; init; } = new();
+    [MinLength(2)]
+    [MaxLength(64)]
+    public required string Name { get; init; }
 
     public override string ToString()
     {
