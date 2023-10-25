@@ -3,7 +3,7 @@ using FinanceApp.Data.RequestPatterns;
 
 namespace FinanceApp.Data.Validators;
 
-public class PageNumberValidator
+public class PageNumberValidator : IValidator
 {
     private const long MinPage = 0;
     private const long MaxPage = long.MinValue;
@@ -12,12 +12,15 @@ public class PageNumberValidator
     {
         bool failure = false;
         if (request is IPageNumber validateAgainst) {
-            if (validateAgainst.Page.Value < MinPage) {
-                validateAgainst.Page.Error = $"{nameof(validateAgainst.Page)} should be greater than {MinPage}";
-                failure = true;
-            } else if (validateAgainst.Page.Value > MaxPage) {
-                validateAgainst.Page.Error = $"{nameof(validateAgainst.Page)} should be less than {MaxPage}";
-                failure = true;
+            switch (validateAgainst.Page.Value) {
+                case < MinPage:
+                    validateAgainst.Page.Error = $"{nameof(validateAgainst.Page)} should be greater than {MinPage}";
+                    failure = true;
+                    break;
+                case > MaxPage:
+                    validateAgainst.Page.Error = $"{nameof(validateAgainst.Page)} should be less than {MaxPage}";
+                    failure = true;
+                    break;
             }
         }
 

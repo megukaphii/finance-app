@@ -9,7 +9,7 @@
 	<VerticalStackLayout>
 		<Entry Text="{Binding Value}" Placeholder="Value..." Keyboard="Numeric"/>
         <Label Text="{Binding ValueError}" TextColor="{StaticResource Error}"/>
-		<Entry Text="{Binding Counterparty}" Placeholder="Counterparty..."/>
+		<Entry Focused="CounterpartyName_OnFocused" Text="{Binding Counterparty}" Placeholder="Counterparty..."/>
         <Label Text="{Binding CounterpartyError}" TextColor="{StaticResource Error}"/>
 		<Button Text="Quick Add" Command="{Binding SendTransactionCommand}" IsEnabled="{Binding IsNotBusy}"/>
 	</VerticalStackLayout>
