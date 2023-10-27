@@ -7,11 +7,11 @@ namespace FinanceApp.MauiClient.ViewModel;
 
 public partial class LoginViewModel(ServerConnection serverConnection) : BaseViewModel(serverConnection)
 {
+	[ObservableProperty]
+	private string _ipAddress = ServerConnection.DefaultAddress;
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsNotConnected))]
     private bool _isConnected;
-	[ObservableProperty]
-	private string _ipAddress = ServerConnection.DefaultAddress;
 
     public bool IsNotConnected => !IsConnected;
 

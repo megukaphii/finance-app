@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FinanceApp.Data.Exceptions;
 using FinanceApp.Data.Models;
-using FinanceApp.Data.RequestPatterns;
 using FinanceApp.Data.Requests.Counterparty;
 using FinanceApp.Data.Requests.Transaction;
 using FinanceApp.MauiClient.Services;
@@ -23,7 +22,11 @@ public partial class QuickAddViewModel(ServerConnection serverConnection) : Base
     [ObservableProperty]
     private string _counterpartyError = string.Empty;
 
-    public ObservableCollection<Counterparty> Counterparties { get; } = new();
+    [ObservableProperty]
+    private bool _counterpartyFocused = true;
+
+    private List<Counterparty> Counterparties { get; } = new();
+    public ObservableCollection<Counterparty> CounterpartiesSearch { get; set; } = new();
 
     [RelayCommand]
 	private async Task SendTransaction()
@@ -60,12 +63,14 @@ public partial class QuickAddViewModel(ServerConnection serverConnection) : Base
         } catch (Exception ex) {
             await ServerConnection.DisconnectAsync();
             await Shell.Current.GoToAsync($"//{nameof(Login)}", true);
-			await Shell.Current.DisplayAlert("Error", ex.Message + " | Inner exception: " + ex.InnerException?.Message, "OK");
+			await Shell.Current.DisplayAlert("Error", ex.Message + " | Inner exception: " + ex.InnerException?.Message,
+                "OK");
 		} finally {
 			IsBusy = false;
 		}
 	}
 
+    [RelayCommand]
     public async Task GetCounterparties()
     {
         try {
@@ -87,7 +92,8 @@ public partial class QuickAddViewModel(ServerConnection serverConnection) : Base
             foreach (Counterparty counterparty in response.Counterparties) {
                 Counterparties.Add(counterparty);
             }
-        } catch (ResponseException<GetCounterparties> ex) {
+            SearchCounterparties();
+        } catch (ResponseException<GetCounterparties>) {
             // TODO - Make error happen!
         } catch (Exception ex) {
             await ServerConnection.DisconnectAsync();
@@ -95,6 +101,21 @@ public partial class QuickAddViewModel(ServerConnection serverConnection) : Base
             await Shell.Current.DisplayAlert("Error", ex.Message + " | Inner exception: " + ex.InnerException?.Message, "OK");
         } finally {
             IsBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    private void SelectCounterparty(Counterparty? selected)
+    {
+        if (selected is not null) Counterparty = selected.Name;
+    }
+
+    public void SearchCounterparties()
+    {
+        CounterpartiesSearch.Clear();
+        IEnumerable<Counterparty> temp = Counterparties.Where(counterparty => counterparty.Name.Contains(Counterparty, StringComparison.CurrentCultureIgnoreCase));
+        foreach (Counterparty counterparty in temp) {
+            CounterpartiesSearch.Add(counterparty);
         }
     }
 

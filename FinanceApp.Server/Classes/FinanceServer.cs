@@ -10,6 +10,7 @@ using FinanceApp.Data.Requests;
 using FinanceApp.Data.Utility;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using FinanceApp.Data.Exceptions;
 
 namespace FinanceApp.Server.Classes;
 
@@ -68,7 +69,7 @@ public class FinanceServer : IServer
 	{
         SocketStream client = new() { Socket = socket, Stream = Stream.Null };
         _clients.Add(client);
-		try {
+        try {
             Console.WriteLine($"[{client.Id}] Connection found.");
             await using SslStream sslStream = await EstablishSslStreamAsync(client);
             client.Stream = sslStream;
@@ -78,6 +79,7 @@ public class FinanceServer : IServer
                     if (strRequest.Equals(string.Empty)) break;
 
                     dynamic request = IRequest.GetRequest(strRequest);
+                    Console.WriteLine($"[{client.Id}] {request}");
                     if (IRequest.IsValid(request)) {
                         await request.HandleAsync(_db, client);
                     } else {
@@ -86,8 +88,10 @@ public class FinanceServer : IServer
                 }
             }
         } catch (OperationCanceledException) {
-			Console.WriteLine($"[{client.Id}] Client timed out.");
-		} catch (Exception e) {
+            Console.WriteLine($"[{client.Id}] Client timed out.");
+        } catch (ConnectionException e) {
+            Console.WriteLine(e.Message);
+        } catch (Exception e) {
 			Console.WriteLine($"[{client.Id}] {e}");
 		} finally {
             await RemoveClientAsync(client);
@@ -144,9 +148,7 @@ public class FinanceServer : IServer
             readFirstBlock = true;
 
 			if (bytes <= 0) {
-                Console.WriteLine($"[{client.Id}] Client disconnected.");
-				await RemoveClientAsync(client);
-                break;
+                throw new ConnectionException($"[{client.Id}] Client disconnected.");
             }
 
 			messageData.Append(DecodeBuffer(buffer, bytes));
@@ -181,10 +183,10 @@ public class FinanceServer : IServer
 	private async Task RemoveClientAsync(SocketStream client)
 	{
         string clientId = client.Id;
-		await client.Socket.DisconnectAsync(false);
+        await client.Socket.DisconnectAsync(false);
         _clients.Remove(client);
-		Console.WriteLine($"[{clientId}] Client connection closed.");
-	}
+        Console.WriteLine($"[{clientId}] Client connection closed.");
+    }
 
     private async Task CloseAsync()
     {

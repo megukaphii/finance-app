@@ -6,7 +6,8 @@ namespace FinanceApp.Data.Validators;
 public class PageNumberValidator : IValidator
 {
     private const long MinPage = 0;
-    private const long MaxPage = long.MinValue;
+    // This is just to stop it complaining about an unreachable switch case. Probably change it later.
+    private const long MaxPage = long.MaxValue - 1;
 
     public bool Validate(IRequest request)
     {

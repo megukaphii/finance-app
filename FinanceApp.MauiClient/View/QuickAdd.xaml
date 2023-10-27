@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:model="clr-namespace:FinanceApp.Data.Models;assembly=FinanceApp.Data"
 			 xmlns:viewmodel="clr-namespace:FinanceApp.MauiClient.ViewModel"
 			 x:DataType="viewmodel:QuickAddViewModel"
              x:Class="FinanceApp.MauiClient.View.QuickAdd"
@@ -9,7 +10,24 @@
 	<VerticalStackLayout>
 		<Entry Text="{Binding Value}" Placeholder="Value..." Keyboard="Numeric"/>
         <Label Text="{Binding ValueError}" TextColor="{StaticResource Error}"/>
-		<Entry Focused="CounterpartyName_OnFocused" Text="{Binding Counterparty}" Placeholder="Counterparty..."/>
+		<Entry TextChanged="CounterpartyName_OnTextChanged" Focused="CounterpartyName_OnFocused" Unfocused="CounterpartyName_OnUnfocused" Text="{Binding Counterparty}" Placeholder="Counterparty..."/>
+        <CollectionView
+                IsVisible="{Binding CounterpartyFocused}"
+                ItemsSource="{Binding CounterpartiesSearch}"
+                SelectionChangedCommand="{Binding SelectCounterpartyCommand}"
+                SelectionChangedCommandParameter="{Binding Path=SelectedItem, Source={RelativeSource Self}}"
+                SelectionMode="Single">
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Vertical" />
+            </CollectionView.ItemsLayout>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="model:Counterparty">
+                    <Frame HeightRequest="50" Padding="10,0">
+                        <Label Text="{Binding Name}" TextColor="White" VerticalTextAlignment="Center" />
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
         <Label Text="{Binding CounterpartyError}" TextColor="{StaticResource Error}"/>
 		<Button Text="Quick Add" Command="{Binding SendTransactionCommand}" IsEnabled="{Binding IsNotBusy}"/>
 	</VerticalStackLayout>
