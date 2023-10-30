@@ -10,14 +10,19 @@ public abstract class TransactionController : IController
 {
     public static async Task Create(Create request, FinanceAppContext database, SocketStream client)
     {
+        Counterparty? counterparty = request.Counterparty.Value;
         if (request.Counterparty.Value.Id == 0) {
-            await database.Counterparties.AddAsync(request.Counterparty.Value);
+            counterparty = await database.Counterparties.FirstOrDefaultAsync(temp => temp.Name == request.Counterparty.Value.Name);
+            if (counterparty is null) {
+                await database.Counterparties.AddAsync(request.Counterparty.Value);
+                counterparty = request.Counterparty.Value;
+            }
         }
 
         Transaction created = new()
         {
             Value = request.Value.Value,
-            Counterparty = request.Counterparty.Value
+            Counterparty = counterparty
         };
         await database.Transactions.AddAsync(created);
         await database.SaveChangesAsync();
