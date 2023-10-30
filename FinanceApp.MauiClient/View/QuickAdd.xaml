@@ -22,9 +22,9 @@
             </CollectionView.ItemsLayout>
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="model:Counterparty">
-                    <Frame HeightRequest="50" Padding="10,0">
+                    <Border HeightRequest="50" Padding="10,0" BackgroundColor="Black">
                         <Label Text="{Binding Name}" TextColor="White" VerticalTextAlignment="Center" />
-                    </Frame>
+                    </Border>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>

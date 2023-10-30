@@ -113,7 +113,9 @@ public partial class QuickAddViewModel(ServerConnection serverConnection) : Base
     public void SearchCounterparties()
     {
         CounterpartiesSearch.Clear();
-        IEnumerable<Counterparty> temp = Counterparties.Where(counterparty => counterparty.Name.Contains(Counterparty, StringComparison.CurrentCultureIgnoreCase));
+        IEnumerable<Counterparty> temp = Counterparties.Where(counterparty =>
+            counterparty.Name.Contains(Counterparty, StringComparison.CurrentCultureIgnoreCase)
+        );
         foreach (Counterparty counterparty in temp) {
             CounterpartiesSearch.Add(counterparty);
         }
