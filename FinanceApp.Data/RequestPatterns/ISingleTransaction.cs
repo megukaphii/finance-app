@@ -10,4 +10,5 @@ public interface ISingleTransaction : IRequest
 
     public RequestField<double> Value { get; }
     public RequestField<Counterparty> Counterparty { get; }
+    public RequestField<DateTime> Timestamp { get; }
 }

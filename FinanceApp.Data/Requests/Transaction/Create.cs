@@ -10,10 +10,11 @@ public class Create : ISingleTransaction
 
     public required RequestField<double> Value { get; init; }
     public required RequestField<Models.Counterparty> Counterparty { get; init; }
+    public required RequestField<DateTime> Timestamp { get; init; }
 
     public override string ToString()
     {
-        return $"{Flag}[{nameof(Value)}: {Value}], [{nameof(Counterparty)}: {Counterparty}]";
+        return $"{Flag}[[{nameof(Counterparty)}: {Counterparty}], {nameof(Value)}: {Value}, {nameof(Timestamp)}: {Timestamp}]";
     }
 
     public Task HandleAsync(FinanceAppContext database, SocketStream client)

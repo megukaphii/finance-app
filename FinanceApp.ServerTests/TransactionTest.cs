@@ -16,27 +16,32 @@ namespace FinanceApp.ServerTests;
 [TestFixture]
 public class TransactionTest
 {
-	private static readonly FinanceAppContext _db = new();
+	private static readonly FinanceAppContext DB = new();
 	private static readonly Socket EmptySocket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
     private static readonly Transaction TestTransaction = new()
     {
-        Value = 100,
-        Counterparty = new Counterparty
+        Counterparty = new()
         {
             Name = "John"
-        }
+        },
+        Value = 100,
+        Timestamp = DateTime.Now.Date
     };
 
     private static readonly Create TestCreateRequest = new()
     {
-        Value = new RequestField<double>
+        Counterparty = new()
+        {
+            Value = TestTransaction.Counterparty
+        },
+        Value = new()
         {
             Value = TestTransaction.Value
         },
-        Counterparty = new RequestField<Counterparty>
+        Timestamp = new()
         {
-            Value = TestTransaction.Counterparty
+            Value = TestTransaction.Timestamp
         }
     };
 
@@ -44,7 +49,7 @@ public class TransactionTest
 
     private static readonly GetPage TestIndexRequest = new()
     {
-        Page = new RequestField<long>
+        Page = new()
         {
             Value = 0
         }
@@ -56,39 +61,42 @@ public class TransactionTest
     private static readonly Counterparty SeedCounterparty2 = new() { Name = "Megumin" };
     private static readonly List<Transaction> SeedTransactions = new()
     {
-        new Transaction
+        new()
         {
             Counterparty = SeedCounterparty1,
-            Value = 10
+            Value = 10,
+            Timestamp = DateTime.Now.Date
         },
-        new Transaction
+        new()
         {
             Counterparty = SeedCounterparty1,
-            Value = -50
+            Value = -50,
+            Timestamp = DateTime.Now.Date
         },
-        new Transaction
+        new()
         {
             Counterparty = SeedCounterparty2,
-            Value = 420
+            Value = 420,
+            Timestamp = DateTime.Now.Date
         }
     };
 
     [OneTimeSetUp]
     public async Task PerformMigrations()
     {
-        if ((await _db.Database.GetPendingMigrationsAsync()).Any()) {
-            await _db.Database.MigrateAsync();
+        if ((await DB.Database.GetPendingMigrationsAsync()).Any()) {
+            await DB.Database.MigrateAsync();
         }
     }
 
     [SetUp]
     public async Task ClearDB()
     {
-        _db.ChangeTracker.Clear();
-        await _db.Database.ExecuteSqlRawAsync("DELETE FROM Transactions WHERE Id != 0");
-        await _db.Database.ExecuteSqlRawAsync("DELETE FROM sqlite_sequence WHERE name='Transactions';");
-        await _db.Database.ExecuteSqlRawAsync("DELETE FROM Counterparties WHERE Id != 0");
-        await _db.Database.ExecuteSqlRawAsync("DELETE FROM sqlite_sequence WHERE name='Counterparties';");
+        DB.ChangeTracker.Clear();
+        await DB.Database.ExecuteSqlRawAsync("DELETE FROM Transactions WHERE Id != 0");
+        await DB.Database.ExecuteSqlRawAsync("DELETE FROM sqlite_sequence WHERE name='Transactions';");
+        await DB.Database.ExecuteSqlRawAsync("DELETE FROM Counterparties WHERE Id != 0");
+        await DB.Database.ExecuteSqlRawAsync("DELETE FROM sqlite_sequence WHERE name='Counterparties';");
     }
 
     [Test]
@@ -98,9 +106,9 @@ public class TransactionTest
         byte[] buffer = new byte[2048];
         MemoryStream stream = new(buffer);
         SocketStream client = new SocketStream() { Socket = EmptySocket, Stream =  stream };
-        await request.HandleAsync(_db, client);
+        await request.HandleAsync(DB, client);
 
-        Transaction? result = await _db.Transactions
+        Transaction? result = await DB.Transactions
             .Include(transaction => transaction.Counterparty)
             .FirstOrDefaultAsync(transaction => transaction.Id == 1);
 
@@ -115,7 +123,7 @@ public class TransactionTest
         byte[] buffer = new byte[2048];
         MemoryStream stream = new(buffer);
 		SocketStream client = new() { Socket = EmptySocket, Stream = stream };
-		await request.HandleAsync(_db, client);
+		await request.HandleAsync(DB, client);
 
 		CreateResponse expected = new()
         {
@@ -138,7 +146,7 @@ public class TransactionTest
         byte[] buffer = new byte[2048];
         MemoryStream stream = new(buffer);
 		SocketStream client = new() { Socket = EmptySocket, Stream = stream };
-		await request.HandleAsync(_db, client);
+		await request.HandleAsync(DB, client);
 
 		string message = Encoding.UTF8.GetString(stream.ToArray());
         message = Helpers.RemoveFromEof(message);
@@ -150,7 +158,7 @@ public class TransactionTest
 
     private async Task SeedDB()
     {
-        await _db.Transactions.AddRangeAsync(SeedTransactions);
-        await _db.SaveChangesAsync();
+        await DB.Transactions.AddRangeAsync(SeedTransactions);
+        await DB.SaveChangesAsync();
     }
 }

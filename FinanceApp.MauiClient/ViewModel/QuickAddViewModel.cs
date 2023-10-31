@@ -23,6 +23,11 @@ public partial class QuickAddViewModel(ServerConnection serverConnection) : Base
     private string _counterpartyError = string.Empty;
 
     [ObservableProperty]
+    private DateTime _timestamp = DateTime.Now.Date;
+    [ObservableProperty]
+    private string _timestampError = string.Empty;
+
+    [ObservableProperty]
     private bool _counterpartyFocused = true;
 
     private List<Counterparty> Counterparties { get; } = new();
@@ -37,16 +42,20 @@ public partial class QuickAddViewModel(ServerConnection serverConnection) : Base
 
             Create request = new()
             {
-                Value = new()
-                {
-                    Value = Value
-                },
                 Counterparty = new()
                 {
                     Value = new()
                     {
                         Name = Counterparty
                     }
+                },
+                Value = new()
+                {
+                    Value = Value
+                },
+                Timestamp = new()
+                {
+                    Value = Timestamp
                 }
             };
             CreateResponse response = await ServerConnection.SendMessageAsync<Create, CreateResponse>(request);

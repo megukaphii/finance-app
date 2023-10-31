@@ -21,8 +21,9 @@ public abstract class TransactionController : IController
 
         Transaction created = new()
         {
+            Counterparty = counterparty,
             Value = request.Value.Value,
-            Counterparty = counterparty
+            Timestamp = request.Timestamp.Value
         };
         await database.Transactions.AddAsync(created);
         await database.SaveChangesAsync();
@@ -39,7 +40,9 @@ public abstract class TransactionController : IController
     public static async Task Index(FinanceAppContext database, SocketStream client)
     {
         List<Transaction> transactions =
-            await database.Transactions.Include(transaction => transaction.Counterparty).ToListAsync();
+            await database.Transactions.Include(transaction => transaction.Counterparty).
+                OrderByDescending(transaction => transaction.Timestamp).
+                ToListAsync();
 
         IResponse response = new GetPageResponse
         {
