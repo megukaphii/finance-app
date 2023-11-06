@@ -13,13 +13,13 @@ public class RequestTest
 {
     private static readonly Create TestRequest = new()
     {
-        Value = new RequestField<double>
+        Value = new()
         {
             Value = 100
         },
-        Counterparty = new RequestField<Counterparty>
+        Counterparty = new()
         {
-            Value = new Counterparty
+            Value = new()
             {
                 Name = "John"
             }

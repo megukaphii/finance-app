@@ -21,8 +21,14 @@ public abstract class TransactionController : IController
 
         Transaction created = new()
         {
-            Value = request.Value.Value,
-            Counterparty = counterparty
+            Account = new()
+            {
+                Name = "Test Acc.",
+                Description = "Test Desc.",
+                Value = 0
+            },
+            Counterparty = counterparty,
+            Value = request.Value.Value
         };
         await database.Transactions.AddAsync(created);
         await database.SaveChangesAsync();

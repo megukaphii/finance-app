@@ -8,7 +8,7 @@ public class Create : ISingleTransaction
 {
     public static string Flag => "<CreateTransaction>";
 
-    public required RequestField<double> Value { get; init; }
+    public required RequestField<decimal> Value { get; init; }
     public required RequestField<Models.Counterparty> Counterparty { get; init; }
 
     public override string ToString()

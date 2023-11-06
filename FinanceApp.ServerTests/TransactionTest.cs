@@ -3,7 +3,6 @@ using System.Text;
 using FinanceApp.Data;
 using FinanceApp.Data.Interfaces;
 using FinanceApp.Data.Models;
-using FinanceApp.Data.RequestPatterns;
 using FinanceApp.Data.Requests.Transaction;
 using FinanceApp.Data.Utility;
 using Microsoft.EntityFrameworkCore;
@@ -21,20 +20,26 @@ public class TransactionTest
 
     private static readonly Transaction TestTransaction = new()
     {
-        Value = 100,
-        Counterparty = new Counterparty
+        Account = new()
+        {
+            Name = "Test Acc.",
+            Description = "Test Desc.",
+            Value = 0
+        },
+        Counterparty = new()
         {
             Name = "John"
-        }
+        },
+        Value = 100
     };
 
     private static readonly Create TestCreateRequest = new()
     {
-        Value = new RequestField<double>
+        Value = new()
         {
             Value = TestTransaction.Value
         },
-        Counterparty = new RequestField<Counterparty>
+        Counterparty = new()
         {
             Value = TestTransaction.Counterparty
         }
@@ -44,7 +49,7 @@ public class TransactionTest
 
     private static readonly GetPage TestIndexRequest = new()
     {
-        Page = new RequestField<long>
+        Page = new()
         {
             Value = 0
         }
@@ -56,18 +61,36 @@ public class TransactionTest
     private static readonly Counterparty SeedCounterparty2 = new() { Name = "Megumin" };
     private static readonly List<Transaction> SeedTransactions = new()
     {
-        new Transaction
+        new()
         {
+            Account = new()
+            {
+                Name = "Test Acc.",
+                Description = "Test Desc.",
+                Value = 0
+            },
             Counterparty = SeedCounterparty1,
             Value = 10
         },
-        new Transaction
+        new()
         {
+            Account = new()
+            {
+                Name = "Test Acc.",
+                Description = "Test Desc.",
+                Value = 0
+            },
             Counterparty = SeedCounterparty1,
             Value = -50
         },
-        new Transaction
+        new()
         {
+            Account = new()
+            {
+                Name = "Test Acc.",
+                Description = "Test Desc.",
+                Value = 0
+            },
             Counterparty = SeedCounterparty2,
             Value = 420
         }
