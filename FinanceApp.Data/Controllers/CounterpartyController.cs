@@ -8,7 +8,7 @@ namespace FinanceApp.Data.Controllers;
 
 public abstract class CounterpartyController : IController
 {
-    public static async Task Index(FinanceAppContext database, SocketStream client)
+    public static async Task Index(FinanceAppContext database, Client client)
     {
         List<Counterparty> counterparties = await database.Counterparties.ToListAsync();
 

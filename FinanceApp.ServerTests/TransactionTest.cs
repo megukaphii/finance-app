@@ -120,7 +120,7 @@ public class TransactionTest
         IRequest request = IRequest.GetRequest(MessageCreteRequest);
         byte[] buffer = new byte[2048];
         MemoryStream stream = new(buffer);
-        SocketStream client = new SocketStream() { Socket = EmptySocket, Stream =  stream };
+        Client client = new() { Socket = EmptySocket, Stream =  stream };
         await request.HandleAsync(_db, client);
 
         Transaction? result = await _db.Transactions
@@ -137,7 +137,7 @@ public class TransactionTest
         IRequest request = IRequest.GetRequest(MessageCreteRequest);
         byte[] buffer = new byte[2048];
         MemoryStream stream = new(buffer);
-		SocketStream client = new() { Socket = EmptySocket, Stream = stream };
+		Client client = new() { Socket = EmptySocket, Stream = stream };
 		await request.HandleAsync(_db, client);
 
 		CreateResponse expected = new()
@@ -160,7 +160,7 @@ public class TransactionTest
         IRequest request = IRequest.GetRequest(MessageIndexRequest);
         byte[] buffer = new byte[2048];
         MemoryStream stream = new(buffer);
-		SocketStream client = new() { Socket = EmptySocket, Stream = stream };
+		Client client = new() { Socket = EmptySocket, Stream = stream };
 		await request.HandleAsync(_db, client);
 
 		string message = Encoding.UTF8.GetString(stream.ToArray());

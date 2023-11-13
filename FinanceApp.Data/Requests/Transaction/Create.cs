@@ -6,6 +6,7 @@ namespace FinanceApp.Data.Requests.Transaction;
 
 public class Create : ISingleTransaction
 {
+    // TODO - Standardise request names and flags
     public static string Flag => "<CreateTransaction>";
 
     public required RequestField<decimal> Value { get; init; }
@@ -16,7 +17,7 @@ public class Create : ISingleTransaction
         return $"{Flag}[{nameof(Value)}: {Value}], [{nameof(Counterparty)}: {Counterparty}]";
     }
 
-    public Task HandleAsync(FinanceAppContext database, SocketStream client)
+    public Task HandleAsync(FinanceAppContext database, Client client)
     {
         return TransactionController.Create(this, database, client);
     }

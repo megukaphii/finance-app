@@ -6,8 +6,10 @@ public class Account
 {
     public long Id { get; init; }
     public List<Transaction> Transactions { get; init; } = new();
+    [MinLength(2)]
     [MaxLength(64)]
     public required string Name { get; set; } = string.Empty;
+    [MinLength(0)]
     [MaxLength(255)]
     public required string Description { get; set; } = string.Empty;
     [DataType(DataType.Currency)]

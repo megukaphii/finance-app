@@ -35,7 +35,7 @@ public partial class LoginViewModel(ServerConnection serverConnection) : BaseVie
 			if (await ServerConnection.EstablishConnection(IpAddress)) {
 				IsConnected = ServerConnection.IsConnected;
 				await Shell.Current.DisplayAlert("Connection Established", $"Successfully connected to {IpAddress}!", "OK");
-				await Shell.Current.GoToAsync($"//{nameof(QuickAdd)}", true);
+				await Shell.Current.GoToAsync($"//{nameof(Accounts)}", true);
 			}
 		} catch (Exception ex) {
 			await Shell.Current.DisplayAlert("Error", ex.Message + " | Inner exception: " + ex.InnerException?.Message, "OK");
@@ -62,5 +62,10 @@ public partial class LoginViewModel(ServerConnection serverConnection) : BaseVie
     public void CheckConnection()
     {
         IsConnected = ServerConnection.IsConnected;
+    }
+
+    public override void ClearErrors()
+    {
+
     }
 }

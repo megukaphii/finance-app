@@ -20,7 +20,7 @@ public class FinanceServer : IServer
 
     private readonly Socket _listener = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
     private readonly X509Certificate _serverCertificate;
-    private readonly List<SocketStream> _clients = new();
+    private readonly List<Client> _clients = new();
     private readonly FinanceAppContext _db = new();
 
     private bool _isRunning;
@@ -67,7 +67,7 @@ public class FinanceServer : IServer
 
 	private async Task HandleConnection(Socket socket)
 	{
-        SocketStream client = new() { Socket = socket, Stream = Stream.Null };
+        Client client = new() { Socket = socket, Stream = Stream.Null };
         _clients.Add(client);
         try {
             Console.WriteLine($"[{client.Id}] Connection found.");
@@ -98,7 +98,7 @@ public class FinanceServer : IServer
         }
 	}
 
-    private async Task<SslStream> EstablishSslStreamAsync(SocketStream client)
+    private async Task<SslStream> EstablishSslStreamAsync(Client client)
     {
         NetworkStream networkStream = new(client.Socket);
         SslStream sslStream = new(networkStream, false);
@@ -107,7 +107,7 @@ public class FinanceServer : IServer
         return sslStream;
 	}
 
-    private async Task<bool> IsClientCompatibleAsync(SocketStream client)
+    private async Task<bool> IsClientCompatibleAsync(Client client)
     {
         try {
             string messageReceived = await ReadMessageAsync(client);
@@ -134,7 +134,7 @@ public class FinanceServer : IServer
         }
 	}
 
-	private async Task<string> ReadMessageAsync(SocketStream client)
+	private async Task<string> ReadMessageAsync(Client client)
 	{
 		byte[] buffer = new byte[2048];
 		StringBuilder messageData = new();
@@ -180,7 +180,7 @@ public class FinanceServer : IServer
         await stream.FlushAsync();
 	}
 
-	private async Task RemoveClientAsync(SocketStream client)
+	private async Task RemoveClientAsync(Client client)
 	{
         string clientId = client.Id;
         await client.Socket.DisconnectAsync(false);
@@ -190,7 +190,7 @@ public class FinanceServer : IServer
 
     private async Task CloseAsync()
     {
-        foreach (SocketStream client in _clients) {
+        foreach (Client client in _clients) {
             await client.Socket.DisconnectAsync(false);
         }
 

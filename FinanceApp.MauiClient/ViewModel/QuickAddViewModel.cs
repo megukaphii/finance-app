@@ -121,7 +121,7 @@ public partial class QuickAddViewModel(ServerConnection serverConnection) : Base
         }
     }
 
-    private void ClearErrors()
+    public override void ClearErrors()
     {
         ValueError = string.Empty;
         CounterpartyError = string.Empty;

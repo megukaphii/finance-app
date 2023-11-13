@@ -5,6 +5,7 @@ namespace FinanceApp.Data;
 
 public class FinanceAppContext : DbContext
 {
+    public DbSet<Account> Accounts { get; set; }
     public DbSet<Transaction> Transactions { get; set; }
     public DbSet<Counterparty> Counterparties { get; set; }
 
