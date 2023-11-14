@@ -11,6 +11,11 @@ public class CreateAccount : ISingleAccount
     public required RequestField<string> Name { get; init; }
     public required RequestField<string> Description { get; init; }
 
+    public override string ToString()
+    {
+        return $"{Flag}[{nameof(Name)}: {Name}, {nameof(Description)}: {Description}]";
+    }
+
     public Task HandleAsync(FinanceAppContext database, Client client)
     {
         return AccountController.Create(this, database, client);

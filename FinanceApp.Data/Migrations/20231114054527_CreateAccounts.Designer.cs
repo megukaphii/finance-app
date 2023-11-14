@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FinanceApp.Data.Migrations
 {
     [DbContext(typeof(FinanceAppContext))]
-    [Migration("20231106045552_CreateAccounts")]
+    [Migration("20231114054527_CreateAccounts")]
     partial class CreateAccounts
     {
         /// <inheritdoc />
@@ -40,7 +40,7 @@ namespace FinanceApp.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Account");
+                    b.ToTable("Accounts");
                 });
 
             modelBuilder.Entity("FinanceApp.Data.Models.Counterparty", b =>

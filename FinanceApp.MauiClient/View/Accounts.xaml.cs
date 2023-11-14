@@ -9,6 +9,10 @@ public partial class Accounts : ContentPage
         InitializeComponent();
         BindingContext = viewModel;
         viewModel.Title = "Accounts";
+    }
+
+    protected override void OnAppearing()
+    {
         ((AccountsViewModel)BindingContext).LoadAccounts();
     }
 }

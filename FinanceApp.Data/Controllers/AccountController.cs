@@ -1,7 +1,6 @@
 ﻿using FinanceApp.Data.Interfaces;
 using FinanceApp.Data.Models;
 using FinanceApp.Data.Requests.Account;
-using FinanceApp.Data.Requests.Transaction;
 using FinanceApp.Data.Utility;
 using Microsoft.EntityFrameworkCore;
 
@@ -41,12 +40,12 @@ public class AccountController : IController
             Success = true
         };
 
-        await response.Send<CreateResponse>(client);
+        await response.Send<CreateAccountResponse>(client);
     }
 
     public static async Task SetActiveAccount(SelectAccount request, FinanceAppContext database, Client client)
     {
-        client.SetActiveAccount((await database.Accounts.FindAsync(request.Id))!);
+        client.SetActiveAccount((await database.Accounts.FindAsync(request.Id.Value))!);
         IResponse response = new SelectAccountResponse
         {
             Success = true

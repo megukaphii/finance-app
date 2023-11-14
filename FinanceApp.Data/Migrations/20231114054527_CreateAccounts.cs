@@ -26,7 +26,7 @@ namespace FinanceApp.Data.Migrations
                 defaultValue: 0L);
 
             migrationBuilder.CreateTable(
-                name: "Account",
+                name: "Accounts",
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "INTEGER", nullable: false)
@@ -37,7 +37,7 @@ namespace FinanceApp.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Account", x => x.Id);
+                    table.PrimaryKey("PK_Accounts", x => x.Id);
                 });
 
             migrationBuilder.CreateIndex(
@@ -46,10 +46,10 @@ namespace FinanceApp.Data.Migrations
                 column: "AccountId");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Transactions_Account_AccountId",
+                name: "FK_Transactions_Accounts_AccountId",
                 table: "Transactions",
                 column: "AccountId",
-                principalTable: "Account",
+                principalTable: "Accounts",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
         }
@@ -58,11 +58,11 @@ namespace FinanceApp.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Transactions_Account_AccountId",
+                name: "FK_Transactions_Accounts_AccountId",
                 table: "Transactions");
 
             migrationBuilder.DropTable(
-                name: "Account");
+                name: "Accounts");
 
             migrationBuilder.DropIndex(
                 name: "IX_Transactions_AccountId",

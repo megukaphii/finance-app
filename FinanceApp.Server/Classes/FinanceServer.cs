@@ -59,9 +59,12 @@ public class FinanceServer : IServer
 	}
 
 	private async Task PerformMigrations()
-	{
-		if ((await _db.Database.GetPendingMigrationsAsync()).Any()) {
+    {
+        List<string> migrations = (await _db.Database.GetPendingMigrationsAsync()).ToList();
+        if (migrations.Any()) {
+            Console.WriteLine($"Migrations to be applied: {string.Join(", ", migrations)}");
 			await _db.Database.MigrateAsync();
+            Console.WriteLine("Migrations successfully applied!");
 		}
 	}
 

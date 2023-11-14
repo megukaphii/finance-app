@@ -37,7 +37,7 @@ namespace FinanceApp.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Account");
+                    b.ToTable("Accounts");
                 });
 
             modelBuilder.Entity("FinanceApp.Data.Models.Counterparty", b =>

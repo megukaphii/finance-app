@@ -1,5 +1,6 @@
 ﻿using FinanceApp.Data.Interfaces;
 using FinanceApp.Data.Models;
+using FinanceApp.Data.Requests.Account;
 using FinanceApp.Data.Requests.Transaction;
 using FinanceApp.Data.Utility;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +12,10 @@ public abstract class TransactionController : IController
     public static async Task Index(FinanceAppContext database, Client client)
     {
         List<Transaction> transactions =
-            await database.Transactions.Include(transaction => transaction.Counterparty).ToListAsync();
+            await database.Transactions
+                .Where(transaction => transaction.Account.Equals(client.Account))
+                .Include(transaction => transaction.Counterparty)
+                .ToListAsync();
 
         IResponse response = new GetPageResponse
         {
@@ -33,26 +37,32 @@ public abstract class TransactionController : IController
             }
         }
 
-        Transaction created = new()
-        {
-            Account = new()
+        if (client.Account is null) {
+            // TODO - Make sure this is handled properly! Probably doesn't currently work
+            IResponse response = new CreateAccountResponse
             {
-                Name = "Test Acc.",
-                Description = "Test Desc.",
-                Value = 0
-            },
-            Counterparty = counterparty,
-            Value = request.Value.Value
-        };
-        await database.Transactions.AddAsync(created);
-        await database.SaveChangesAsync();
+                Id = 0,
+                Success = false
+            };
 
-        IResponse response = new CreateResponse
-        {
-            Id = created.Id,
-            Success = true
-        };
+            await response.Send<CreateAccountResponse>(client);
+        } else {
+            Transaction created = new()
+            {
+                Account = client.Account,
+                Counterparty = counterparty,
+                Value = request.Value.Value
+            };
+            await database.Transactions.AddAsync(created);
+            await database.SaveChangesAsync();
 
-        await response.Send<CreateResponse>(client);
+            IResponse response = new CreateAccountResponse
+            {
+                Id = created.Id,
+                Success = true
+            };
+
+            await response.Send<CreateAccountResponse>(client);
+        }
     }
 }

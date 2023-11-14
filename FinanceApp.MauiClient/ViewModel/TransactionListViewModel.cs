@@ -17,7 +17,7 @@ public partial class TransactionListViewModel(ServerConnection serverConnection)
 	public ObservableCollection<Transaction> Transactions { get; } = new();
 
     [RelayCommand]
-	private async Task LoadTransactions()
+	public async Task LoadTransactions()
 	{
 		if (IsBusy) return;
 
