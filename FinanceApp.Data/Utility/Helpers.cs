@@ -2,7 +2,7 @@
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace FinanceApp.Data.Extensions;
+namespace FinanceApp.Data.Utility;
 
 public static class Helpers
 {

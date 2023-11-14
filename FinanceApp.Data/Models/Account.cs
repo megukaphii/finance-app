@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using FinanceApp.Data.Extensions;
 
 namespace FinanceApp.Data.Models;
 
@@ -17,7 +18,7 @@ public class Account
 
     public override string ToString()
     {
-        return $"{nameof(Id)}: {Id}, {nameof(Name)}: {Name}, {nameof(Description)}: {Description[..64] + (Description.Length > 64 ? "..." : "")}";
+        return $"{nameof(Id)}: {Id}, {nameof(Name)}: {Name}, {nameof(Description)}: {Description.Truncate(64)}";
     }
 
     public override bool Equals(object? obj)

@@ -18,14 +18,16 @@ public class TransactionTest
 	private static readonly FinanceAppContext _db = new();
 	private static readonly Socket EmptySocket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
+    private static Account _defaultAccount = new()
+    {
+        Name = "Test Acc.",
+        Description = "Test Desc.",
+        Value = 0
+    };
+
     private static readonly Transaction TestTransaction = new()
     {
-        Account = new()
-        {
-            Name = "Test Acc.",
-            Description = "Test Desc.",
-            Value = 0
-        },
+        Account = _defaultAccount,
         Counterparty = new()
         {
             Name = "John"
@@ -63,34 +65,19 @@ public class TransactionTest
     {
         new()
         {
-            Account = new()
-            {
-                Name = "Test Acc.",
-                Description = "Test Desc.",
-                Value = 0
-            },
+            Account = _defaultAccount,
             Counterparty = SeedCounterparty1,
             Value = 10
         },
         new()
         {
-            Account = new()
-            {
-                Name = "Test Acc.",
-                Description = "Test Desc.",
-                Value = 0
-            },
+            Account = _defaultAccount,
             Counterparty = SeedCounterparty1,
             Value = -50
         },
         new()
         {
-            Account = new()
-            {
-                Name = "Test Acc.",
-                Description = "Test Desc.",
-                Value = 0
-            },
+            Account = _defaultAccount,
             Counterparty = SeedCounterparty2,
             Value = 420
         }
@@ -101,6 +88,11 @@ public class TransactionTest
     {
         if ((await _db.Database.GetPendingMigrationsAsync()).Any()) {
             await _db.Database.MigrateAsync();
+        }
+
+        if (!await _db.Accounts.AnyAsync()) {
+            await _db.Accounts.AddAsync(_defaultAccount);
+            await _db.SaveChangesAsync();
         }
     }
 
@@ -114,6 +106,7 @@ public class TransactionTest
         await _db.Database.ExecuteSqlRawAsync("DELETE FROM sqlite_sequence WHERE name='Counterparties';");
     }
 
+    // TODO - These need a lot of reworking, I think. First do the TODO in FinanceAppContext though.
     [Test]
     public async Task TransactionCreateHandle()
     {
@@ -121,6 +114,7 @@ public class TransactionTest
         byte[] buffer = new byte[2048];
         MemoryStream stream = new(buffer);
         Client client = new() { Socket = EmptySocket, Stream =  stream };
+        client.SetActiveAccount(await _db.Accounts.FirstAsync());
         await request.HandleAsync(_db, client);
 
         Transaction? result = await _db.Transactions
@@ -138,6 +132,7 @@ public class TransactionTest
         byte[] buffer = new byte[2048];
         MemoryStream stream = new(buffer);
 		Client client = new() { Socket = EmptySocket, Stream = stream };
+        client.SetActiveAccount(await _db.Accounts.FirstAsync());
 		await request.HandleAsync(_db, client);
 
 		CreateResponse expected = new()
@@ -161,6 +156,7 @@ public class TransactionTest
         byte[] buffer = new byte[2048];
         MemoryStream stream = new(buffer);
 		Client client = new() { Socket = EmptySocket, Stream = stream };
+        client.SetActiveAccount(await _db.Accounts.FirstAsync());
 		await request.HandleAsync(_db, client);
 
 		string message = Encoding.UTF8.GetString(stream.ToArray());
@@ -173,7 +169,17 @@ public class TransactionTest
 
     private async Task SeedDB()
     {
-        await _db.Transactions.AddRangeAsync(SeedTransactions);
+        Account tempAccount = await _db.Accounts.FirstAsync();
+        List<Transaction> tempTransactions = SeedTransactions.Select(
+            template => new Transaction
+            {
+                Account = tempAccount,
+                Counterparty = template.Counterparty,
+                Value = template.Value
+            }
+        ).ToList();
+
+        await _db.Transactions.AddRangeAsync(tempTransactions);
         await _db.SaveChangesAsync();
     }
 }

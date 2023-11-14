@@ -1,5 +1,4 @@
 ﻿using FinanceApp.Data.Interfaces;
-using FinanceApp.Data.Models;
 using FinanceApp.Data.RequestPatterns;
 using FinanceApp.Data.Requests.Transaction;
 using FinanceApp.Data.Validators;
@@ -40,6 +39,7 @@ public class RequestTest
     {
         IRequest request = IRequest.GetRequest(Message);
 
+        // TODO - This test doesn't work! It doesn't actually confirm the Validator is run, because IsValid skips if it doesn't find the Validator
         Assert.DoesNotThrow(() => IRequest.IsValid(request));
         Assert.IsTrue(request is ISingleTransaction);
         Assert.AreEqual(typeof(TransactionValidator), ISingleTransaction.Validator);
