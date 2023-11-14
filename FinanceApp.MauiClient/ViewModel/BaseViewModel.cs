@@ -3,7 +3,7 @@ using FinanceApp.MauiClient.Services;
 
 namespace FinanceApp.MauiClient.ViewModel;
 
-public partial class BaseViewModel(ServerConnection serverConnection) : ObservableObject
+public abstract partial class BaseViewModel(ServerConnection serverConnection) : ObservableObject
 {
 	[ObservableProperty]
 	[NotifyPropertyChangedFor(nameof(IsNotBusy))]
@@ -14,4 +14,6 @@ public partial class BaseViewModel(ServerConnection serverConnection) : Observab
 	public bool IsNotBusy => !IsBusy;
 
 	protected readonly ServerConnection ServerConnection = serverConnection;
+
+    public abstract void ClearErrors();
 }

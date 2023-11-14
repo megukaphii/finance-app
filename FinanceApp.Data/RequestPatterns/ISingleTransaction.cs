@@ -8,6 +8,6 @@ public interface ISingleTransaction : IRequest
 {
     public new static Type Validator => typeof(TransactionValidator);
 
-    public RequestField<double> Value { get; }
+    public RequestField<decimal> Value { get; }
     public RequestField<Counterparty> Counterparty { get; }
 }

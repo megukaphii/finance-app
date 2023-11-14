@@ -1,5 +1,6 @@
 ﻿using FinanceApp.Data.Interfaces;
 using FinanceApp.Data.Models;
+using FinanceApp.Data.Requests.Account;
 using FinanceApp.Data.Requests.Transaction;
 using FinanceApp.Data.Utility;
 using Microsoft.EntityFrameworkCore;
@@ -8,7 +9,24 @@ namespace FinanceApp.Data.Controllers;
 
 public abstract class TransactionController : IController
 {
-    public static async Task Create(Create request, FinanceAppContext database, SocketStream client)
+    public static async Task Index(FinanceAppContext database, Client client)
+    {
+        List<Transaction> transactions =
+            await database.Transactions
+                .Where(transaction => transaction.Account.Equals(client.Account))
+                .Include(transaction => transaction.Counterparty)
+                .ToListAsync();
+
+        IResponse response = new GetPageResponse
+        {
+            Transactions = transactions,
+            Success = true,
+        };
+
+        await response.Send<GetPageResponse>(client);
+    }
+
+    public static async Task Create(Create request, FinanceAppContext database, Client client)
     {
         Counterparty? counterparty = request.Counterparty.Value;
         if (request.Counterparty.Value.Id == 0) {
@@ -19,34 +37,32 @@ public abstract class TransactionController : IController
             }
         }
 
-        Transaction created = new()
-        {
-            Value = request.Value.Value,
-            Counterparty = counterparty
-        };
-        await database.Transactions.AddAsync(created);
-        await database.SaveChangesAsync();
+        if (client.Account is null) {
+            // TODO - Make sure this is handled properly! Probably doesn't currently work
+            IResponse response = new CreateAccountResponse
+            {
+                Id = 0,
+                Success = false
+            };
 
-        IResponse response = new CreateResponse
-        {
-            Id = created.Id,
-            Success = true
-        };
+            await response.Send<CreateAccountResponse>(client);
+        } else {
+            Transaction created = new()
+            {
+                Account = client.Account,
+                Counterparty = counterparty,
+                Value = request.Value.Value
+            };
+            await database.Transactions.AddAsync(created);
+            await database.SaveChangesAsync();
 
-        await response.Send<CreateResponse>(client);
-    }
+            IResponse response = new CreateAccountResponse
+            {
+                Id = created.Id,
+                Success = true
+            };
 
-    public static async Task Index(FinanceAppContext database, SocketStream client)
-    {
-        List<Transaction> transactions =
-            await database.Transactions.Include(transaction => transaction.Counterparty).ToListAsync();
-
-        IResponse response = new GetPageResponse
-        {
-            Transactions = transactions,
-            Success = true,
-        };
-
-        await response.Send<GetPageResponse>(client);
+            await response.Send<CreateAccountResponse>(client);
+        }
     }
 }

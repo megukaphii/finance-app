@@ -9,7 +9,9 @@ public partial class AppShell : Shell
 		InitializeComponent();
 
 		Routing.RegisterRoute(nameof(Login), typeof(Login));
-		Routing.RegisterRoute(nameof(QuickAdd), typeof(QuickAdd));
+        Routing.RegisterRoute(nameof(Accounts), typeof(Accounts));
+        Routing.RegisterRoute(nameof(AccountCreate), typeof(AccountCreate));
+        Routing.RegisterRoute(nameof(QuickAdd), typeof(QuickAdd));
 		Routing.RegisterRoute(nameof(TransactionList), typeof(TransactionList));
 	}
 }

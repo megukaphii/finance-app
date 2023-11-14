@@ -67,7 +67,7 @@ public interface IRequest
         }
     }
 
-    public Task HandleAsync(FinanceAppContext database, SocketStream client);
+    public Task HandleAsync(FinanceAppContext database, Client client);
 }
 
 public class InvalidRequest : IRequest
@@ -79,7 +79,7 @@ public class InvalidRequest : IRequest
 
     public InvalidRequest(Exception exception) => Exception = exception;
 
-    public Task HandleAsync(FinanceAppContext database, SocketStream client)
+    public Task HandleAsync(FinanceAppContext database, Client client)
     {
         throw new InvalidDataException();
     }

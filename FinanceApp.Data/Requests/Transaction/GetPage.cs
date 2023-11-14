@@ -15,7 +15,7 @@ public class GetPage : IPageNumber
         return $"{Flag}[{nameof(Page)}: {Page}]";
     }
 
-    public Task HandleAsync(FinanceAppContext database, SocketStream client)
+    public Task HandleAsync(FinanceAppContext database, Client client)
     {
         return TransactionController.Index(database, client);
     }

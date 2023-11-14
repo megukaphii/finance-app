@@ -3,7 +3,6 @@ using System.Text;
 using FinanceApp.Data;
 using FinanceApp.Data.Interfaces;
 using FinanceApp.Data.Models;
-using FinanceApp.Data.RequestPatterns;
 using FinanceApp.Data.Requests.Transaction;
 using FinanceApp.Data.Utility;
 using Microsoft.EntityFrameworkCore;
@@ -19,22 +18,30 @@ public class TransactionTest
 	private static readonly FinanceAppContext _db = new();
 	private static readonly Socket EmptySocket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
+    private static Account _defaultAccount = new()
+    {
+        Name = "Test Acc.",
+        Description = "Test Desc.",
+        Value = 0
+    };
+
     private static readonly Transaction TestTransaction = new()
     {
-        Value = 100,
-        Counterparty = new Counterparty
+        Account = _defaultAccount,
+        Counterparty = new()
         {
             Name = "John"
-        }
+        },
+        Value = 100
     };
 
     private static readonly Create TestCreateRequest = new()
     {
-        Value = new RequestField<double>
+        Value = new()
         {
             Value = TestTransaction.Value
         },
-        Counterparty = new RequestField<Counterparty>
+        Counterparty = new()
         {
             Value = TestTransaction.Counterparty
         }
@@ -44,7 +51,7 @@ public class TransactionTest
 
     private static readonly GetPage TestIndexRequest = new()
     {
-        Page = new RequestField<long>
+        Page = new()
         {
             Value = 0
         }
@@ -56,18 +63,21 @@ public class TransactionTest
     private static readonly Counterparty SeedCounterparty2 = new() { Name = "Megumin" };
     private static readonly List<Transaction> SeedTransactions = new()
     {
-        new Transaction
+        new()
         {
+            Account = _defaultAccount,
             Counterparty = SeedCounterparty1,
             Value = 10
         },
-        new Transaction
+        new()
         {
+            Account = _defaultAccount,
             Counterparty = SeedCounterparty1,
             Value = -50
         },
-        new Transaction
+        new()
         {
+            Account = _defaultAccount,
             Counterparty = SeedCounterparty2,
             Value = 420
         }
@@ -78,6 +88,11 @@ public class TransactionTest
     {
         if ((await _db.Database.GetPendingMigrationsAsync()).Any()) {
             await _db.Database.MigrateAsync();
+        }
+
+        if (!await _db.Accounts.AnyAsync()) {
+            await _db.Accounts.AddAsync(_defaultAccount);
+            await _db.SaveChangesAsync();
         }
     }
 
@@ -91,13 +106,15 @@ public class TransactionTest
         await _db.Database.ExecuteSqlRawAsync("DELETE FROM sqlite_sequence WHERE name='Counterparties';");
     }
 
+    // TODO - These need a lot of reworking, I think. First do the TODO in FinanceAppContext though.
     [Test]
     public async Task TransactionCreateHandle()
     {
         IRequest request = IRequest.GetRequest(MessageCreteRequest);
         byte[] buffer = new byte[2048];
         MemoryStream stream = new(buffer);
-        SocketStream client = new SocketStream() { Socket = EmptySocket, Stream =  stream };
+        Client client = new() { Socket = EmptySocket, Stream =  stream };
+        client.SetActiveAccount(await _db.Accounts.FirstAsync());
         await request.HandleAsync(_db, client);
 
         Transaction? result = await _db.Transactions
@@ -114,7 +131,8 @@ public class TransactionTest
         IRequest request = IRequest.GetRequest(MessageCreteRequest);
         byte[] buffer = new byte[2048];
         MemoryStream stream = new(buffer);
-		SocketStream client = new() { Socket = EmptySocket, Stream = stream };
+		Client client = new() { Socket = EmptySocket, Stream = stream };
+        client.SetActiveAccount(await _db.Accounts.FirstAsync());
 		await request.HandleAsync(_db, client);
 
 		CreateResponse expected = new()
@@ -137,7 +155,8 @@ public class TransactionTest
         IRequest request = IRequest.GetRequest(MessageIndexRequest);
         byte[] buffer = new byte[2048];
         MemoryStream stream = new(buffer);
-		SocketStream client = new() { Socket = EmptySocket, Stream = stream };
+		Client client = new() { Socket = EmptySocket, Stream = stream };
+        client.SetActiveAccount(await _db.Accounts.FirstAsync());
 		await request.HandleAsync(_db, client);
 
 		string message = Encoding.UTF8.GetString(stream.ToArray());
@@ -150,7 +169,17 @@ public class TransactionTest
 
     private async Task SeedDB()
     {
-        await _db.Transactions.AddRangeAsync(SeedTransactions);
+        Account tempAccount = await _db.Accounts.FirstAsync();
+        List<Transaction> tempTransactions = SeedTransactions.Select(
+            template => new Transaction
+            {
+                Account = tempAccount,
+                Counterparty = template.Counterparty,
+                Value = template.Value
+            }
+        ).ToList();
+
+        await _db.Transactions.AddRangeAsync(tempTransactions);
         await _db.SaveChangesAsync();
     }
 }

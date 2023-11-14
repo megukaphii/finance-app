@@ -10,4 +10,9 @@ public partial class TransactionList : ContentPage
 		BindingContext = viewModel;
 		viewModel.Title = "Transaction List";
 	}
+
+    protected override void OnAppearing()
+    {
+        ((TransactionListViewModel)BindingContext).LoadTransactions();
+    }
 }

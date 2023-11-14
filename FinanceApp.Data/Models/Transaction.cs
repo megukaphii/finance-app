@@ -1,16 +1,18 @@
-﻿using FinanceApp.Data.Utility;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace FinanceApp.Data.Models;
 
 public class Transaction
 {
     public long Id { get; init; }
+    public required Account Account { get; init; }
     public required Counterparty Counterparty { get; init; }
-    public required double Value { get; init; }
+    [DataType(DataType.Currency)]
+    public required decimal Value { get; init; }
 
     public override string ToString()
     {
-        return $"{nameof(Id)}: {Id}, [{nameof(Counterparty)}: {Counterparty}], {nameof(Value)}: {Value}";
+        return $"{nameof(Id)}: {Id}, [{nameof(Account)}: {Account}], [{nameof(Counterparty)}: {Counterparty}], {nameof(Value)}: {Value}";
     }
 
     public override bool Equals(object? obj)
@@ -23,7 +25,8 @@ public class Transaction
 
     private bool Equals(Transaction other)
     {
-        return (Id == other.Id || Id == 0 || other.Id == 0) && Counterparty.Equals(other.Counterparty) && Math.Abs(Value - other.Value) < FloatCompare.Tolerance;
+        return (Id == other.Id || Id == 0 || other.Id == 0) && Account.Equals(other.Account) &&
+               Counterparty.Equals(other.Counterparty) && Value == other.Value;
     }
 
     public override int GetHashCode()

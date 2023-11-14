@@ -13,7 +13,7 @@ namespace FinanceApp.MauiClient.ViewModel;
 public partial class QuickAddViewModel(ServerConnection serverConnection) : BaseViewModel(serverConnection)
 {
 	[ObservableProperty]
-	private double _value;
+	private decimal _value;
     [ObservableProperty]
     private string _valueError = string.Empty;
 
@@ -121,7 +121,7 @@ public partial class QuickAddViewModel(ServerConnection serverConnection) : Base
         }
     }
 
-    private void ClearErrors()
+    public override void ClearErrors()
     {
         ValueError = string.Empty;
         CounterpartyError = string.Empty;
