@@ -17,16 +17,16 @@ public abstract class TransactionController : IController
                 .Include(transaction => transaction.Counterparty)
                 .ToListAsync();
 
-        IResponse response = new GetPageResponse
+        IResponse response = new GetTransactionResponse
         {
             Transactions = transactions,
             Success = true,
         };
 
-        await response.Send<GetPageResponse>(client);
+        await response.Send<GetTransactionResponse>(client);
     }
 
-    public static async Task Create(Create request, FinanceAppContext database, Client client)
+    public static async Task Create(CreateTransaction request, FinanceAppContext database, Client client)
     {
         Counterparty? counterparty = request.Counterparty.Value;
         if (request.Counterparty.Value.Id == 0) {

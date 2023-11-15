@@ -35,7 +35,7 @@ public partial class QuickAddViewModel(ServerConnection serverConnection) : Base
             IsBusy = true;
             ClearErrors();
 
-            Create request = new()
+            CreateTransaction request = new()
             {
                 Value = new()
                 {
@@ -49,10 +49,10 @@ public partial class QuickAddViewModel(ServerConnection serverConnection) : Base
                     }
                 }
             };
-            CreateResponse response = await ServerConnection.SendMessageAsync<Create, CreateResponse>(request);
-            await Shell.Current.DisplayAlert("Created Transaction", $"Successfully created transaction {response}",
+            CreateTransactionResponse transactionResponse = await ServerConnection.SendMessageAsync<CreateTransaction, CreateTransactionResponse>(request);
+            await Shell.Current.DisplayAlert("Created Transaction", $"Successfully created transaction {transactionResponse}",
                 "OK");
-        } catch (ResponseException<Create> ex) {
+        } catch (ResponseException<CreateTransaction> ex) {
             if (!string.IsNullOrEmpty(ex.Response.Value.Error)) {
                 ValueError = ex.Response.Value.Error;
             }

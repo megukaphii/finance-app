@@ -10,7 +10,7 @@ namespace FinanceApp.ServerTests;
 [TestFixture]
 public class RequestTest
 {
-    private static readonly Create TestRequest = new()
+    private static readonly CreateTransaction TestRequest = new()
     {
         Value = new()
         {
@@ -31,7 +31,7 @@ public class RequestTest
     {
         IRequest request = IRequest.GetRequest(Message);
 
-        Assert.IsInstanceOf<Create>(request);
+        Assert.IsInstanceOf<CreateTransaction>(request);
     }
 
     [Test]

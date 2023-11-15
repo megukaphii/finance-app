@@ -4,9 +4,8 @@ using FinanceApp.Data.Controllers;
 
 namespace FinanceApp.Data.Requests.Transaction;
 
-public class Create : ISingleTransaction
+public class CreateTransaction : ISingleTransaction
 {
-    // TODO - Standardise request names and flags
     public static string Flag => "<CreateTransaction>";
 
     public required RequestField<decimal> Value { get; init; }

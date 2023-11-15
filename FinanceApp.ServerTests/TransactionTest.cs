@@ -8,7 +8,6 @@ using FinanceApp.Data.Utility;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using NUnit.Framework;
-using GetPage = FinanceApp.Data.Requests.Transaction.GetPage;
 
 namespace FinanceApp.ServerTests;
 
@@ -35,7 +34,7 @@ public class TransactionTest
         Value = 100
     };
 
-    private static readonly Create TestCreateRequest = new()
+    private static readonly CreateTransaction TestCreateTransactionRequest = new()
     {
         Value = new()
         {
@@ -47,9 +46,9 @@ public class TransactionTest
         }
     };
 
-	private static readonly string MessageCreteRequest = $"{Create.Flag}{JsonSerializer.Serialize(TestCreateRequest)}";
+	private static readonly string MessageCreteRequest = $"{CreateTransaction.Flag}{JsonSerializer.Serialize(TestCreateTransactionRequest)}";
 
-    private static readonly GetPage TestIndexRequest = new()
+    private static readonly GetTransactions TestIndexRequest = new()
     {
         Page = new()
         {
@@ -57,7 +56,7 @@ public class TransactionTest
         }
     };
 
-	private static readonly string MessageIndexRequest = $"{GetPage.Flag}{JsonSerializer.Serialize(TestIndexRequest)}";
+	private static readonly string MessageIndexRequest = $"{GetTransactions.Flag}{JsonSerializer.Serialize(TestIndexRequest)}";
 
     private static readonly Counterparty SeedCounterparty1 = new() { Name = "John Doe" };
     private static readonly Counterparty SeedCounterparty2 = new() { Name = "Megumin" };
@@ -135,14 +134,14 @@ public class TransactionTest
         client.SetActiveAccount(await _db.Accounts.FirstAsync());
 		await request.HandleAsync(_db, client);
 
-		CreateResponse expected = new()
+		CreateTransactionResponse expected = new()
         {
             Id = 1,
             Success = true
         };
         string message = Encoding.UTF8.GetString(stream.ToArray());
 		message = Helpers.RemoveFromEof(message);
-		CreateResponse? result = JsonSerializer.Deserialize<CreateResponse>(message);
+		CreateTransactionResponse? result = JsonSerializer.Deserialize<CreateTransactionResponse>(message);
 
         Assert.AreEqual(expected, result);
     }
@@ -161,7 +160,7 @@ public class TransactionTest
 
 		string message = Encoding.UTF8.GetString(stream.ToArray());
         message = Helpers.RemoveFromEof(message);
-		GetPageResponse? result = JsonSerializer.Deserialize<GetPageResponse>(message);
+		GetTransactionResponse? result = JsonSerializer.Deserialize<GetTransactionResponse>(message);
 
         Assert.True(result?.Success);
         Assert.AreEqual(SeedTransactions, result?.Transactions);

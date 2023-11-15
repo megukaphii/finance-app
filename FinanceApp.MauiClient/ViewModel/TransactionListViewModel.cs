@@ -25,19 +25,19 @@ public partial class TransactionListViewModel(ServerConnection serverConnection)
             IsBusy = true;
             ClearErrors();
 
-            GetPage request = new()
+            GetTransactions request = new()
             {
                 Page = new() { Value = 0 }
             };
 
-            GetPageResponse response = await ServerConnection.SendMessageAsync<GetPage, GetPageResponse>(request);
+            GetTransactionResponse response = await ServerConnection.SendMessageAsync<GetTransactions, GetTransactionResponse>(request);
 
             Transactions.Clear();
             foreach (Transaction transaction in response.Transactions) {
                 // TODO - This fires off an event with each add, figure out how to add range instead (refer to MonkeyFinder James Montemagno tutorial)
                 Transactions.Add(transaction);
             }
-        } catch (ResponseException<GetPage> ex) {
+        } catch (ResponseException<GetTransactions> ex) {
             if (!string.IsNullOrEmpty(ex.Response.Page.Error)) {
                 PageError = ex.Response.Page.Error;
             }

@@ -4,9 +4,9 @@ using FinanceApp.Data.Controllers;
 
 namespace FinanceApp.Data.Requests.Transaction;
 
-public class GetPage : IPageNumber
+public class GetTransactions : IPageNumber
 {
-    public static string Flag => "<GetPageTransactions>";
+    public static string Flag => "<GetTransactions>";
 
     public required RequestField<long> Page { get; init; }
 
