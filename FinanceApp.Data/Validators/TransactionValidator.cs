@@ -1,7 +1,6 @@
 ﻿using FinanceApp.Data.Interfaces;
 using FinanceApp.Data.Models;
 using FinanceApp.Data.RequestPatterns;
-using FinanceApp.Data.Extensions;
 using FinanceApp.Data.Utility;
 
 namespace FinanceApp.Data.Validators;
@@ -13,7 +12,7 @@ public class TransactionValidator : IValidator
     private static readonly int MinCounterpartyNameLength = Helpers.GetPropertyMinLength((Counterparty c) => c.Name);
     private static readonly int MaxCounterpartyNameLength = Helpers.GetPropertyMaxLength((Counterparty c) => c.Name);
 
-    public bool Validate(IRequest request)
+    public bool Validate(IRequest request, FinanceAppContext db)
     {
         bool failure = false;
         if (request is ISingleTransaction validateAgainst) {

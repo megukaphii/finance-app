@@ -32,8 +32,6 @@ public class AccountController : IController
         await database.Accounts.AddAsync(created);
         await database.SaveChangesAsync();
 
-        client.SetActiveAccount(created);
-
         IResponse response = new CreateAccountResponse
         {
             Id = created.Id,

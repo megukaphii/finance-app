@@ -10,7 +10,7 @@ public interface IRequest
     public static virtual string Flag => string.Empty;
     public static virtual Type? Validator => null;
 
-	public static bool IsValid(IRequest request)
+	public static bool IsValid(IRequest request, FinanceAppContext db)
     {
         Type requestType = request.GetType();
         if (requestType == typeof(InvalidRequest)) return false;
@@ -21,7 +21,7 @@ public interface IRequest
 
         if (requestValidator.IsAssignableTo(typeof(IValidator))) {
             IValidator validator = (IValidator)Activator.CreateInstance(requestValidator)!;
-            return validator.Validate(request);
+            return validator.Validate(request, db);
         }
 
         throw new(

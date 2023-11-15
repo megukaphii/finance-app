@@ -83,7 +83,7 @@ public class FinanceServer : IServer
 
                     dynamic request = IRequest.GetRequest(strRequest);
                     Console.WriteLine($"[{client.Id}] {request}");
-                    if (IRequest.IsValid(request)) {
+                    if (IRequest.IsValid(request, _db)) {
                         await request.HandleAsync(_db, client);
                     } else {
                         await SendErrorResponseAsync(sslStream, request);

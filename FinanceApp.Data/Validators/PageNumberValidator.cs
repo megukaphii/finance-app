@@ -9,7 +9,7 @@ public class PageNumberValidator : IValidator
     // This is just to stop it complaining about an unreachable switch case. Probably change it later.
     private const long MaxPage = long.MaxValue - 1;
 
-    public bool Validate(IRequest request)
+    public bool Validate(IRequest request, FinanceAppContext db)
     {
         bool failure = false;
         if (request is IPageNumber validateAgainst) {

@@ -1,7 +1,6 @@
 ﻿using FinanceApp.Data.Interfaces;
 using FinanceApp.Data.Models;
 using FinanceApp.Data.RequestPatterns;
-using FinanceApp.Data.Extensions;
 using FinanceApp.Data.Utility;
 
 namespace FinanceApp.Data.Validators;
@@ -14,7 +13,7 @@ public class AccountValidator : IValidator
     private static readonly int MinDescriptionLength = Helpers.GetPropertyMinLength((Account a) => a.Description);
     private static readonly int MaxDescriptionLength = Helpers.GetPropertyMaxLength((Account a) => a.Description);
 
-    public bool Validate(IRequest request)
+    public bool Validate(IRequest request, FinanceAppContext db)
     {
         bool failure = false;
         if (request is ISingleAccount validateAgainst) {

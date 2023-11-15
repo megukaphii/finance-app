@@ -5,13 +5,13 @@ namespace FinanceApp.Data.Validators;
 
 public class AccountIdValidator : IValidator
 {
-    public bool Validate(IRequest request)
+    public bool Validate(IRequest request, FinanceAppContext db)
     {
-        bool failure = false;
+        bool pass = false;
         if (request is IAccountId validateAgainst) {
-            // TODO - Needs to check if ID exists in DB
+            pass = db.Accounts.Any(transaction => transaction.Id == validateAgainst.Id.Value);
         }
 
-        return !failure;
+        return pass;
     }
 }

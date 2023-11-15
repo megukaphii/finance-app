@@ -2,5 +2,5 @@
 
 public interface IValidator
 {
-    public bool Validate(IRequest request);
+    public bool Validate(IRequest request, FinanceAppContext db);
 }
