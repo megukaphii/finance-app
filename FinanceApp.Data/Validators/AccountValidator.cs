@@ -13,7 +13,7 @@ public class AccountValidator : IValidator
     private static readonly int MinDescriptionLength = Helpers.GetPropertyMinLength((Account a) => a.Description);
     private static readonly int MaxDescriptionLength = Helpers.GetPropertyMaxLength((Account a) => a.Description);
 
-    public bool Validate(IRequest request, FinanceAppContext db)
+    public Task<bool> ValidateAsync(IRequest request, FinanceAppContext db)
     {
         bool failure = false;
         if (request is ISingleAccount validateAgainst) {
@@ -34,6 +34,6 @@ public class AccountValidator : IValidator
             }
         }
 
-        return !failure;
+        return Task.FromResult(!failure);
     }
 }

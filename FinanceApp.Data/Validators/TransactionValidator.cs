@@ -12,7 +12,7 @@ public class TransactionValidator : IValidator
     private static readonly int MinCounterpartyNameLength = Helpers.GetPropertyMinLength((Counterparty c) => c.Name);
     private static readonly int MaxCounterpartyNameLength = Helpers.GetPropertyMaxLength((Counterparty c) => c.Name);
 
-    public bool Validate(IRequest request, FinanceAppContext db)
+    public Task<bool> ValidateAsync(IRequest request, FinanceAppContext db)
     {
         bool failure = false;
         if (request is ISingleTransaction validateAgainst) {
@@ -38,6 +38,6 @@ public class TransactionValidator : IValidator
             }
         }
 
-        return !failure;
+        return Task.FromResult(!failure);
     }
 }

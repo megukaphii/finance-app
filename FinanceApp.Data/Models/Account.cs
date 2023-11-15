@@ -5,6 +5,8 @@ namespace FinanceApp.Data.Models;
 
 public class Account
 {
+    public static Account Empty { get; } = new() { Name = string.Empty, Description = string.Empty, Value = 0 };
+
     public long Id { get; init; }
     public List<Transaction> Transactions { get; init; } = new();
     [MinLength(2)]

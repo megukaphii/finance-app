@@ -13,7 +13,7 @@ public abstract class TransactionController : IController
     {
         List<Transaction> transactions =
             await database.Transactions
-                .Where(transaction => transaction.Account.Equals(client.Account))
+                .Where(transaction => transaction.Account.Equals(client.Session.Account))
                 .Include(transaction => transaction.Counterparty)
                 .ToListAsync();
 
@@ -37,7 +37,7 @@ public abstract class TransactionController : IController
             }
         }
 
-        if (client.Account is null) {
+        if (!client.Session.IsAccountSet()) {
             // TODO - Make sure this is handled properly! Probably doesn't currently work
             IResponse response = new CreateAccountResponse
             {
@@ -49,7 +49,7 @@ public abstract class TransactionController : IController
         } else {
             Transaction created = new()
             {
-                Account = client.Account,
+                Account = client.Session.Account,
                 Counterparty = counterparty,
                 Value = request.Value.Value
             };

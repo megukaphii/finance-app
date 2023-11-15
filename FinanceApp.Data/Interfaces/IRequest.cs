@@ -10,18 +10,21 @@ public interface IRequest
     public static virtual string Flag => string.Empty;
     public static virtual Type? Validator => null;
 
-	public static bool IsValid(IRequest request, FinanceAppContext db)
+	public static async Task<bool> IsValidAsync(IRequest request, FinanceAppContext db)
     {
         Type requestType = request.GetType();
         if (requestType == typeof(InvalidRequest)) return false;
 
-        Type? requestValidator = (Type?)requestType.GetInterfaces().First(type => type != typeof(IRequest))
-            .GetProperty(nameof(Validator))?.GetValue(null);
+        Type? requestValidator = (Type?)requestType
+            .GetInterfaces()
+            .First(type => type != typeof(IRequest))
+            .GetProperty(nameof(Validator))?
+            .GetValue(null);
         if (requestValidator is null) return true;
 
         if (requestValidator.IsAssignableTo(typeof(IValidator))) {
             IValidator validator = (IValidator)Activator.CreateInstance(requestValidator)!;
-            return validator.Validate(request, db);
+            return await validator.ValidateAsync(request, db);
         }
 
         throw new(

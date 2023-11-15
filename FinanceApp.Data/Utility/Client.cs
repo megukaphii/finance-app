@@ -8,13 +8,12 @@ public class Client
     private readonly Guid _id = Guid.NewGuid();
     public required Socket Socket { get; init; }
     public required Stream Stream { get; set; }
-    // TODO - Perhaps introduce a Session class to track these and related variables
-    public Account? Account { get; private set; }
+    public Session Session { get; } = new();
 
     public string Id => _id.ToString();
 
     public void SetActiveAccount(Account active)
     {
-        Account = active;
+        Session.Account = active;
     }
 }
