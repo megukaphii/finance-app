@@ -9,6 +9,7 @@ IHost host = Host.CreateDefaultBuilder()
     })
     .ConfigureServices((_, services) =>
     {
+        services.AddMemoryCache();
         services.AddSingleton<IServer, FinanceServer>();
     })
 .Build();

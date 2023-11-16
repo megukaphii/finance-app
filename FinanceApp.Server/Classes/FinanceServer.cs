@@ -11,6 +11,7 @@ using FinanceApp.Data.Utility;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using FinanceApp.Data.Exceptions;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace FinanceApp.Server.Classes;
 
@@ -22,18 +23,18 @@ public class FinanceServer : IServer
     private readonly X509Certificate _serverCertificate;
     private readonly List<Client> _clients = new();
     private readonly FinanceAppContext _db = new();
+    private readonly IMemoryCache _cache;
 
     private bool _isRunning;
 
-    public FinanceServer()
+    public FinanceServer(IMemoryCache cache)
     {
         IPEndPoint ipEndPoint = new(IPAddress.Any, 42069);
         _listener.Bind(ipEndPoint);
-        if (File.Exists("certificate.key")) {
-            _serverCertificate = X509Certificate2.CreateFromPemFile("certificate.crt", "certificate.key");
-        } else {
-			_serverCertificate = X509Certificate2.CreateFromPemFile("/Certificates/certificate.crt", "/Certificates/certificate.key");
-        }
+        _serverCertificate = File.Exists("certificate.key")
+            ? X509Certificate2.CreateFromPemFile("certificate.crt", "certificate.key")
+            : X509Certificate2.CreateFromPemFile("/Certificates/certificate.crt", "/Certificates/certificate.key");
+        _cache = cache;
     }
 
     public async Task Start()
