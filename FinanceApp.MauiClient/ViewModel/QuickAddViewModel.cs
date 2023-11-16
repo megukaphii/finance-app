@@ -12,6 +12,9 @@ namespace FinanceApp.MauiClient.ViewModel;
 
 public partial class QuickAddViewModel(ServerConnection serverConnection) : BaseViewModel(serverConnection)
 {
+    [ObservableProperty]
+    private string _pageError = string.Empty;
+
 	[ObservableProperty]
 	private decimal _value;
     [ObservableProperty]
@@ -93,8 +96,8 @@ public partial class QuickAddViewModel(ServerConnection serverConnection) : Base
                 Counterparties.Add(counterparty);
             }
             SearchCounterparties();
-        } catch (ResponseException<GetCounterparties>) {
-            // TODO - Make error happen!
+        } catch (ResponseException<GetCounterparties> ex) {
+            PageError = ex.Message;
         } catch (Exception ex) {
             await ServerConnection.DisconnectAsync();
             await Shell.Current.GoToAsync($"//{nameof(Login)}", true);
@@ -123,6 +126,7 @@ public partial class QuickAddViewModel(ServerConnection serverConnection) : Base
 
     public override void ClearErrors()
     {
+        PageError = string.Empty;
         ValueError = string.Empty;
         CounterpartyError = string.Empty;
     }

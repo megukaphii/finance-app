@@ -30,7 +30,7 @@ public partial class TransactionListViewModel(ServerConnection serverConnection)
                 Page = new() { Value = 0 }
             };
 
-            GetTransactionResponse response = await ServerConnection.SendMessageAsync<GetTransactions, GetTransactionResponse>(request);
+            GetTransactionsResponse response = await ServerConnection.SendMessageAsync<GetTransactions, GetTransactionsResponse>(request);
 
             Transactions.Clear();
             foreach (Transaction transaction in response.Transactions) {

@@ -160,7 +160,7 @@ public class TransactionTest
 
 		string message = Encoding.UTF8.GetString(stream.ToArray());
         message = Helpers.RemoveFromEof(message);
-		GetTransactionResponse? result = JsonSerializer.Deserialize<GetTransactionResponse>(message);
+		GetTransactionsResponse? result = JsonSerializer.Deserialize<GetTransactionsResponse>(message);
 
         Assert.True(result?.Success);
         Assert.AreEqual(SeedTransactions, result?.Transactions);

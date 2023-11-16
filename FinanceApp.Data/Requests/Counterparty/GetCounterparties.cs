@@ -1,4 +1,6 @@
-﻿using FinanceApp.Data.Controllers;
+﻿using System.Text;
+using FinanceApp.Data.Controllers;
+using FinanceApp.Data.Interfaces;
 using FinanceApp.Data.RequestPatterns;
 using FinanceApp.Data.Utility;
 
@@ -18,5 +20,17 @@ public class GetCounterparties : IPageNumber
     public Task HandleAsync(FinanceAppContext database, Client client)
     {
         return CounterpartyController.Index(database, client);
+    }
+}
+
+public class GetCounterpartiesResponse : IResponse
+{
+    public required bool Success { get; init; }
+    public required List<Models.Counterparty> Counterparties { get; init; }
+
+    public override string ToString()
+    {
+        StringBuilder result = new($"{nameof(Success)}: {Success}, Count: {Counterparties.Count}, [{nameof(Counterparties)}: {string.Join(", ", Counterparties)}]");
+        return result.ToString();
     }
 }

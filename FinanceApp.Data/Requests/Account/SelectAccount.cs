@@ -1,4 +1,5 @@
 ﻿using FinanceApp.Data.Controllers;
+using FinanceApp.Data.Interfaces;
 using FinanceApp.Data.RequestPatterns;
 using FinanceApp.Data.Utility;
 
@@ -18,5 +19,15 @@ public class SelectAccount : IAccountId
     public Task HandleAsync(FinanceAppContext database, Client client)
     {
         return AccountController.SetActiveAccount(this, database, client);
+    }
+}
+
+public class SelectAccountResponse : IResponse
+{
+    public required bool Success { get; init; }
+
+    public override string ToString()
+    {
+        return $"{nameof(Success)}: {Success}";
     }
 }
