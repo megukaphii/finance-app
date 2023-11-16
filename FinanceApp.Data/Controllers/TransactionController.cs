@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FinanceApp.Data.Controllers;
 
-public abstract class TransactionController : IController
+public class TransactionController : IController
 {
     public static async Task Index(FinanceAppContext database, Client client)
     {

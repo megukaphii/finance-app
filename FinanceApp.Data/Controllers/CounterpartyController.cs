@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FinanceApp.Data.Controllers;
 
-public abstract class CounterpartyController : IController
+public class CounterpartyController : IController
 {
     public static async Task Index(FinanceAppContext database, Client client)
     {

@@ -9,7 +9,6 @@ public interface IResponse
 {
     public bool Success { get; init; }
 
-    // TODO - Can we derive T from the instance's class?
     public async Task Send<T>(Client client) where T : IResponse
     {
         string strResponse = JsonSerializer.Serialize((T)this, new JsonSerializerOptions
