@@ -90,8 +90,9 @@ public class FinanceServer : IHostedService
         foreach (Client client in _clients) {
             await client.Socket.DisconnectAsync(false, cancellationToken);
         }
-
         _clients.Clear();
+        _listener.Dispose();
+        _maxConnections.Dispose();
     }
 
 	private async Task HandleConnection(Socket socket)
