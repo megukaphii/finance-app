@@ -12,17 +12,19 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using FinanceApp.Data.Exceptions;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Hosting;
 
 namespace FinanceApp.Server.Classes;
 
-public class FinanceServer : IServer
+public class FinanceServer : IHostedService
 {
-    private const int READ_TIMEOUT = 10000;
+    private const int ReadTimeout = 10000;
 
     private readonly Socket _listener = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
     private readonly X509Certificate _serverCertificate;
     private readonly List<Client> _clients = new();
     private readonly FinanceAppContext _db = new();
+    private readonly SemaphoreSlim _maxConnections;
     private readonly IMemoryCache _cache;
 
     private bool _isRunning;
@@ -30,47 +32,70 @@ public class FinanceServer : IServer
     public FinanceServer(IMemoryCache cache)
     {
         IPEndPoint ipEndPoint = new(IPAddress.Any, 42069);
+        ThreadPool.GetMaxThreads(out int workerThreads, out int _);
         _listener.Bind(ipEndPoint);
         _serverCertificate = File.Exists("certificate.key")
             ? X509Certificate2.CreateFromPemFile("certificate.crt", "certificate.key")
             : X509Certificate2.CreateFromPemFile("/Certificates/certificate.crt", "/Certificates/certificate.key");
         _cache = cache;
+        _maxConnections = new(workerThreads);
     }
 
-    public async Task Start()
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
-        await PerformMigrations();
-
         try {
+            await PerformMigrations(cancellationToken);
+
             _listener.Listen(10);
             Console.WriteLine("Listener started.");
             _isRunning = true;
 
-            while (_isRunning) {
-                Socket handle = await _listener.AcceptAsync();
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-				HandleConnection(handle);
+            RunServer(cancellationToken);
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-			}
-
-            await CloseAsync();
         } catch (Exception e) {
             Console.WriteLine($"[{e.GetType()}]: {e.Message}");
         }
-	}
+    }
 
-	private async Task PerformMigrations()
+    private async Task PerformMigrations(CancellationToken cancellationToken)
     {
-        List<string> migrations = (await _db.Database.GetPendingMigrationsAsync()).ToList();
+        List<string> migrations = (await _db.Database.GetPendingMigrationsAsync(cancellationToken)).ToList();
         if (migrations.Any()) {
             Console.WriteLine($"Migrations to be applied: {string.Join(", ", migrations)}");
-			await _db.Database.MigrateAsync();
+            await _db.Database.MigrateAsync(cancellationToken);
             Console.WriteLine("Migrations successfully applied!");
-		}
-	}
+        }
+    }
+
+    private async Task RunServer(CancellationToken cancellationToken)
+    {
+        try {
+            while (_isRunning) {
+                await _maxConnections.WaitAsync(cancellationToken);
+                Socket handle = await _listener.AcceptAsync(cancellationToken);
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                HandleConnection(handle);
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+            }
+        } catch (Exception e) {
+            Console.WriteLine($"[{e.GetType()}]: {e.Message}");
+        }
+    }
+
+    public async Task StopAsync(CancellationToken cancellationToken)
+    {
+        _isRunning = false;
+
+        foreach (Client client in _clients) {
+            await client.Socket.DisconnectAsync(false, cancellationToken);
+        }
+
+        _clients.Clear();
+    }
 
 	private async Task HandleConnection(Socket socket)
-	{
+    {
         Client client = new() { Socket = socket, Stream = Stream.Null };
         _clients.Add(client);
         try {
@@ -146,7 +171,7 @@ public class FinanceServer : IServer
         bool readFirstBlock = false;
 		do {
             if (readFirstBlock)
-                source.CancelAfter(READ_TIMEOUT);
+                source.CancelAfter(ReadTimeout);
 
 			int bytes = await client.Stream.ReadAsync(buffer, source.Token);
             readFirstBlock = true;
@@ -189,15 +214,7 @@ public class FinanceServer : IServer
         string clientId = client.Id;
         await client.Socket.DisconnectAsync(false);
         _clients.Remove(client);
+        _maxConnections.Release();
         Console.WriteLine($"[{clientId}] Client connection closed.");
-    }
-
-    private async Task CloseAsync()
-    {
-        foreach (Client client in _clients) {
-            await client.Socket.DisconnectAsync(false);
-        }
-
-        _clients.Clear();
     }
 }
