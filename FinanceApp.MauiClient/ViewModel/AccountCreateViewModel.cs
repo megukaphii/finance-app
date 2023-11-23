@@ -4,10 +4,11 @@ using CommunityToolkit.Mvvm.Input;
 using FinanceApp.Data.Exceptions;
 using FinanceApp.Data.Requests.Account;
 using FinanceApp.MauiClient.View;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace FinanceApp.MauiClient.ViewModel;
 
-public partial class AccountCreateViewModel(ServerConnection serverConnection) : BaseViewModel(serverConnection)
+public partial class AccountCreateViewModel(ServerConnection serverConnection, IMemoryCache cache) : BaseViewModel(serverConnection, cache)
 {
     [ObservableProperty]
     private string _name = string.Empty;
@@ -41,6 +42,8 @@ public partial class AccountCreateViewModel(ServerConnection serverConnection) :
             if (response.Success) {
                 await Shell.Current.DisplayAlert("Created Transaction", $"Successfully created account {response}",
                     "OK");
+
+                await Shell.Current.GoToAsync("..", true);
             }
         } catch (ResponseException<CreateAccount> ex) {
             if (!string.IsNullOrEmpty(ex.Response.Name.Error)) {
@@ -57,8 +60,6 @@ public partial class AccountCreateViewModel(ServerConnection serverConnection) :
                 "OK");
         } finally {
             IsBusy = false;
-
-            await Shell.Current.GoToAsync("..", true);
         }
     }
 

@@ -21,6 +21,7 @@ public static class MauiProgram
 		builder.Logging.AddDebug();
 #endif
 
+        builder.Services.AddMemoryCache();
 		builder.Services.AddSingleton<ServerConnection>();
 
 		builder.Services.AddSingleton<Login>();

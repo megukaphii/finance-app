@@ -1,9 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using FinanceApp.MauiClient.Services;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace FinanceApp.MauiClient.ViewModel;
 
-public abstract partial class BaseViewModel(ServerConnection serverConnection) : ObservableObject
+public abstract partial class BaseViewModel(ServerConnection serverConnection, IMemoryCache cache) : ObservableObject
 {
 	[ObservableProperty]
 	[NotifyPropertyChangedFor(nameof(IsNotBusy))]
@@ -14,6 +15,7 @@ public abstract partial class BaseViewModel(ServerConnection serverConnection) :
 	public bool IsNotBusy => !IsBusy;
 
 	protected readonly ServerConnection ServerConnection = serverConnection;
+    protected readonly IMemoryCache Cache = cache;
 
     public abstract void ClearErrors();
 }

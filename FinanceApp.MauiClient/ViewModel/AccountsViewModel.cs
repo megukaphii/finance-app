@@ -6,10 +6,11 @@ using CommunityToolkit.Mvvm.Input;
 using FinanceApp.Data.Exceptions;
 using FinanceApp.Data.Requests.Account;
 using FinanceApp.MauiClient.View;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace FinanceApp.MauiClient.ViewModel;
 
-public partial class AccountsViewModel(ServerConnection serverConnection) : BaseViewModel(serverConnection)
+public partial class AccountsViewModel(ServerConnection serverConnection, IMemoryCache cache) : BaseViewModel(serverConnection, cache)
 {
     [ObservableProperty]
     private string _pageError = string.Empty;

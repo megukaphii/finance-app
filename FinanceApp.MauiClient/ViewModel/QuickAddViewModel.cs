@@ -7,10 +7,11 @@ using FinanceApp.Data.Requests.Counterparty;
 using FinanceApp.Data.Requests.Transaction;
 using FinanceApp.MauiClient.Services;
 using FinanceApp.MauiClient.View;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace FinanceApp.MauiClient.ViewModel;
 
-public partial class QuickAddViewModel(ServerConnection serverConnection) : BaseViewModel(serverConnection)
+public partial class QuickAddViewModel(ServerConnection serverConnection, IMemoryCache cache) : BaseViewModel(serverConnection, cache)
 {
     [ObservableProperty]
     private string _pageError = string.Empty;
@@ -28,8 +29,8 @@ public partial class QuickAddViewModel(ServerConnection serverConnection) : Base
     [ObservableProperty]
     private bool _counterpartyFocused = true;
 
-    private List<Counterparty> Counterparties { get; } = new();
-    public ObservableCollection<Counterparty> CounterpartiesSearch { get; set; } = new();
+    private List<Counterparty> Counterparties { get; } = [];
+    public ObservableCollection<Counterparty> CounterpartiesSearch { get; set; } = [];
 
     [RelayCommand]
 	private async Task SendTransaction()
@@ -77,7 +78,6 @@ public partial class QuickAddViewModel(ServerConnection serverConnection) : Base
     public async Task GetCounterparties()
     {
         try {
-            // TODO - Should this mark as busy? It's kinda just a little helper that goes on in the background
             IsBusy = true;
             ClearErrors();
 
@@ -90,7 +90,6 @@ public partial class QuickAddViewModel(ServerConnection serverConnection) : Base
             };
             GetCounterpartiesResponse response = await ServerConnection.SendMessageAsync<GetCounterparties, GetCounterpartiesResponse>(request);
 
-            // TODO - Cache this for x amount of seconds/minutes/etc?
             Counterparties.Clear();
             foreach (Counterparty counterparty in response.Counterparties) {
                 Counterparties.Add(counterparty);
