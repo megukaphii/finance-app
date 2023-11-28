@@ -4,17 +4,16 @@ using FinanceApp.Data.Extensions;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.Json;
 using FinanceApp.Data.Exceptions;
 using FinanceApp.Data.Utility;
+using FinanceApp.MauiClient.Extensions;
 
 namespace FinanceApp.MauiClient.Services;
 public class ServerConnection
 {
     public const string DefaultAddress = "127.0.0.1";
-    private const int ReadTimeout = 10000;
 
     public bool IsConnected => _socket.Connected;
 
@@ -26,7 +25,7 @@ public class ServerConnection
         if (string.IsNullOrEmpty(ipAddressStr)) ipAddressStr = DefaultAddress;
 
         await ConnectToIpAsync(ipAddressStr);
-        await EstablishStreamAsync();
+        _sslStream = await _socket.EstablishSslStreamAsync();
         bool isCompatible = await IsServerCompatible();
         if (!isCompatible) {
             await _socket.DisconnectAsync(false);
@@ -45,7 +44,7 @@ public class ServerConnection
 		_sslStream.Write(message);
 		_sslStream.Flush();
 
-		string messageReceived = await ReadMessageAsync(_sslStream);
+		string messageReceived = await _sslStream.ReadMessageAsync();
         if (messageReceived.Contains(Serialization.Error)) {
             messageReceived = messageReceived.Replace(Serialization.Error, "");
             TRequest errorResponse = JsonSerializer.Deserialize<TRequest>(messageReceived) ??
@@ -70,29 +69,6 @@ public class ServerConnection
         await _socket.ConnectAsync(ipEndPoint);
     }
 
-    private Task EstablishStreamAsync()
-    {
-        NetworkStream networkStream = new(_socket);
-        _sslStream = new(networkStream, false, ValidateServerCertificate, null);
-        return _sslStream.AuthenticateAsClientAsync("CoryMacdonald");
-    }
-
-    private static bool ValidateServerCertificate(
-        object sender,
-        X509Certificate? certificate,
-        X509Chain? chain,
-        SslPolicyErrors sslPolicyErrors)
-    {
-        /*if (sslPolicyErrors == SslPolicyErrors.None)
-            return true;
-
-        Console.WriteLine("Certificate error: {0}", sslPolicyErrors);
-
-        // Do not allow this client to communicate with unauthenticated servers.
-        return false;*/
-        return true;
-    }
-
     private async Task<bool> IsServerCompatible()
     {
         try {
@@ -108,7 +84,7 @@ public class ServerConnection
             await _sslStream.WriteAsync(message);
             await _sslStream.FlushAsync();
 
-			string messageReceived = await ReadMessageAsync(_sslStream);
+			string messageReceived = await _sslStream.ReadMessageAsync();
             CompareVersion request = JsonSerializer.Deserialize<CompareVersion>(messageReceived) ?? throw new($"Malformed {nameof(CompareVersion)} request received");
 
 			if (request.SemanticVersion.IsCompatible(AppInfo.Version)) {
@@ -121,43 +97,5 @@ public class ServerConnection
 			await Shell.Current.DisplayAlert("Version Issue", "Could not compare version against server.", "OK");
 			return false;
         }
-    }
-
-    private async Task<string> ReadMessageAsync(Stream stream)
-    {
-        byte[] buffer = new byte[2048];
-        StringBuilder messageData = new();
-        CancellationTokenSource source = new();
-        bool readFirstBlock = false;
-        do {
-            if (readFirstBlock)
-                source.CancelAfter(ReadTimeout);
-
-            int bytes = await stream.ReadAsync(buffer, source.Token);
-            readFirstBlock = true;
-
-            if (bytes <= 0) {
-                throw new("Server connection timed out");
-            }
-
-            messageData.Append(DecodeBuffer(buffer, bytes));
-            if (messageData.ToString().Contains(Serialization.Eof)) {
-                break;
-            } else {
-                source.Dispose();
-                source = new();
-            }
-        } while (true);
-
-        source.Dispose();
-        return messageData.ToString().Replace(Serialization.Eof, "");
-    }
-
-    private static char[] DecodeBuffer(byte[] buffer, int bytes)
-    {
-        Decoder decoder = Encoding.UTF8.GetDecoder();
-        char[] chars = new char[decoder.GetCharCount(buffer, 0, bytes)];
-        decoder.GetChars(buffer, 0, bytes, chars, 0);
-        return chars;
     }
 }
