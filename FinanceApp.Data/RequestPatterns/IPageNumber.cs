@@ -7,5 +7,5 @@ public interface IPageNumber : IRequest
 {
     public new static Type Validator => typeof(PageNumberValidator);
 
-    public RequestField<long> Page { get; }
+    public RequestField<long> Page { get; init; }
 }

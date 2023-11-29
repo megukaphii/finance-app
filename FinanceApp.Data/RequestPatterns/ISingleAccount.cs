@@ -7,6 +7,6 @@ public interface ISingleAccount : IRequest
 {
     public new static Type Validator => typeof(AccountValidator);
 
-    public RequestField<string> Name { get; }
-    public RequestField<string> Description { get; }
+    public RequestField<string> Name { get; init; }
+    public RequestField<string> Description { get; init; }
 }

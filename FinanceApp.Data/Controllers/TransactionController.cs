@@ -17,13 +17,13 @@ public class TransactionController : IController
                 .Include(transaction => transaction.Counterparty)
                 .ToListAsync();
 
-        IResponse response = new GetTransactionsResponse
+        GetTransactionsResponse response = new()
         {
             Transactions = transactions,
             Success = true,
         };
 
-        await response.Send<GetTransactionsResponse>(client);
+        await client.Send(response);
     }
 
     public static async Task Create(CreateTransaction request, FinanceAppContext database, Client client)
@@ -39,13 +39,13 @@ public class TransactionController : IController
 
         if (!client.Session.IsAccountSet()) {
             // TODO - Make sure this is handled properly! Probably doesn't currently work
-            IResponse response = new CreateAccountResponse
+            CreateAccountResponse response = new()
             {
                 Id = 0,
                 Success = false
             };
 
-            await response.Send<CreateAccountResponse>(client);
+            await client.Send(response);
         } else {
             Transaction created = new()
             {
@@ -56,13 +56,13 @@ public class TransactionController : IController
             await database.Transactions.AddAsync(created);
             await database.SaveChangesAsync();
 
-            IResponse response = new CreateAccountResponse
+            CreateAccountResponse response = new()
             {
                 Id = created.Id,
                 Success = true
             };
 
-            await response.Send<CreateAccountResponse>(client);
+            await client.Send(response);
         }
     }
 }

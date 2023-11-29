@@ -8,9 +8,11 @@ using System.Text;
 using System.Text.Json;
 using FinanceApp.Data.Exceptions;
 using FinanceApp.Data.Utility;
+using FinanceApp.MauiClient.Classes;
 using FinanceApp.MauiClient.Extensions;
 
 namespace FinanceApp.MauiClient.Services;
+
 public class ServerConnection
 {
     public const string DefaultAddress = "127.0.0.1";
@@ -26,12 +28,13 @@ public class ServerConnection
 
         await ConnectToIpAsync(ipAddressStr);
         _sslStream = await _socket.EstablishSslStreamAsync();
-        bool isCompatible = await IsServerCompatible();
-        if (!isCompatible) {
+        ServerInitialiser initialiser = new(this);
+        bool success = await initialiser.Initialise();
+        if (!success) {
             await _socket.DisconnectAsync(false);
 			_socket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 		}
-        return isCompatible;
+        return success;
 	}
 
     public async Task<TResponse> SendMessageAsync<TRequest, TResponse>(TRequest request) where TRequest : IRequest
@@ -67,35 +70,5 @@ public class ServerConnection
         IPAddress ip = hostEntry.AddressList[0] ?? throw new($"Unable to find IP address for {ipAddressStr}");
         IPEndPoint ipEndPoint = new(ip, 42069);
         await _socket.ConnectAsync(ipEndPoint);
-    }
-
-    private async Task<bool> IsServerCompatible()
-    {
-        try {
-            if (_sslStream == null) throw new InvalidOperationException("Cannot send a message without a valid SSL stream.");
-
-            CompareVersion response = new()
-            {
-                SemanticVersion = AppInfo.Version
-            };
-
-            string strRequest = JsonSerializer.Serialize(response);
-            byte[] message = Encoding.UTF8.GetBytes(strRequest + Serialization.Eof);
-            await _sslStream.WriteAsync(message);
-            await _sslStream.FlushAsync();
-
-			string messageReceived = await _sslStream.ReadMessageAsync();
-            CompareVersion request = JsonSerializer.Deserialize<CompareVersion>(messageReceived) ?? throw new($"Malformed {nameof(CompareVersion)} request received");
-
-			if (request.SemanticVersion.IsCompatible(AppInfo.Version)) {
-				return true;
-			} else {
-				await Shell.Current.DisplayAlert("Version Issue", $"Server version {request.SemanticVersion} is not compatible with {response.SemanticVersion}", "OK");
-				return false;
-            }
-		} catch {
-			await Shell.Current.DisplayAlert("Version Issue", "Could not compare version against server.", "OK");
-			return false;
-        }
     }
 }

@@ -12,12 +12,12 @@ public class CounterpartyController : IController
     {
         List<Counterparty> counterparties = await database.Counterparties.ToListAsync();
 
-        IResponse response = new GetCounterpartiesResponse
+        GetCounterpartiesResponse response = new()
         {
             Counterparties = counterparties,
             Success = true
         };
 
-        await response.Send<GetCounterpartiesResponse>(client);
+        await client.Send(response);
     }
 }

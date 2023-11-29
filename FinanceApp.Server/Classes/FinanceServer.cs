@@ -4,9 +4,7 @@ using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using FinanceApp.Data;
-using FinanceApp.Data.Extensions;
 using FinanceApp.Data.Interfaces;
-using FinanceApp.Data.Requests;
 using FinanceApp.Data.Utility;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
@@ -104,10 +102,11 @@ public class FinanceServer : IHostedService
             client.WriteLine("Connection found.");
             await using SslStream sslStream = await client.EstablishSslStreamAsync(_serverCertificate);
             client.Stream = sslStream;
-            if (await IsClientCompatibleAsync(client)) {
+            ClientInitialiser initialiser = new(client);
+            if (await initialiser.Initialise()) {
                 while (_isRunning) {
                     string strRequest = await client.ReadMessageAsync();
-                    if (strRequest.Equals(string.Empty)) break;
+                    if (string.IsNullOrWhiteSpace(strRequest)) break;
 
                     dynamic request = IRequest.GetRequest(strRequest);
                     client.WriteLine(request);
@@ -122,34 +121,6 @@ public class FinanceServer : IHostedService
             client.WriteLine(e.Message);
 		} finally {
             await RemoveClientAsync(client);
-        }
-	}
-
-    // TODO - Move this somewhere more appropriate
-    private async Task<bool> IsClientCompatibleAsync(Client client)
-    {
-        try {
-            string messageReceived = await client.ReadMessageAsync();
-            CompareVersion response = JsonSerializer.Deserialize<CompareVersion>(messageReceived) ?? throw new($"Malformed {nameof(CompareVersion)} request received");
-
-            CompareVersion request = new()
-            {
-                SemanticVersion = ThisAssembly.Git.SemVer.Version
-            };
-            string strRequest = JsonSerializer.Serialize(request);
-            byte[] message = Encoding.UTF8.GetBytes(strRequest + Serialization.Eof);
-            await client.Stream.WriteAsync(message);
-            await client.Stream.FlushAsync();
-
-            if (response.SemanticVersion.IsCompatible(request.SemanticVersion)) {
-                return true;
-            } else {
-                client.WriteLine($"Client has incompatible version - {response.SemanticVersion}");
-                return false;
-            }
-		} catch {
-            client.WriteLine($"Client did not send appropriate {nameof(CompareVersion)} request, disconnecting.");
-            return false;
         }
 	}
 

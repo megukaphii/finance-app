@@ -7,5 +7,5 @@ public interface IAccountId : IRequest
 {
     public new static Type Validator => typeof(AccountIdValidator);
 
-    public RequestField<long> Id { get; }
+    public RequestField<long> Id { get; init; }
 }

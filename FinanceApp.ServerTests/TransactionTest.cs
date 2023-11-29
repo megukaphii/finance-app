@@ -14,10 +14,10 @@ namespace FinanceApp.ServerTests;
 [TestFixture]
 public class TransactionTest
 {
-	private static readonly FinanceAppContext _db = new();
+	private static readonly FinanceAppContext DB = new();
 	private static readonly Socket EmptySocket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-    private static Account _defaultAccount = new()
+    private static readonly Account DefaultAccount = new()
     {
         Name = "Test Acc.",
         Description = "Test Desc.",
@@ -26,7 +26,7 @@ public class TransactionTest
 
     private static readonly Transaction TestTransaction = new()
     {
-        Account = _defaultAccount,
+        Account = DefaultAccount,
         Counterparty = new()
         {
             Name = "John"
@@ -64,19 +64,19 @@ public class TransactionTest
     {
         new()
         {
-            Account = _defaultAccount,
+            Account = DefaultAccount,
             Counterparty = SeedCounterparty1,
             Value = 10
         },
         new()
         {
-            Account = _defaultAccount,
+            Account = DefaultAccount,
             Counterparty = SeedCounterparty1,
             Value = -50
         },
         new()
         {
-            Account = _defaultAccount,
+            Account = DefaultAccount,
             Counterparty = SeedCounterparty2,
             Value = 420
         }
@@ -85,24 +85,24 @@ public class TransactionTest
     [OneTimeSetUp]
     public async Task PerformMigrations()
     {
-        if ((await _db.Database.GetPendingMigrationsAsync()).Any()) {
-            await _db.Database.MigrateAsync();
+        if ((await DB.Database.GetPendingMigrationsAsync()).Any()) {
+            await DB.Database.MigrateAsync();
         }
 
-        if (!await _db.Accounts.AnyAsync()) {
-            await _db.Accounts.AddAsync(_defaultAccount);
-            await _db.SaveChangesAsync();
+        if (!await DB.Accounts.AnyAsync()) {
+            await DB.Accounts.AddAsync(DefaultAccount);
+            await DB.SaveChangesAsync();
         }
     }
 
     [SetUp]
     public async Task ClearDB()
     {
-        _db.ChangeTracker.Clear();
-        await _db.Database.ExecuteSqlRawAsync("DELETE FROM Transactions WHERE Id != 0");
-        await _db.Database.ExecuteSqlRawAsync("DELETE FROM sqlite_sequence WHERE name='Transactions';");
-        await _db.Database.ExecuteSqlRawAsync("DELETE FROM Counterparties WHERE Id != 0");
-        await _db.Database.ExecuteSqlRawAsync("DELETE FROM sqlite_sequence WHERE name='Counterparties';");
+        DB.ChangeTracker.Clear();
+        await DB.Database.ExecuteSqlRawAsync("DELETE FROM Transactions WHERE Id != 0");
+        await DB.Database.ExecuteSqlRawAsync("DELETE FROM sqlite_sequence WHERE name='Transactions';");
+        await DB.Database.ExecuteSqlRawAsync("DELETE FROM Counterparties WHERE Id != 0");
+        await DB.Database.ExecuteSqlRawAsync("DELETE FROM sqlite_sequence WHERE name='Counterparties';");
     }
 
     // TODO - These need a lot of reworking, I think. First do the TODO in FinanceAppContext though.
@@ -112,11 +112,17 @@ public class TransactionTest
         IRequest request = IRequest.GetRequest(MessageCreteRequest);
         byte[] buffer = new byte[2048];
         MemoryStream stream = new(buffer);
-        Client client = new() { Socket = EmptySocket, Stream =  stream };
-        client.SetActiveAccount(await _db.Accounts.FirstAsync());
-        await request.HandleAsync(_db, client);
+        Client client = new()
+        {
+            Socket = EmptySocket, Stream = stream,
+            Session =
+            {
+                Account = await DB.Accounts.FirstAsync()
+            }
+        };
+        await request.HandleAsync(DB, client);
 
-        Transaction? result = await _db.Transactions
+        Transaction? result = await DB.Transactions
             .Include(transaction => transaction.Counterparty)
             .FirstOrDefaultAsync(transaction => transaction.Id == 1);
 
@@ -130,9 +136,15 @@ public class TransactionTest
         IRequest request = IRequest.GetRequest(MessageCreteRequest);
         byte[] buffer = new byte[2048];
         MemoryStream stream = new(buffer);
-		Client client = new() { Socket = EmptySocket, Stream = stream };
-        client.SetActiveAccount(await _db.Accounts.FirstAsync());
-		await request.HandleAsync(_db, client);
+		Client client = new()
+        {
+            Socket = EmptySocket, Stream = stream,
+            Session =
+            {
+                Account = await DB.Accounts.FirstAsync()
+            }
+        };
+        await request.HandleAsync(DB, client);
 
 		CreateTransactionResponse expected = new()
         {
@@ -154,9 +166,15 @@ public class TransactionTest
         IRequest request = IRequest.GetRequest(MessageIndexRequest);
         byte[] buffer = new byte[2048];
         MemoryStream stream = new(buffer);
-		Client client = new() { Socket = EmptySocket, Stream = stream };
-        client.SetActiveAccount(await _db.Accounts.FirstAsync());
-		await request.HandleAsync(_db, client);
+		Client client = new()
+        {
+            Socket = EmptySocket, Stream = stream,
+            Session =
+            {
+                Account = await DB.Accounts.FirstAsync()
+            }
+        };
+        await request.HandleAsync(DB, client);
 
 		string message = Encoding.UTF8.GetString(stream.ToArray());
         message = Helpers.RemoveFromEof(message);
@@ -166,9 +184,9 @@ public class TransactionTest
         Assert.AreEqual(SeedTransactions, result?.Transactions);
     }
 
-    private async Task SeedDB()
+    private static async Task SeedDB()
     {
-        Account tempAccount = await _db.Accounts.FirstAsync();
+        Account tempAccount = await DB.Accounts.FirstAsync();
         List<Transaction> tempTransactions = SeedTransactions.Select(
             template => new Transaction
             {
@@ -178,7 +196,7 @@ public class TransactionTest
             }
         ).ToList();
 
-        await _db.Transactions.AddRangeAsync(tempTransactions);
-        await _db.SaveChangesAsync();
+        await DB.Transactions.AddRangeAsync(tempTransactions);
+        await DB.SaveChangesAsync();
     }
 }

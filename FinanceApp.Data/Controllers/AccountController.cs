@@ -12,13 +12,13 @@ public class AccountController : IController
     {
         List<Account> accounts = await database.Accounts.ToListAsync();
 
-        IResponse response = new GetAccountsResponse
+        GetAccountsResponse response = new()
         {
             Accounts = accounts,
             Success = true,
         };
 
-        await response.Send<GetAccountsResponse>(client);
+        await client.Send(response);
     }
 
     public static async Task Create(CreateAccount request, FinanceAppContext database, Client client)
@@ -32,22 +32,23 @@ public class AccountController : IController
         await database.Accounts.AddAsync(created);
         await database.SaveChangesAsync();
 
-        IResponse response = new CreateAccountResponse
+        CreateAccountResponse response = new()
         {
             Id = created.Id,
             Success = true
         };
 
-        await response.Send<CreateAccountResponse>(client);
+        await client.Send(response);
     }
 
     public static async Task SetActiveAccount(SelectAccount request, FinanceAppContext database, Client client)
     {
-        client.SetActiveAccount((await database.Accounts.FindAsync(request.Id.Value))!);
-        IResponse response = new SelectAccountResponse
+        client.Session.Account = (await database.Accounts.FindAsync(request.Id.Value))!;
+        SelectAccountResponse response = new()
         {
             Success = true
         };
-        await response.Send<SelectAccountResponse>(client);
+
+        await client.Send(response);
     }
 }

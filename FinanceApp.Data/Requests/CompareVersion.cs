@@ -1,10 +1,15 @@
-﻿namespace FinanceApp.Data.Requests;
+﻿using FinanceApp.Data.Interfaces;
+using FinanceApp.Data.Utility;
 
-public class CompareVersion
+namespace FinanceApp.Data.Requests;
+
+public class CompareVersion : IRequest
 {
+    public static string Flag => "<CompareVersion>";
+
 	public required Version SemanticVersion { get; init; }
 
-	public override string ToString()
+    public override string ToString()
 	{
 		return $"{nameof(SemanticVersion)}: {SemanticVersion}";
 	}
@@ -29,4 +34,20 @@ public class CompareVersion
 	{
 		return HashCode.Combine(SemanticVersion);
 	}
+
+    public Task HandleAsync(FinanceAppContext database, Client client)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public class CompareVersionResponse : IResponse
+{
+    public required bool Success { get; init; }
+    public required Version SemanticVersion { get; init; }
+
+    public override string ToString()
+    {
+        return $"{nameof(Success)}: {Success}, {nameof(SemanticVersion)}: {SemanticVersion}";
+    }
 }
