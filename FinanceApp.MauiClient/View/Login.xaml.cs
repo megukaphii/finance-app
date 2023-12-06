@@ -11,8 +11,8 @@ public partial class Login : ContentPage
 		viewModel.Title = "Login";
 	}
 
-    protected override void OnAppearing()
-    {
-        ((LoginViewModel)BindingContext).CheckConnection();
-    }
+	protected override void OnAppearing()
+	{
+		((LoginViewModel)BindingContext).CheckConnection();
+	}
 }

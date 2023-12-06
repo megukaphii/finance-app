@@ -5,7 +5,7 @@ namespace FinanceApp.Data.RequestPatterns;
 
 public interface IAccountId : IRequest
 {
-    public new static Type Validator => typeof(AccountIdValidator);
+	public new static Type Validator => typeof(AccountIdValidator);
 
-    public RequestField<long> Id { get; init; }
+	public RequestField<long> Id { get; init; }
 }

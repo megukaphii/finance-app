@@ -5,11 +5,12 @@ namespace FinanceApp.Server.Database;
 
 internal static class Seeder
 {
-    private static readonly FinanceAppContext DB = null!;
+	private static readonly FinanceAppContext DB = null!;
 
-	internal static async void SeedDB() {
+	internal static async void SeedDB()
+	{
 		string sql =
-		@"
+			@"
 			INSERT INTO Transactions (
 			    CounterpartyId,
 				Value
@@ -19,6 +20,6 @@ internal static class Seeder
 				120
 			);
 		";
-        await DB.Database.ExecuteSqlRawAsync(sql);
-    }
+		await DB.Database.ExecuteSqlRawAsync(sql);
+	}
 }

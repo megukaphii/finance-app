@@ -1,12 +1,11 @@
-﻿using FinanceApp.Data.Interfaces;
-using FinanceApp.Data.Requests;
-using FinanceApp.Data.Extensions;
-using System.Net;
+﻿using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using FinanceApp.Data.Exceptions;
+using FinanceApp.Data.Extensions;
+using FinanceApp.Data.Interfaces;
 using FinanceApp.Data.Utility;
 using FinanceApp.MauiClient.Classes;
 using FinanceApp.MauiClient.Extensions;
@@ -15,60 +14,62 @@ namespace FinanceApp.MauiClient.Services;
 
 public class ServerConnection
 {
-    public const string DefaultAddress = "127.0.0.1";
+	public const string DefaultAddress = "127.0.0.1";
+	private Socket _socket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+	private SslStream? _sslStream;
 
-    public bool IsConnected => _socket.Connected;
+	public bool IsConnected => _socket.Connected;
 
-    private SslStream? _sslStream;
-    private Socket _socket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+	public async Task<bool> EstablishConnection(string ipAddressStr = "")
+	{
+		if (string.IsNullOrEmpty(ipAddressStr)) ipAddressStr = DefaultAddress;
 
-    public async Task<bool> EstablishConnection(string ipAddressStr = "")
-    {
-        if (string.IsNullOrEmpty(ipAddressStr)) ipAddressStr = DefaultAddress;
-
-        await ConnectToIpAsync(ipAddressStr);
-        _sslStream = await _socket.EstablishSslStreamAsync();
-        ServerInitialiser initialiser = new(this);
-        bool success = await initialiser.Initialise();
-        if (!success) {
-            await _socket.DisconnectAsync(false);
+		await ConnectToIpAsync(ipAddressStr);
+		_sslStream = await _socket.EstablishSslStreamAsync();
+		ServerInitialiser initialiser = new(this);
+		bool success = await initialiser.Initialise();
+		if (!success) {
+			await _socket.DisconnectAsync(false);
 			_socket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 		}
-        return success;
+
+		return success;
 	}
 
-    public async Task<TResponse> SendMessageAsync<TRequest, TResponse>(TRequest request) where TRequest : IRequest
+	public async Task<TResponse> SendMessageAsync<TRequest, TResponse>(TRequest request) where TRequest : IRequest
 	{
-        string json = JsonSerializer.Serialize(request);
+		string json = JsonSerializer.Serialize(request);
 		byte[] message = Encoding.UTF8.GetBytes(TRequest.Flag + json + Serialization.Eof);
 
-        if (_sslStream == null) throw new InvalidOperationException("Cannot send a message without a valid SSL stream.");
+		if (_sslStream == null)
+			throw new InvalidOperationException("Cannot send a message without a valid SSL stream.");
 
 		_sslStream.Write(message);
 		_sslStream.Flush();
 
 		string messageReceived = await _sslStream.ReadMessageAsync();
-        if (messageReceived.Contains(Serialization.Error)) {
-            messageReceived = messageReceived.Replace(Serialization.Error, "");
-            TRequest errorResponse = JsonSerializer.Deserialize<TRequest>(messageReceived) ??
-                                     throw new($"Malformed {typeof(TRequest).Name} from server");
-            throw new ResponseException<TRequest> { Response = errorResponse };
-        } else {
-            return JsonSerializer.Deserialize<TResponse>(messageReceived) ?? throw new($"Malformed {typeof(TResponse).Name} from server");
-        }
-    }
-
-    public async Task DisconnectAsync()
-    {
-        await _socket.DisconnectAsync(false);
-        _socket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+		if (messageReceived.Contains(Serialization.Error)) {
+			messageReceived = messageReceived.Replace(Serialization.Error, "");
+			TRequest errorResponse = JsonSerializer.Deserialize<TRequest>(messageReceived) ??
+			                         throw new($"Malformed {typeof(TRequest).Name} from server");
+			throw new ResponseException<TRequest> { Response = errorResponse };
+		} else {
+			return JsonSerializer.Deserialize<TResponse>(messageReceived) ??
+			       throw new($"Malformed {typeof(TResponse).Name} from server");
+		}
 	}
 
-    private async Task ConnectToIpAsync(string ipAddressStr)
-    {
-        IPHostEntry hostEntry = await Dns.GetHostEntryAsync(ipAddressStr);
-        IPAddress ip = hostEntry.AddressList[0] ?? throw new($"Unable to find IP address for {ipAddressStr}");
-        IPEndPoint ipEndPoint = new(ip, 42069);
-        await _socket.ConnectAsync(ipEndPoint);
-    }
+	public async Task DisconnectAsync()
+	{
+		await _socket.DisconnectAsync(false);
+		_socket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+	}
+
+	private async Task ConnectToIpAsync(string ipAddressStr)
+	{
+		IPHostEntry hostEntry = await Dns.GetHostEntryAsync(ipAddressStr);
+		IPAddress ip = hostEntry.AddressList[0] ?? throw new($"Unable to find IP address for {ipAddressStr}");
+		IPEndPoint ipEndPoint = new(ip, 42069);
+		await _socket.ConnectAsync(ipEndPoint);
+	}
 }

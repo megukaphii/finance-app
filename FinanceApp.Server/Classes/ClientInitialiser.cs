@@ -7,36 +7,34 @@ namespace FinanceApp.Server.Classes;
 
 public class ClientInitialiser : ConnectionInitialiser
 {
-    private readonly Client _client;
+	private readonly Client _client;
 
-    public ClientInitialiser(Client client)
-    {
-        _client = client;
-    }
+	public ClientInitialiser(Client client) => _client = client;
 
-    protected override async Task<bool> IsCompatibleAsync()
-    {
-        try {
-            string messageReceived = await _client.ReadMessageAsync();
-            CompareVersion request = JsonSerializer.Deserialize<CompareVersion>(messageReceived.Replace(CompareVersion.Flag, string.Empty))
-                                     ?? throw new($"Malformed {nameof(CompareVersion)} request received");
+	protected override async Task<bool> IsCompatibleAsync()
+	{
+		try {
+			string messageReceived = await _client.ReadMessageAsync();
+			CompareVersion request =
+				JsonSerializer.Deserialize<CompareVersion>(messageReceived.Replace(CompareVersion.Flag, string.Empty))
+				?? throw new($"Malformed {nameof(CompareVersion)} request received");
 
-            Version serverVersion = ThisAssembly.Git.SemVer.Version;
-            bool isCompatible = serverVersion.IsCompatible(request.SemanticVersion);
-            CompareVersionResponse response = new()
-            {
-                Success = isCompatible,
-                SemanticVersion = serverVersion
-            };
-            await _client.Send(response);
+			Version serverVersion = ThisAssembly.Git.SemVer.Version;
+			bool isCompatible = serverVersion.IsCompatible(request.SemanticVersion);
+			CompareVersionResponse response = new()
+			{
+				Success = isCompatible,
+				SemanticVersion = serverVersion
+			};
+			await _client.Send(response);
 
-            if (!isCompatible)
-                _client.WriteLine($"Client has incompatible version - {request.SemanticVersion}");
+			if (!isCompatible)
+				_client.WriteLine($"Client has incompatible version - {request.SemanticVersion}");
 
-            return isCompatible;
-        } catch {
-            _client.WriteLine($"Client did not send appropriate {nameof(CompareVersion)} request, disconnecting.");
-            return false;
-        }
-    }
+			return isCompatible;
+		} catch {
+			_client.WriteLine($"Client did not send appropriate {nameof(CompareVersion)} request, disconnecting.");
+			return false;
+		}
+	}
 }

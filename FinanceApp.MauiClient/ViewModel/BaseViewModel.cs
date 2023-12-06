@@ -6,16 +6,17 @@ namespace FinanceApp.MauiClient.ViewModel;
 
 public abstract partial class BaseViewModel(ServerConnection serverConnection, IMemoryCache cache) : ObservableObject
 {
+	protected readonly IMemoryCache Cache = cache;
+	protected readonly ServerConnection ServerConnection = serverConnection;
+
 	[ObservableProperty]
 	[NotifyPropertyChangedFor(nameof(IsNotBusy))]
 	private bool _isBusy;
+
 	[ObservableProperty]
 	private string _title = string.Empty;
 
 	public bool IsNotBusy => !IsBusy;
 
-	protected readonly ServerConnection ServerConnection = serverConnection;
-    protected readonly IMemoryCache Cache = cache;
-
-    public abstract void ClearErrors();
+	public abstract void ClearErrors();
 }

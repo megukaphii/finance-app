@@ -6,11 +6,11 @@ namespace FinanceApp.Data.Utility;
 
 public static class Helpers
 {
-    public static int GetPropertyMinLength<TModel, TProperty>(Expression<Func<TModel, TProperty>> property)
-    {
-        Type type = property.Parameters.First().Type;
-        return type.GetProperty(GetPropertyName(property))?.GetCustomAttribute<MinLengthAttribute>()?.Length ?? 0;
-    }
+	public static int GetPropertyMinLength<TModel, TProperty>(Expression<Func<TModel, TProperty>> property)
+	{
+		Type type = property.Parameters.First().Type;
+		return type.GetProperty(GetPropertyName(property))?.GetCustomAttribute<MinLengthAttribute>()?.Length ?? 0;
+	}
 
 	public static int GetPropertyMaxLength<TModel, TProperty>(Expression<Func<TModel, TProperty>> property)
 	{
@@ -19,8 +19,8 @@ public static class Helpers
 	}
 
 	private static string GetPropertyName<TModel, TProperty>(Expression<Func<TModel, TProperty>> property)
-    {
-        MemberExpression memberExpression = (MemberExpression)property.Body;
-        return memberExpression.Member.Name;
-    }
+	{
+		MemberExpression memberExpression = (MemberExpression)property.Body;
+		return memberExpression.Member.Name;
+	}
 }

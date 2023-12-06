@@ -1,22 +1,24 @@
-﻿using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using FinanceApp.MauiClient.Services;
 using FinanceApp.MauiClient.View;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace FinanceApp.MauiClient.ViewModel;
 
-public partial class LoginViewModel(ServerConnection serverConnection, IMemoryCache cache) : BaseViewModel(serverConnection, cache)
+public partial class LoginViewModel(ServerConnection serverConnection, IMemoryCache cache)
+	: BaseViewModel(serverConnection, cache)
 {
 	[ObservableProperty]
 	private string _ipAddress = ServerConnection.DefaultAddress;
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsNotConnected))]
-    private bool _isConnected;
 
-    public bool IsNotConnected => !IsConnected;
+	[ObservableProperty]
+	[NotifyPropertyChangedFor(nameof(IsNotConnected))]
+	private bool _isConnected;
 
-    [RelayCommand]
+	public bool IsNotConnected => !IsConnected;
+
+	[RelayCommand]
 	private void SetLocalIp()
 	{
 		IpAddress = "127.0.0.1";
@@ -35,11 +37,13 @@ public partial class LoginViewModel(ServerConnection serverConnection, IMemoryCa
 			IsBusy = true;
 			if (await ServerConnection.EstablishConnection(IpAddress)) {
 				IsConnected = ServerConnection.IsConnected;
-				await Shell.Current.DisplayAlert("Connection Established", $"Successfully connected to {IpAddress}!", "OK");
+				await Shell.Current.DisplayAlert("Connection Established", $"Successfully connected to {IpAddress}!",
+					"OK");
 				await Shell.Current.GoToAsync($"//{nameof(Accounts)}", true);
 			}
 		} catch (Exception ex) {
-			await Shell.Current.DisplayAlert("Error", ex.Message + " | Inner exception: " + ex.InnerException?.Message, "OK");
+			await Shell.Current.DisplayAlert("Error", ex.Message + " | Inner exception: " + ex.InnerException?.Message,
+				"OK");
 		} finally {
 			IsBusy = false;
 		}
@@ -54,19 +58,17 @@ public partial class LoginViewModel(ServerConnection serverConnection, IMemoryCa
 			IsConnected = ServerConnection.IsConnected;
 			await Shell.Current.DisplayAlert("Disconnected", "Successfully disconnected from server!", "OK");
 		} catch (Exception ex) {
-			await Shell.Current.DisplayAlert("Error", ex.Message + " | Inner exception: " + ex.InnerException?.Message, "OK");
+			await Shell.Current.DisplayAlert("Error", ex.Message + " | Inner exception: " + ex.InnerException?.Message,
+				"OK");
 		} finally {
 			IsBusy = false;
 		}
 	}
 
-    public void CheckConnection()
-    {
-        IsConnected = ServerConnection.IsConnected;
-    }
+	public void CheckConnection()
+	{
+		IsConnected = ServerConnection.IsConnected;
+	}
 
-    public override void ClearErrors()
-    {
-
-    }
+	public override void ClearErrors() { }
 }
