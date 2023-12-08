@@ -1,9 +1,11 @@
 ﻿using FinanceApp.Data;
 using FinanceApp.Data.Interfaces;
+using FinanceApp.Data.RequestPatterns;
 using FinanceApp.Data.Requests.Account;
 using FinanceApp.Data.Requests.Counterparty;
 using FinanceApp.Data.Requests.Transaction;
 using FinanceApp.Data.Utility;
+using FinanceApp.Data.Validators;
 using FinanceApp.Server.Classes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,10 +28,17 @@ public static class Program
 				services.AddMemoryCache();
 				services.AddHostedService<FinanceServer>();
 
+				services.AddSingleton<IValidatorResolver, ValidatorResolver>();
 				services.AddSingleton<IRequestProcessor, RequestProcessor>();
+
+				services.AddSingleton<IValidator<IAccountId>, AccountIdValidator>();
+				services.AddSingleton<IValidator<IPageNumber>, PageNumberValidator>();
+				services.AddSingleton<IValidator<ISingleAccount>, SingleAccountValidator>();
+				services.AddSingleton<IValidator<ISingleTransaction>, SingleTransactionValidator>();
 
 				services.AddTransient<DbContext, FinanceAppContext>();
 				services.AddTransient<IUnitOfWork, UnitOfWork>();
+
 				services.AddTransient<IRequestHandler<CreateAccount>, CreateAccountHandler>();
 				services.AddTransient<IRequestHandler<GetAccounts>, GetAccountsHandler>();
 				services.AddTransient<IRequestHandler<SelectAccount>, SelectAccountHandler>();

@@ -43,6 +43,6 @@ public class RequestTest
 		// TODO - This test doesn't work! It doesn't actually confirm the Validator is run, because IsValid skips if it doesn't find the Validator
 		Assert.DoesNotThrowAsync(async () => await IRequest.IsValidAsync(request, new()));
 		Assert.IsTrue(request is ISingleTransaction);
-		Assert.AreEqual(typeof(TransactionValidator), ISingleTransaction.Validator);
+		Assert.AreEqual(typeof(SingleTransactionValidator), ISingleTransaction.Validator);
 	}
 }

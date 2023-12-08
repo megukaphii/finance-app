@@ -4,16 +4,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FinanceApp.Data.Validators;
 
-public class AccountIdValidator : IValidator
+public class AccountIdValidator : IValidator<IAccountId>
 {
-	public async Task<bool> ValidateAsync(IRequest request)
+	public Task<bool> ValidateAsync(IAccountId request)
 	{
-		bool pass = false;
-		if (request is IAccountId validateAgainst) {
-			FinanceAppContext db = new();
-			pass = await db.Accounts.AnyAsync(transaction => transaction.Id == validateAgainst.Id.Value);
-		}
-
-		return pass;
+		FinanceAppContext db = new();
+		return db.Accounts.AnyAsync(transaction => transaction.Id == request.Id.Value);
 	}
 }

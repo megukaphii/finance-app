@@ -7,28 +7,6 @@ public interface IRequest
 {
 	private static List<Type> RequestTypes { get; } = new();
 	public static virtual string Flag => string.Empty;
-	public static virtual Type? Validator => null;
-
-	public static async Task<bool> IsValidAsync(IRequest request)
-	{
-		Type requestType = request.GetType();
-		if (requestType == typeof(InvalidRequest)) return false;
-
-		Type? requestValidator = (Type?)requestType
-			.GetInterfaces()
-			.First(type => type != typeof(IRequest))
-			.GetProperty(nameof(Validator))?
-			.GetValue(null);
-		if (requestValidator is null) return true;
-
-		if (requestValidator.IsAssignableTo(typeof(IValidator))) {
-			IValidator validator = (IValidator)Activator.CreateInstance(requestValidator)!;
-			return await validator.ValidateAsync(request);
-		}
-
-		throw new(
-			$"{nameof(Validator)} <{requestValidator.Name}> for <{requestType.Name}> is not a child of {nameof(IValidator)}.");
-	}
 
 	public static IRequest GetRequest(string message)
 	{
@@ -75,7 +53,7 @@ public class InvalidRequest : IRequest
 	public InvalidRequest(Exception exception) => Exception = exception;
 
 	public Exception Exception { get; }
+	public static Type? Validator => throw new InvalidDataException();
 
 	public static string Flag => throw new InvalidDataException();
-	public static Type? Validator => throw new InvalidDataException();
 }

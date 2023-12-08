@@ -2,8 +2,6 @@
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Text.Json;
 using FinanceApp.Data;
 using FinanceApp.Data.Exceptions;
 using FinanceApp.Data.Interfaces;
@@ -111,10 +109,7 @@ public class FinanceServer : IHostedService
 
 					dynamic request = IRequest.GetRequest(strRequest);
 					client.WriteLine(request);
-					if (await IRequest.IsValidAsync(request))
-						await _processor.ProcessAsync(request, client);
-					else
-						await SendErrorResponseAsync(client.Stream, request);
+					await _processor.ProcessAsync(request, client);
 				}
 		} catch (ConnectionException e) {
 			client.WriteLine(e.Message);
@@ -128,15 +123,6 @@ public class FinanceServer : IHostedService
 		} finally {
 			await RemoveClientAsync(client);
 		}
-	}
-
-	private static async Task SendErrorResponseAsync<TRequest>(Stream stream, TRequest validatedRequest)
-		where TRequest : IRequest
-	{
-		string strResponse = JsonSerializer.Serialize(validatedRequest);
-		byte[] message = Encoding.UTF8.GetBytes(Serialization.Error + strResponse + Serialization.Eof);
-		await stream.WriteAsync(message);
-		await stream.FlushAsync();
 	}
 
 	private async Task RemoveClientAsync(Client client)

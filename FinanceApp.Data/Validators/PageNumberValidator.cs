@@ -3,27 +3,25 @@ using FinanceApp.Data.RequestPatterns;
 
 namespace FinanceApp.Data.Validators;
 
-public class PageNumberValidator : IValidator
+public class PageNumberValidator : IValidator<IPageNumber>
 {
 	private const long MinPage = 0;
-
 	// This is just to stop it complaining about an unreachable switch case. Probably change it later.
 	private const long MaxPage = long.MaxValue - 1;
 
-	public Task<bool> ValidateAsync(IRequest request)
+	public Task<bool> ValidateAsync(IPageNumber request)
 	{
 		bool failure = false;
-		if (request is IPageNumber validateAgainst)
-			switch (validateAgainst.Page.Value) {
-				case < MinPage:
-					validateAgainst.Page.Error = $"{nameof(validateAgainst.Page)} should be greater than {MinPage}";
-					failure = true;
-					break;
-				case > MaxPage:
-					validateAgainst.Page.Error = $"{nameof(validateAgainst.Page)} should be less than {MaxPage}";
-					failure = true;
-					break;
-			}
+		switch (request.Page.Value) {
+			case < MinPage:
+				request.Page.Error = $"{nameof(request.Page)} should be greater than {MinPage}";
+				failure = true;
+				break;
+			case > MaxPage:
+				request.Page.Error = $"{nameof(request.Page)} should be less than {MaxPage}";
+				failure = true;
+				break;
+		}
 
 		return Task.FromResult(!failure);
 	}
