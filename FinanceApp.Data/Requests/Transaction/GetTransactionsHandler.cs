@@ -1,5 +1,4 @@
 ﻿using FinanceApp.Data.Interfaces;
-using FinanceApp.Data.Utility;
 using Microsoft.EntityFrameworkCore;
 
 namespace FinanceApp.Data.Requests.Transaction;
@@ -10,7 +9,7 @@ public class GetTransactionsHandler : IRequestHandler<GetTransactions>
 
 	public IUnitOfWork UnitOfWork { get; }
 
-	public async Task HandleAsync(GetTransactions request, Client client)
+	public async Task HandleAsync(GetTransactions request, IClient client)
 	{
 		using (UnitOfWork) {
 			List<Models.Transaction> transactions =

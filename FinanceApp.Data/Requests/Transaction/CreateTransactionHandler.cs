@@ -1,5 +1,4 @@
 ﻿using FinanceApp.Data.Interfaces;
-using FinanceApp.Data.Utility;
 
 namespace FinanceApp.Data.Requests.Transaction;
 
@@ -9,7 +8,7 @@ public class CreateTransactionHandler : IRequestHandler<CreateTransaction>
 
 	public IUnitOfWork UnitOfWork { get; }
 
-	public async Task HandleAsync(CreateTransaction request, Client client)
+	public async Task HandleAsync(CreateTransaction request, IClient client)
 	{
 		using (UnitOfWork) {
 			Models.Counterparty? counterparty = request.Counterparty.Value;

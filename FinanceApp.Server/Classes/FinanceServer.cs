@@ -16,7 +16,7 @@ namespace FinanceApp.Server.Classes;
 public class FinanceServer : IHostedService
 {
 	private readonly IMemoryCache _cache;
-	private readonly List<Client> _clients = new();
+	private readonly List<IClient> _clients = new();
 	private readonly Socket _listener = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 	private readonly SemaphoreSlim _maxConnections;
 	private readonly IRequestProcessor _processor;
@@ -54,7 +54,7 @@ public class FinanceServer : IHostedService
 	{
 		_isRunning = false;
 
-		foreach (Client client in _clients) await client.Socket.DisconnectAsync(false, cancellationToken);
+		foreach (IClient client in _clients) await client.Socket.DisconnectAsync(false, cancellationToken);
 
 		_clients.Clear();
 		_listener.Dispose();
@@ -107,7 +107,8 @@ public class FinanceServer : IHostedService
 					string strRequest = await client.ReadMessageAsync();
 					if (string.IsNullOrWhiteSpace(strRequest)) break;
 
-					dynamic request = IRequest.GetRequest(strRequest);
+					// TODO - Handle invalid requests
+					IRequest request = IRequest.GetRequest(strRequest);
 					client.WriteLine(request);
 					await _processor.ProcessAsync(request, client);
 				}
@@ -125,7 +126,7 @@ public class FinanceServer : IHostedService
 		}
 	}
 
-	private async Task RemoveClientAsync(Client client)
+	private async Task RemoveClientAsync(IClient client)
 	{
 		await client.Socket.DisconnectAsync(false);
 		_clients.Remove(client);

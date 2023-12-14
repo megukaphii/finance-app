@@ -1,13 +1,10 @@
 ﻿using System.Net.Sockets;
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using FinanceApp.Data.Extensions;
 using FinanceApp.Data.Interfaces;
 
 namespace FinanceApp.Data.Utility;
 
-public class Client
+public class Client : IClient
 {
 	private readonly Guid _id = Guid.NewGuid();
 	private string Id => _id.ToString();
@@ -17,15 +14,9 @@ public class Client
 
 	public Task<string> ReadMessageAsync() => Stream.ReadMessageAsync();
 
-	public async Task Send<T>(T response) where T : IResponse
+	public Task Send(IResponse response)
 	{
-		string strResponse = JsonSerializer.Serialize(response, new JsonSerializerOptions
-		{
-			ReferenceHandler = ReferenceHandler.IgnoreCycles
-		});
-		byte[] message = Encoding.UTF8.GetBytes(strResponse + Serialization.Eof);
-		await Stream.WriteAsync(message);
-		await Stream.FlushAsync();
+		return Stream.SendResponseAsync(response);
 	}
 
 	public void WriteLine(object? value)

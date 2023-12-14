@@ -1,5 +1,5 @@
-﻿using System.Text.Json;
-using FinanceApp.Data.Extensions;
+﻿using FinanceApp.Data.Extensions;
+using FinanceApp.Data.Interfaces;
 using FinanceApp.Data.Requests;
 using FinanceApp.Data.Utility;
 
@@ -7,16 +7,16 @@ namespace FinanceApp.Server.Classes;
 
 public class ClientInitialiser : ConnectionInitialiser
 {
-	private readonly Client _client;
+	private readonly IClient _client;
 
-	public ClientInitialiser(Client client) => _client = client;
+	public ClientInitialiser(IClient client) => _client = client;
 
 	protected override async Task<bool> IsCompatibleAsync()
 	{
 		try {
 			string messageReceived = await _client.ReadMessageAsync();
 			CompareVersion request =
-				JsonSerializer.Deserialize<CompareVersion>(messageReceived.Replace(CompareVersion.Flag, string.Empty))
+				Serialization.Deserialize<CompareVersion>(messageReceived.Replace(CompareVersion.Flag, string.Empty))
 				?? throw new($"Malformed {nameof(CompareVersion)} request received");
 
 			Version serverVersion = ThisAssembly.Git.SemVer.Version;

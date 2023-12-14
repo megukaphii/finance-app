@@ -1,0 +1,63 @@
+﻿using FinanceApp.Data.Interfaces;
+using FinanceApp.Data.Utility;
+using NSubstitute;
+using NUnit.Framework;
+
+namespace FinanceApp.ServerTests.Utility;
+
+[TestFixture]
+public class RequestProcessorTest
+{
+	[SetUp]
+	public void Setup()
+	{
+		_mockServiceProvider = Substitute.For<IServiceProvider>();
+		_mockValidatorResolver = Substitute.For<IValidatorResolver>();
+		_sut = new RequestProcessor(_mockServiceProvider, _mockValidatorResolver);
+	}
+
+	private IServiceProvider _mockServiceProvider = null!;
+	private IValidatorResolver _mockValidatorResolver = null!;
+	private IRequestProcessor _sut = null!;
+
+	[Test]
+	public async Task ProcessAsync_Returns_If_RequestIsValid()
+	{
+		// Arrange
+		IRequest? mockRequest = Substitute.For<IRequest>();
+		IClient? mockClient = Substitute.For<IClient>();
+		using MemoryStream memoryStream = new();
+		mockClient.Stream.Returns(memoryStream);
+		IRequestHandler<IRequest>? mockRequestHandler = Substitute.For<IRequestHandler<IRequest>>();
+		Type test = typeof(IRequestHandler<>).MakeGenericType(mockRequest.GetType());
+		_mockServiceProvider.GetService(test).Returns(mockRequestHandler);
+		IValidator<IRequest>? mockValidator = Substitute.For<IValidator<IRequest>>();
+		mockValidator.ValidateAsync(mockRequest).Returns(true);
+		_mockValidatorResolver.GetValidator<IRequest>().Returns(mockValidator);
+
+		// Act
+		await _sut.ProcessAsync(mockRequest, mockClient);
+
+		// Assert
+		await mockRequestHandler.Received().HandleAsync(mockRequest, mockClient);
+	}
+
+	[Test]
+	public async Task ProcessAsync_Calls_SendErrorResponseAsync_If_RequestIsNotValid()
+	{
+		// Arrange
+		IRequest? mockRequest = Substitute.For<IRequest>();
+		IClient? mockClient = Substitute.For<IClient>();
+		MemoryStream stream = new();
+		mockClient.Stream.Returns(stream);
+		IValidator<IRequest>? mockValidator = Substitute.For<IValidator<IRequest>>();
+		_mockValidatorResolver.GetValidator<IRequest>().Returns(mockValidator);
+		mockValidator.ValidateAsync(mockRequest).Returns(false);
+
+		// Act
+		await _sut.ProcessAsync(mockRequest, mockClient);
+
+		// Assert
+		Assert.That(stream.Length, Is.GreaterThan(0));
+	}
+}

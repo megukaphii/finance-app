@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using FinanceApp.Data.Exceptions;
+using FinanceApp.Data.Interfaces;
 using FinanceApp.Data.Utility;
 
 namespace FinanceApp.Data.Extensions;
@@ -7,6 +8,22 @@ namespace FinanceApp.Data.Extensions;
 public static class StreamExtensions
 {
 	private const int ReadTimeout = 10000;
+
+	public static async Task SendRequestAsync(this Stream stream, IRequest value)
+	{
+		string strResponse = Serialization.Serialize(value);
+		byte[] message = Encoding.UTF8.GetBytes(strResponse);
+		await stream.WriteAsync(message);
+		await stream.FlushAsync();
+	}
+
+	public static async Task SendResponseAsync(this Stream stream, IResponse value)
+	{
+		string strResponse = Serialization.Serialize(value);
+		byte[] message = Encoding.UTF8.GetBytes(strResponse);
+		await stream.WriteAsync(message);
+		await stream.FlushAsync();
+	}
 
 	public static async Task<string> ReadMessageAsync(this Stream stream)
 	{
@@ -33,7 +50,7 @@ public static class StreamExtensions
 		} while (true);
 
 		source.Dispose();
-		return messageData.ToString().Replace(Serialization.Eof, "");
+		return messageData.ToString();
 	}
 
 	private static char[] DecodeBuffer(byte[] buffer, int bytes)

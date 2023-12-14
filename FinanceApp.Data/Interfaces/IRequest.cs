@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
-using System.Text.Json;
+using FinanceApp.Data.Exceptions;
+using FinanceApp.Data.Utility;
 
 namespace FinanceApp.Data.Interfaces;
 
@@ -17,16 +18,16 @@ public interface IRequest
 			string flag = (string)flagProperty?.GetValue(null)!;
 			if (flag != string.Empty && message.StartsWith(flag))
 				try {
-					IRequest request = (IRequest?)JsonSerializer.Deserialize(message.Replace(flag, ""), t) ??
-					                   throw new($"Message {message} does not contain valid {t.Name} properties");
+					IRequest request = (IRequest?)Serialization.Deserialize(message.Replace(flag, ""), t) ??
+					                   throw new InvalidRequestException($"Could not deserialize message: {message}");
 
 					return request;
 				} catch (Exception e) {
-					return new InvalidRequest(e);
+					throw new InvalidRequestException($"Could not deserialize message: {message}", e);
 				}
 		}
 
-		throw new($"No valid flag exists for message {message}");
+		throw new InvalidMessageException($"No flag exists for message: {message}");
 	}
 
 	private static void CacheRequestTypes()

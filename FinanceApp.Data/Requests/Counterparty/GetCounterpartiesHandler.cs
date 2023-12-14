@@ -1,5 +1,4 @@
 ﻿using FinanceApp.Data.Interfaces;
-using FinanceApp.Data.Utility;
 
 namespace FinanceApp.Data.Requests.Counterparty;
 
@@ -9,7 +8,7 @@ public class GetCounterpartiesHandler : IRequestHandler<GetCounterparties>
 
 	public IUnitOfWork UnitOfWork { get; }
 
-	public async Task HandleAsync(GetCounterparties request, Client client)
+	public async Task HandleAsync(GetCounterparties request, IClient client)
 	{
 		using (UnitOfWork) {
 			List<Models.Counterparty> counterparties = await UnitOfWork.Repository<Models.Counterparty>().AllAsync();

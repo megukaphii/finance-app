@@ -1,8 +1,6 @@
 ﻿using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
-using System.Text;
-using System.Text.Json;
 using FinanceApp.Data.Exceptions;
 using FinanceApp.Data.Extensions;
 using FinanceApp.Data.Interfaces;
@@ -36,25 +34,22 @@ public class ServerConnection
 		return success;
 	}
 
-	public async Task<TResponse> SendMessageAsync<TRequest, TResponse>(TRequest request) where TRequest : IRequest
+	public async Task<TResponse> SendMessageAsync<TRequest, TResponse>(TRequest request)
+		where TRequest : IRequest where TResponse : IResponse
 	{
-		string json = JsonSerializer.Serialize(request);
-		byte[] message = Encoding.UTF8.GetBytes(TRequest.Flag + json + Serialization.Eof);
-
 		if (_sslStream == null)
 			throw new InvalidOperationException("Cannot send a message without a valid SSL stream.");
 
-		_sslStream.Write(message);
-		_sslStream.Flush();
+		await _sslStream.SendRequestAsync(request);
 
 		string messageReceived = await _sslStream.ReadMessageAsync();
 		if (messageReceived.Contains(Serialization.Error)) {
 			messageReceived = messageReceived.Replace(Serialization.Error, "");
-			TRequest errorResponse = JsonSerializer.Deserialize<TRequest>(messageReceived) ??
+			TRequest errorResponse = Serialization.Deserialize<TRequest>(messageReceived) ??
 			                         throw new($"Malformed {typeof(TRequest).Name} from server");
 			throw new ResponseException<TRequest> { Response = errorResponse };
 		} else {
-			return JsonSerializer.Deserialize<TResponse>(messageReceived) ??
+			return Serialization.Deserialize<TResponse>(messageReceived) ??
 			       throw new($"Malformed {typeof(TResponse).Name} from server");
 		}
 	}

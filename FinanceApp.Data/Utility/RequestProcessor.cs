@@ -1,5 +1,4 @@
-﻿using System.Text;
-using System.Text.Json;
+﻿using FinanceApp.Data.Extensions;
 using FinanceApp.Data.Interfaces;
 
 namespace FinanceApp.Data.Utility;
@@ -15,13 +14,14 @@ public class RequestProcessor : IRequestProcessor
 		_validatorResolver = validatorResolver;
 	}
 
-	public async Task ProcessAsync(IRequest request, Client client)
+	public async Task ProcessAsync<T>(T request, IClient client) where T : IRequest
 	{
-		if (await IsValidAsync((dynamic)request)) {
+		if (await IsValidAsync(request)) {
 			Type type = typeof(IRequestHandler<>).MakeGenericType(request.GetType());
 			dynamic handler = _serviceProvider.GetService(type) ??
 			                  throw new InvalidOperationException(
 				                  $"Could not find appropriate request handler for {type.GenericTypeArguments.First().Name}");
+
 			await handler.HandleAsync((dynamic)request, client);
 		} else {
 			await SendErrorResponseAsync(client.Stream, request);
@@ -34,12 +34,8 @@ public class RequestProcessor : IRequestProcessor
 		return validator.ValidateAsync(request);
 	}
 
-	private static async Task SendErrorResponseAsync<TRequest>(Stream stream, TRequest validatedRequest)
-		where TRequest : IRequest
+	private static Task SendErrorResponseAsync(Stream stream, IRequest failedRequest)
 	{
-		string strResponse = JsonSerializer.Serialize(validatedRequest);
-		byte[] message = Encoding.UTF8.GetBytes(Serialization.Error + strResponse + Serialization.Eof);
-		await stream.WriteAsync(message);
-		await stream.FlushAsync();
+		return stream.SendRequestAsync(failedRequest);
 	}
 }
