@@ -47,7 +47,7 @@ public class IRequestTest
 	}
 
 	[Test]
-	public void GetRequest_WithInvalidMessageType_ShouldThrowInvalidMessage()
+	public void GetRequest_WithInvalidMessage_ShouldThrowInvalidMessage()
 	{
 		string invalidMessage = _requestUnderTest.Replace(CreateAccount.Flag, "Completely invalid message");
 
