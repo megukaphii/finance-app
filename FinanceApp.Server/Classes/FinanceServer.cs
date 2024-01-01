@@ -102,7 +102,7 @@ public class FinanceServer : IHostedService
 			await using SslStream sslStream = await client.EstablishSslStreamAsync(_serverCertificate);
 			client.Stream = sslStream;
 			ClientInitialiser initialiser = new(client);
-			if (await initialiser.Initialise())
+			if (await initialiser.Initialise()) {
 				while (_isRunning) {
 					string strRequest = await client.ReadMessageAsync();
 					if (string.IsNullOrWhiteSpace(strRequest)) break;
@@ -112,6 +112,7 @@ public class FinanceServer : IHostedService
 					client.WriteLine(request);
 					await _processor.ProcessAsync(request, client);
 				}
+			}
 		} catch (ConnectionException e) {
 			client.WriteLine(e.Message);
 		} catch (Exception e) {

@@ -36,6 +36,7 @@ public class RequestProcessor : IRequestProcessor
 
 	private static Task SendErrorResponseAsync(Stream stream, IRequest failedRequest)
 	{
+		// TODO - I don't think this works??? The <Error> flag is never added?
 		return stream.SendRequestAsync(failedRequest);
 	}
 }

@@ -29,12 +29,18 @@ public static class Serialization
 
 	public static object? Deserialize(string json, Type returnType)
 	{
-		string stripped = json.Replace(Eof, "");
+		string stripped = StripEof(json);
 		return JsonSerializer.Deserialize(stripped, returnType);
 	}
 
 	public static T? Deserialize<T>(string json)
 	{
-		return JsonSerializer.Deserialize<T>(json);
+		string stripped = StripEof(json);
+		return JsonSerializer.Deserialize<T>(stripped);
+	}
+
+	private static string StripEof(string message)
+	{
+		return message.Replace(Eof, "");
 	}
 }

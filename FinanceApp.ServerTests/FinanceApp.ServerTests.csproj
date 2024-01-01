@@ -30,4 +30,10 @@
 		<ProjectReference Include="..\FinanceApp.Server\FinanceApp.Server.csproj"/>
 	</ItemGroup>
 
+	<ItemGroup>
+		<Compile Include="..\FinanceApp.Server\SemVer.cs">
+			<Link>SemVer.cs</Link>
+		</Compile>
+	</ItemGroup>
+
 </Project>

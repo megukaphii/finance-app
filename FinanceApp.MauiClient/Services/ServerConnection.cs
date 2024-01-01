@@ -46,11 +46,11 @@ public class ServerConnection
 		if (messageReceived.Contains(Serialization.Error)) {
 			messageReceived = messageReceived.Replace(Serialization.Error, "");
 			TRequest errorResponse = Serialization.Deserialize<TRequest>(messageReceived) ??
-			                         throw new($"Malformed {typeof(TRequest).Name} from server");
+			                         throw new($"Malformed <{typeof(TRequest).Name}> from server");
 			throw new ResponseException<TRequest> { Response = errorResponse };
 		} else {
 			return Serialization.Deserialize<TResponse>(messageReceived) ??
-			       throw new($"Malformed {typeof(TResponse).Name} from server");
+			       throw new($"Malformed <{typeof(TResponse).Name}> from server");
 		}
 	}
 

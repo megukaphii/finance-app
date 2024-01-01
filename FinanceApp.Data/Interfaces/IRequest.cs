@@ -9,6 +9,12 @@ public interface IRequest
 	private static List<Type> RequestTypes { get; } = new();
 	public static virtual string Flag => string.Empty;
 
+	public static T? Deserialize<T>(string message) where T : IRequest
+	{
+		message = message.Replace(T.Flag, "");
+		return Serialization.Deserialize<T>(message);
+	}
+
 	public static IRequest GetRequest(string message)
 	{
 		CacheRequestTypes();
@@ -54,7 +60,7 @@ public class InvalidRequest : IRequest
 	public InvalidRequest(Exception exception) => Exception = exception;
 
 	public Exception Exception { get; }
-	public static Type? Validator => throw new InvalidDataException();
+	public static Type Validator => throw new InvalidDataException();
 
 	public static string Flag => throw new InvalidDataException();
 }

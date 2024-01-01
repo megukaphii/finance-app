@@ -16,7 +16,7 @@ public class ClientInitialiser : ConnectionInitialiser
 		try {
 			string messageReceived = await _client.ReadMessageAsync();
 			CompareVersion request =
-				Serialization.Deserialize<CompareVersion>(messageReceived.Replace(CompareVersion.Flag, string.Empty))
+				IRequest.Deserialize<CompareVersion>(messageReceived)
 				?? throw new($"Malformed {nameof(CompareVersion)} request received");
 
 			Version serverVersion = ThisAssembly.Git.SemVer.Version;

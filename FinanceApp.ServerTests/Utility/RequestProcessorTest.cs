@@ -13,12 +13,12 @@ public class RequestProcessorTest
 	{
 		_mockServiceProvider = Substitute.For<IServiceProvider>();
 		_mockValidatorResolver = Substitute.For<IValidatorResolver>();
-		_sut = new RequestProcessor(_mockServiceProvider, _mockValidatorResolver);
+		_requestProcessor = new RequestProcessor(_mockServiceProvider, _mockValidatorResolver);
 	}
 
 	private IServiceProvider _mockServiceProvider = null!;
 	private IValidatorResolver _mockValidatorResolver = null!;
-	private IRequestProcessor _sut = null!;
+	private IRequestProcessor _requestProcessor = null!;
 
 	[Test]
 	public async Task ProcessAsync_Returns_If_RequestIsValid()
@@ -36,7 +36,7 @@ public class RequestProcessorTest
 		_mockValidatorResolver.GetValidator<IRequest>().Returns(mockValidator);
 
 		// Act
-		await _sut.ProcessAsync(mockRequest, mockClient);
+		await _requestProcessor.ProcessAsync(mockRequest, mockClient);
 
 		// Assert
 		await mockRequestHandler.Received().HandleAsync(mockRequest, mockClient);
@@ -55,7 +55,7 @@ public class RequestProcessorTest
 		mockValidator.ValidateAsync(mockRequest).Returns(false);
 
 		// Act
-		await _sut.ProcessAsync(mockRequest, mockClient);
+		await _requestProcessor.ProcessAsync(mockRequest, mockClient);
 
 		// Assert
 		Assert.That(stream.Length, Is.GreaterThan(0));

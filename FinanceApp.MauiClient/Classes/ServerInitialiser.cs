@@ -1,5 +1,4 @@
-﻿using FinanceApp.Data.Extensions;
-using FinanceApp.Data.Requests;
+﻿using FinanceApp.Data.Requests;
 using FinanceApp.Data.Utility;
 using FinanceApp.MauiClient.Services;
 
@@ -17,7 +16,7 @@ public class ServerInitialiser(ServerConnection serverConnection) : ConnectionIn
 			CompareVersionResponse response =
 				await serverConnection.SendMessageAsync<CompareVersion, CompareVersionResponse>(request);
 
-			if (request.SemanticVersion.IsCompatible(AppInfo.Version)) {
+			if (response.Success) {
 				return true;
 			} else {
 				await Shell.Current.DisplayAlert("Version Issue",
