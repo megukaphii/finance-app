@@ -6,6 +6,7 @@ using NUnit.Framework;
 namespace FinanceApp.ServerTests.Utility;
 
 [TestFixture]
+[TestOf(typeof(RequestProcessor))]
 public class RequestProcessorTest
 {
 	[SetUp]

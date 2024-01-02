@@ -7,6 +7,8 @@ using NUnit.Framework;
 
 namespace FinanceApp.ServerTests.Classes;
 
+[TestFixture]
+[TestOf(typeof(ClientInitialiser))]
 public class ClientInitialiserTests
 {
 	private ClientInitialiser _clientInitialiser = null!;
