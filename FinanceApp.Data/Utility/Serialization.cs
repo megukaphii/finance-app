@@ -9,16 +9,12 @@ public static class Serialization
 	public const string Eof = "<EOF>";
 	public const string Error = "<ERROR>";
 
-	public static string Serialize<T>(T value) where T : IRequest
+	public static string SerializeRequest<T>(T value) where T : IRequest
 	{
-		string json = JsonSerializer.Serialize(value, new JsonSerializerOptions
-		{
-			ReferenceHandler = ReferenceHandler.IgnoreCycles
-		});
-		return T.Flag + json + Eof;
+		return T.Flag + Serialize(value);
 	}
 
-	public static string Serialize(IResponse value)
+	public static string Serialize<T>(T value)
 	{
 		string json = JsonSerializer.Serialize(value, new JsonSerializerOptions
 		{

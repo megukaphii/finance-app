@@ -1,5 +1,6 @@
 ﻿using FinanceApp.Data.Interfaces;
-using FinanceApp.Data.Utility;
+using FinanceApp.Server.Interfaces;
+using FinanceApp.Server.Utility;
 using NSubstitute;
 using NUnit.Framework;
 

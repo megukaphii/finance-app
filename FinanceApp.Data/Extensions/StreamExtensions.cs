@@ -9,15 +9,16 @@ public static class StreamExtensions
 {
 	private const int ReadTimeout = 10000;
 
-	public static async Task SendRequestAsync(this Stream stream, IRequest value)
+	// TODO - Write tests for this (specifically, ensure resulting string retains type information and such)
+	public static async Task SendRequestAsync<T>(this Stream stream, T value) where T : IRequest
 	{
-		string strResponse = Serialization.Serialize(value);
+		string strResponse = Serialization.SerializeRequest(value);
 		byte[] message = Encoding.UTF8.GetBytes(strResponse);
 		await stream.WriteAsync(message);
 		await stream.FlushAsync();
 	}
 
-	public static async Task SendResponseAsync(this Stream stream, IResponse value)
+	public static async Task SendResponseAsync<T>(this Stream stream, T value) where T : IResponse
 	{
 		string strResponse = Serialization.Serialize(value);
 		byte[] message = Encoding.UTF8.GetBytes(strResponse);

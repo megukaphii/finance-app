@@ -1,5 +1,6 @@
-﻿using FinanceApp.Data.Interfaces;
-using FinanceApp.Data.Requests.Account;
+﻿using FinanceApp.Data.Requests.Account;
+using FinanceApp.Server.Handlers.Account;
+using FinanceApp.Server.Interfaces;
 using NSubstitute;
 using NUnit.Framework;
 
@@ -9,10 +10,6 @@ namespace FinanceApp.ServerTests.Requests.Account;
 [TestOf(typeof(CreateAccountHandler))]
 public class CreateAccountHandlerTest
 {
-	private CreateAccountHandler _handler = null!;
-	private IUnitOfWork _unitOfWork = null!;
-	private IClient _client = null!;
-
 	[SetUp]
 	public void Setup()
 	{
@@ -20,6 +17,10 @@ public class CreateAccountHandlerTest
 		_client = Substitute.For<IClient>();
 		_handler = new(_unitOfWork);
 	}
+
+	private CreateAccountHandler _handler = null!;
+	private IUnitOfWork _unitOfWork = null!;
+	private IClient _client = null!;
 
 	[Test]
 	public async Task HandleAsync_ShouldInteractWithCorrectMethods()

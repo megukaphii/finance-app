@@ -1,7 +1,7 @@
-﻿using FinanceApp.Data.Interfaces;
-using FinanceApp.Data.Requests;
+﻿using FinanceApp.Data.Requests;
 using FinanceApp.Data.Utility;
-using FinanceApp.Server.Classes;
+using FinanceApp.Server.Interfaces;
+using FinanceApp.Server.Utility;
 using NSubstitute;
 using NUnit.Framework;
 
@@ -11,15 +11,15 @@ namespace FinanceApp.ServerTests.Classes;
 [TestOf(typeof(ClientInitialiser))]
 public class ClientInitialiserTests
 {
-	private ClientInitialiser _clientInitialiser = null!;
-	private IClient _client = null!;
-
 	[SetUp]
 	public void SetUp()
 	{
 		_client = Substitute.For<IClient>();
 		_clientInitialiser = new(_client);
 	}
+
+	private ClientInitialiser _clientInitialiser = null!;
+	private IClient _client = null!;
 
 	[Test]
 	public async Task Initialise_ReturnsTrueWhenClientVersionIsCompatible()

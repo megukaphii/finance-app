@@ -1,6 +1,6 @@
 ﻿using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
-using FinanceApp.Data.Utility;
+using FinanceApp.Server.Utility;
 
 namespace FinanceApp.Server.Extensions;
 

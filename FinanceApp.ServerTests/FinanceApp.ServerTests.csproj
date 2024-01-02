@@ -31,7 +31,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Compile Include="..\FinanceApp.Server\SemVer.cs">
+		<Compile Include="..\FinanceApp.Server\Utility\SemVer.cs">
 			<Link>SemVer.cs</Link>
 		</Compile>
 	</ItemGroup>
