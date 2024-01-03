@@ -4,11 +4,10 @@ using FinanceApp.Server.Exceptions;
 using FinanceApp.Server.Utility;
 using NUnit.Framework;
 
-namespace FinanceApp.ServerTests.Interfaces;
+namespace FinanceApp.ServerTests.Utility;
 
 [TestFixture]
 [TestOf(typeof(RequestResolver))]
-// ReSharper disable once InconsistentNaming
 public class RequestResolverTest
 {
 	[SetUp]
@@ -16,16 +15,10 @@ public class RequestResolverTest
 	{
 		CreateAccount request = new()
 		{
-			Name = new()
-			{
-				Value = "Test Name"
-			},
-			Description = new()
-			{
-				Value = "Test Description"
-			}
+			Name = new() { Value = "Test Name" },
+			Description = new() { Value = "Test Description" }
 		};
-		_requestUnderTest = Serialization.Serialize(request);
+		_requestUnderTest = Serialization.SerializeRequest(request);
 	}
 
 	private string _requestUnderTest = string.Empty;

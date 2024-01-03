@@ -4,7 +4,7 @@ using FinanceApp.Server.Interfaces;
 using NSubstitute;
 using NUnit.Framework;
 
-namespace FinanceApp.ServerTests.Requests.Account;
+namespace FinanceApp.ServerTests.Handlers.Account;
 
 [TestFixture]
 [TestOf(typeof(CreateAccountHandler))]
@@ -25,17 +25,14 @@ public class CreateAccountHandlerTest
 	[Test]
 	public async Task HandleAsync_ShouldInteractWithCorrectMethods()
 	{
-		// Arrange
 		CreateAccount request = new()
 		{
 			Name = new() { Value = "Making Bank" },
 			Description = new() { Value = "A Test Bank Account" }
 		};
 
-		// Act
 		await _handler.HandleAsync(request, _client);
 
-		// Assert
 		await _unitOfWork.Received(1).Repository<Data.Models.Account>().AddAsync(Arg.Any<Data.Models.Account>());
 		_unitOfWork.Received(1).SaveChanges();
 		await _client.Received(1).Send(Arg.Any<CreateAccountResponse>());

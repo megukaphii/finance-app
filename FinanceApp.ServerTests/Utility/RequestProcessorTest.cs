@@ -25,7 +25,6 @@ public class RequestProcessorTest
 	[Test]
 	public async Task ProcessAsync_Returns_If_RequestIsValid()
 	{
-		// Arrange
 		IRequest? mockRequest = Substitute.For<IRequest>();
 		IClient? mockClient = Substitute.For<IClient>();
 		using MemoryStream memoryStream = new();
@@ -37,17 +36,14 @@ public class RequestProcessorTest
 		mockValidator.ValidateAsync(mockRequest).Returns(true);
 		_mockValidatorResolver.GetValidator<IRequest>().Returns(mockValidator);
 
-		// Act
 		await _requestProcessor.ProcessAsync(mockRequest, mockClient);
 
-		// Assert
 		await mockRequestHandler.Received().HandleAsync(mockRequest, mockClient);
 	}
 
 	[Test]
 	public async Task ProcessAsync_Calls_SendErrorResponseAsync_If_RequestIsNotValid()
 	{
-		// Arrange
 		IRequest? mockRequest = Substitute.For<IRequest>();
 		IClient? mockClient = Substitute.For<IClient>();
 		MemoryStream stream = new();
@@ -56,10 +52,8 @@ public class RequestProcessorTest
 		_mockValidatorResolver.GetValidator<IRequest>().Returns(mockValidator);
 		mockValidator.ValidateAsync(mockRequest).Returns(false);
 
-		// Act
 		await _requestProcessor.ProcessAsync(mockRequest, mockClient);
 
-		// Assert
 		Assert.That(stream.Length, Is.GreaterThan(0));
 	}
 }
