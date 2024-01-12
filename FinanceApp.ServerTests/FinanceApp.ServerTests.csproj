@@ -19,6 +19,7 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="7.0.15"/>
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0-preview-23577-04"/>
 		<PackageReference Include="NSubstitute" Version="5.1.0"/>
 		<PackageReference Include="NUnit" Version="4.0.1"/>
@@ -32,7 +33,7 @@
 
 	<ItemGroup>
 		<Compile Include="..\FinanceApp.Server\Utility\SemVer.cs">
-			<Link>SemVer.cs</Link>
+			<Link>Helpers\SemVer.cs</Link>
 		</Compile>
 	</ItemGroup>
 

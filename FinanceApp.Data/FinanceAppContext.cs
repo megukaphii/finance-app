@@ -3,15 +3,25 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FinanceApp.Data;
 
-public class FinanceAppContext : DbContext
+public sealed class FinanceAppContext : DbContext
 {
-	private const string DbPath = @"test.db";
+	public FinanceAppContext()
+	{
+		DbContextOptionsBuilder<FinanceAppContext> optionsBuilder = new();
+		OnConfiguring(optionsBuilder);
+	}
 
-	// TODO - This: https://learn.microsoft.com/en-us/aspnet/mvc/overview/older-versions/getting-started-with-ef-5-using-mvc-4/implementing-the-repository-and-unit-of-work-patterns-in-an-asp-net-mvc-application
-	public DbSet<Account> Accounts { get; set; }
-	public DbSet<Transaction> Transactions { get; set; }
-	public DbSet<Counterparty> Counterparties { get; set; }
+	public FinanceAppContext(DbContextOptions<FinanceAppContext> options)
+		: base(options) { }
 
-	protected override void OnConfiguring(DbContextOptionsBuilder options) =>
-		options.UseSqlite($"Data Source={DbPath}");
+	public DbSet<Account> Accounts { get; set; } = null!;
+	public DbSet<Transaction> Transactions { get; set; } = null!;
+	public DbSet<Counterparty> Counterparties { get; set; } = null!;
+
+	protected override void OnConfiguring(DbContextOptionsBuilder options)
+	{
+		if (!options.IsConfigured) {
+			options.UseSqlite("Data Source=test.db");
+		}
+	}
 }

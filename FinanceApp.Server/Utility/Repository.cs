@@ -21,11 +21,6 @@ public class Repository<T> : IRepository<T> where T : class, IModel
 
 	public Task<List<T>> AllAsync() => Context.Set<T>().ToListAsync();
 
-	public async Task AddAsync(T entity)
-	{
-		await Context.Set<T>().AddAsync(entity);
-	}
-
 	public IIncludableQueryable<T, object> Include(Expression<Func<T, object>> include) =>
 		Context.Set<T>().Include(include);
 
@@ -35,6 +30,11 @@ public class Repository<T> : IRepository<T> where T : class, IModel
 		for (int i = 1; i < includes.Length; i++) result = result.Include(includes[i]);
 
 		return result;
+	}
+
+	public async Task AddAsync(T entity)
+	{
+		await Context.Set<T>().AddAsync(entity);
 	}
 
 	public void Update(T entity)

@@ -94,7 +94,7 @@ public class FinanceServer : IHostedService
 
 	private async Task HandleConnection(Socket socket)
 	{
-		Client client = new() { Socket = socket, Stream = Stream.Null };
+		Client client = new(new Session()) { Socket = socket, Stream = Stream.Null };
 		_clients.Add(client);
 		try {
 			client.WriteLine("Connection found.");

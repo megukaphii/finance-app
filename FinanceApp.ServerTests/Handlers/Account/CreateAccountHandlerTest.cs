@@ -11,16 +11,16 @@ namespace FinanceApp.ServerTests.Handlers.Account;
 public class CreateAccountHandlerTest
 {
 	[SetUp]
-	public void Setup()
+	public void SetUp()
 	{
-		_unitOfWork = Substitute.For<IUnitOfWork>();
 		_client = Substitute.For<IClient>();
+		_unitOfWork = Substitute.For<IUnitOfWork>();
 		_handler = new(_unitOfWork);
 	}
 
-	private CreateAccountHandler _handler = null!;
-	private IUnitOfWork _unitOfWork = null!;
 	private IClient _client = null!;
+	private IUnitOfWork _unitOfWork = null!;
+	private CreateAccountHandler _handler = null!;
 
 	[Test]
 	public async Task HandleAsync_ShouldInteractWithCorrectMethods()
@@ -33,8 +33,8 @@ public class CreateAccountHandlerTest
 
 		await _handler.HandleAsync(request, _client);
 
-		await _unitOfWork.Received(1).Repository<Data.Models.Account>().AddAsync(Arg.Any<Data.Models.Account>());
-		_unitOfWork.Received(1).SaveChanges();
-		await _client.Received(1).Send(Arg.Any<CreateAccountResponse>());
+		await _unitOfWork.Repository<Data.Models.Account>().Received().AddAsync(Arg.Any<Data.Models.Account>());
+		_unitOfWork.Received().SaveChanges();
+		await _client.Received().Send(Arg.Is<CreateAccountResponse>(r => r.Success));
 	}
 }

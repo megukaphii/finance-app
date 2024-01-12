@@ -8,10 +8,16 @@ namespace FinanceApp.Server.Utility;
 public class Client : IClient
 {
 	private readonly Guid _id = Guid.NewGuid();
+
+	public Client(ISession session)
+	{
+		Session = session;
+	}
+
 	private string Id => _id.ToString();
 	public required Socket Socket { get; init; }
 	public required Stream Stream { get; set; }
-	public Session Session { get; } = new();
+	public ISession Session { get; }
 
 	public Task<string> ReadMessageAsync() => Stream.ReadMessageAsync();
 

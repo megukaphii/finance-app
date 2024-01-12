@@ -24,7 +24,6 @@ public class CreateTransactionHandler : IRequestHandler<CreateTransaction>
 			}
 
 			if (!client.Session.IsAccountSet()) {
-				// TODO - Make sure this is handled properly! Probably doesn't currently work
 				CreateTransactionResponse response = new()
 				{
 					Id = 0,

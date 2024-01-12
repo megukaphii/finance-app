@@ -13,14 +13,14 @@ public class GetAccountsHandlerTest
 	[SetUp]
 	public void SetUp()
 	{
-		_unitOfWork = Substitute.For<IUnitOfWork>();
 		_client = Substitute.For<IClient>();
+		_unitOfWork = Substitute.For<IUnitOfWork>();
 		_handler = new(_unitOfWork);
 	}
 
-	private GetAccountsHandler _handler = null!;
-	private IUnitOfWork _unitOfWork = null!;
 	private IClient _client = null!;
+	private IUnitOfWork _unitOfWork = null!;
+	private GetAccountsHandler _handler = null!;
 
 	[TestCase(1)]
 	[TestCase(10)]
@@ -35,7 +35,7 @@ public class GetAccountsHandlerTest
 		await _handler.HandleAsync(request, _client);
 
 		// TODO - Update when we add actual pagination
-		await _unitOfWork.Received(1).Repository<FinanceApp.Data.Models.Account>().AllAsync();
-		await _client.Received(1).Send(Arg.Any<GetAccountsResponse>());
+		await _unitOfWork.Repository<FinanceApp.Data.Models.Account>().Received().AllAsync();
+		await _client.Received().Send(Arg.Is<GetAccountsResponse>(r => r.Success));
 	}
 }

@@ -15,14 +15,14 @@ public class GetTransactionsHandler : IRequestHandler<GetTransactions>
 		using (UnitOfWork) {
 			List<Data.Models.Transaction> transactions =
 				await UnitOfWork.Repository<Data.Models.Transaction>()
-					.IncludeAll(transaction => transaction.Counterparty)
+					.Include(transaction => transaction.Counterparty)
 					.Where(transaction => transaction.Account.Equals(client.Session.Account))
 					.ToListAsync();
 
 			GetTransactionsResponse response = new()
 			{
-				Transactions = transactions,
-				Success = true
+				Success = true,
+				Transactions = transactions
 			};
 
 			await client.Send(response);
