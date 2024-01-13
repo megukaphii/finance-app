@@ -7,13 +7,10 @@ using NUnit.Framework;
 
 namespace FinanceApp.ServerTests.Handlers.Account;
 
+[TestFixture]
+[TestOf(typeof(SelectAccountHandler))]
 public class SelectAccountHandlerTests
 {
-	private IClient _client = null!;
-	private IUnitOfWork _unitOfWork = null!;
-	private SelectAccountHandler _handler = null!;
-	private Data.Models.Account _account = null!;
-
 	[SetUp]
 	public void SetUp()
 	{
@@ -34,6 +31,11 @@ public class SelectAccountHandlerTests
 
 		_handler = new(_unitOfWork);
 	}
+
+	private IClient _client = null!;
+	private IUnitOfWork _unitOfWork = null!;
+	private SelectAccountHandler _handler = null!;
+	private Data.Models.Account _account = null!;
 
 	[Test]
 	public async Task HandleAsync_ShouldInteractWithCorrectMethods()

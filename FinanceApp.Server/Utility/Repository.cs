@@ -19,6 +19,8 @@ public class Repository<T> : IRepository<T> where T : class, IModel
 	public Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate) =>
 		Context.Set<T>().FirstOrDefaultAsync(predicate);
 
+	public Task<bool> AnyAsync(Expression<Func<T, bool>> predicate) => Context.Set<T>().AnyAsync(predicate);
+
 	public Task<List<T>> AllAsync() => Context.Set<T>().ToListAsync();
 
 	public IIncludableQueryable<T, object> Include(Expression<Func<T, object>> include) =>

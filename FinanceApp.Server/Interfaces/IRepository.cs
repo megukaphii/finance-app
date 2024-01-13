@@ -10,6 +10,7 @@ public interface IRepository<T> where T : IModel
 	Task<T> FirstAsync(Expression<Func<T, bool>> predicate);
 	Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate);
 	Task<List<T>> AllAsync();
+	public Task<bool> AnyAsync(Expression<Func<T, bool>> predicate);
 	IIncludableQueryable<T, object> Include(Expression<Func<T, object>> include);
 	IIncludableQueryable<T, object> IncludeAll(params Expression<Func<T, object>>[] includes);
 	Task AddAsync(T entity);

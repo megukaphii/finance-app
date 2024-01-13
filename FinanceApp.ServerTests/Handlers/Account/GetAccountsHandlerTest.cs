@@ -1,6 +1,10 @@
-﻿using FinanceApp.Data.Requests.Account;
+﻿using FinanceApp.Data;
+using FinanceApp.Data.Requests.Account;
 using FinanceApp.Server.Handlers.Account;
 using FinanceApp.Server.Interfaces;
+using FinanceApp.Server.Utility;
+using FinanceApp.ServerTests.Extensions;
+using FinanceApp.ServerTests.Helpers;
 using NSubstitute;
 using NUnit.Framework;
 
@@ -13,13 +17,16 @@ public class GetAccountsHandlerTest
 	[SetUp]
 	public void SetUp()
 	{
-		_client = Substitute.For<IClient>();
-		_unitOfWork = Substitute.For<IUnitOfWork>();
-		_handler = new(_unitOfWork);
+		FinanceAppContext context = InMemoryDatabaseFactory.CreateNewDatabase();
+		context.LoadAccounts();
+
+		_mockClient = Substitute.For<IClient>();
+
+		UnitOfWork unitOfWork = new(context);
+		_handler = new(unitOfWork);
 	}
 
-	private IClient _client = null!;
-	private IUnitOfWork _unitOfWork = null!;
+	private IClient _mockClient = null!;
 	private GetAccountsHandler _handler = null!;
 
 	[TestCase(1)]
@@ -27,15 +34,16 @@ public class GetAccountsHandlerTest
 	[TestCase(long.MaxValue)]
 	public async Task Test_HandleAsync(long page)
 	{
+		List<Data.Models.Account> expectedAccounts = DatabaseSeeder.Accounts.OrderBy(account => account.Id).ToList();
 		GetAccounts request = new()
 		{
 			Page = new() { Value = page }
 		};
 
-		await _handler.HandleAsync(request, _client);
+		await _handler.HandleAsync(request, _mockClient);
 
 		// TODO - Update when we add actual pagination
-		await _unitOfWork.Repository<FinanceApp.Data.Models.Account>().Received().AllAsync();
-		await _client.Received().Send(Arg.Is<GetAccountsResponse>(r => r.Success));
+		await _mockClient.Received().Send(Arg.Is<GetAccountsResponse>(r =>
+			r.Success && r.Accounts.OrderBy(account => account.Id).SequenceEqual(expectedAccounts)));
 	}
 }

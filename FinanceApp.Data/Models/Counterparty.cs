@@ -18,8 +18,7 @@ public class Counterparty : IModel
 	{
 		if (ReferenceEquals(null, obj)) return false;
 		if (ReferenceEquals(this, obj)) return true;
-		if (obj.GetType() != typeof(Counterparty)) return false;
-		return Equals((Counterparty)obj);
+		return obj.GetType() == typeof(Counterparty) && Equals((Counterparty)obj);
 	}
 
 	private bool Equals(Counterparty other) => (Id == other.Id || Id == 0 || other.Id == 0) && Name == other.Name;
