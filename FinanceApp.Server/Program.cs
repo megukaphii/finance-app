@@ -33,13 +33,13 @@ public static class Program
 				services.AddSingleton<IValidatorResolver, ValidatorResolver>();
 				services.AddSingleton<IRequestProcessor, RequestProcessor>();
 
-				services.AddSingleton<IValidator<IAccountId>, AccountIdValidator>();
-				services.AddSingleton<IValidator<IPageNumber>, PageNumberValidator>();
-				services.AddSingleton<IValidator<ISingleAccount>, SingleAccountValidator>();
-				services.AddSingleton<IValidator<ISingleTransaction>, SingleTransactionValidator>();
-
 				services.AddTransient<DbContext, FinanceAppContext>();
 				services.AddTransient<IUnitOfWork, UnitOfWork>();
+
+				services.AddTransient<IValidator<IAccountId>, AccountIdValidator>();
+				services.AddTransient<IValidator<IPageNumber>, PageNumberValidator>();
+				services.AddTransient<IValidator<ISingleAccount>, SingleAccountValidator>();
+				services.AddTransient<IValidator<ISingleTransaction>, SingleTransactionValidator>();
 
 				services.AddTransient<IRequestHandler<CreateAccount>, CreateAccountHandler>();
 				services.AddTransient<IRequestHandler<GetAccounts>, GetAccountsHandler>();
