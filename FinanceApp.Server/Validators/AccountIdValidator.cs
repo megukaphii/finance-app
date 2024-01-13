@@ -11,7 +11,7 @@ public class AccountIdValidator : IValidator<IAccountId>
 		UnitOfWork = unitOfWork;
 	}
 
-	public IUnitOfWork UnitOfWork { get; }
+	private IUnitOfWork UnitOfWork { get; }
 
 	public async Task<bool> ValidateAsync(IAccountId request)
 	{
