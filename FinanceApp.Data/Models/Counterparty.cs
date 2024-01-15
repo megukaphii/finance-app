@@ -23,5 +23,5 @@ public class Counterparty : IModel
 
 	private bool Equals(Counterparty other) => (Id == other.Id || Id == 0 || other.Id == 0) && Name == other.Name;
 
-	public override int GetHashCode() => HashCode.Combine(Id, Name);
+	public override int GetHashCode() => HashCode.Combine(Id, Transactions, Name);
 }

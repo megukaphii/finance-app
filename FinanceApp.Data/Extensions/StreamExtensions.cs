@@ -9,7 +9,6 @@ public static class StreamExtensions
 {
 	private const int ReadTimeout = 10000;
 
-	// TODO - Write tests for this (specifically, ensure resulting string retains type information and such)
 	public static async Task SendRequestAsync<T>(this Stream stream, T value) where T : IRequest
 	{
 		string strResponse = Serialization.SerializeRequest(value);

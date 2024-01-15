@@ -36,5 +36,5 @@ public class Account : IModel
 		(Id == other.Id || Id == 0 || other.Id == 0) && Name.Equals(other.Name) &&
 		Description.Equals(other.Description);
 
-	public override int GetHashCode() => HashCode.Combine(Id);
+	public override int GetHashCode() => HashCode.Combine(Id, Transactions);
 }

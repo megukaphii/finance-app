@@ -1,4 +1,5 @@
-﻿using FinanceApp.Data.Models;
+﻿using System.Diagnostics.CodeAnalysis;
+using FinanceApp.Data.Models;
 using FinanceApp.Data.RequestPatterns;
 using FinanceApp.Server.Utility;
 using FinanceApp.Server.Validators;
@@ -68,6 +69,7 @@ public class SingleTransactionValidatorTests
 	}
 
 	[Test]
+	[ExcludeFromCodeCoverage]
 	public async Task ValidateAsync_ShouldReturnFalse_WhenCounterpartyNameIsTooShort()
 	{
 		if (MinCounterpartyNameLength == 0) {
