@@ -1,4 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
+
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodel="clr-namespace:FinanceApp.MauiClient.ViewModel"
@@ -7,13 +8,13 @@
              Title="{Binding Title}"
              Shell.PresentationMode="ModalAnimated">
 
-    <VerticalStackLayout Padding="10" Spacing="10">
-        <Entry Text="{Binding Name}" Placeholder="Name..."/>
-        <Label Text="{Binding NameError}" TextColor="{StaticResource Error}"/>
-        <Entry Text="{Binding Description}" Placeholder="Description..."/>
-        <Label Text="{Binding DescriptionError}" TextColor="{StaticResource Error}"/>
-        <Button Text="Save" Command="{Binding CreateAccountCommand}"
-                IsEnabled="{Binding IsNotBusy}"/>
-    </VerticalStackLayout>
+	<VerticalStackLayout Padding="10" Spacing="10">
+		<Entry Text="{Binding Name}" Placeholder="Name..." />
+		<Label Text="{Binding NameError}" TextColor="{StaticResource Error}" />
+		<Entry Text="{Binding Description}" Placeholder="Description..." />
+		<Label Text="{Binding DescriptionError}" TextColor="{StaticResource Error}" />
+		<Button Text="Save" Command="{Binding CreateAccountCommand}"
+		        IsEnabled="{Binding IsNotBusy}" />
+	</VerticalStackLayout>
 
 </ContentPage>

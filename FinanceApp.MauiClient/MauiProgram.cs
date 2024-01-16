@@ -1,9 +1,10 @@
 ﻿using FinanceApp.MauiClient.Services;
-using FinanceApp.MauiClient.ViewModel;
 using FinanceApp.MauiClient.View;
+using FinanceApp.MauiClient.ViewModel;
 using Microsoft.Extensions.Logging;
 
 namespace FinanceApp.MauiClient;
+
 public static class MauiProgram
 {
 	public static MauiApp CreateMauiApp()
@@ -21,21 +22,22 @@ public static class MauiProgram
 		builder.Logging.AddDebug();
 #endif
 
+		builder.Services.AddMemoryCache();
 		builder.Services.AddSingleton<ServerConnection>();
 
 		builder.Services.AddSingleton<Login>();
-        builder.Services.AddSingleton<Accounts>();
+		builder.Services.AddSingleton<Accounts>();
 		builder.Services.AddSingleton<QuickAdd>();
 		builder.Services.AddSingleton<TransactionList>();
 
-        builder.Services.AddSingleton<LoginViewModel>();
-        builder.Services.AddSingleton<AccountsViewModel>();
-        builder.Services.AddSingleton<QuickAddViewModel>();
-        builder.Services.AddSingleton<TransactionListViewModel>();
+		builder.Services.AddSingleton<LoginViewModel>();
+		builder.Services.AddSingleton<AccountsViewModel>();
+		builder.Services.AddSingleton<QuickAddViewModel>();
+		builder.Services.AddSingleton<TransactionListViewModel>();
 
-        builder.Services.AddTransient<AccountCreate>();
+		builder.Services.AddTransient<AccountCreate>();
 
-        builder.Services.AddTransient<AccountCreateViewModel>();
+		builder.Services.AddTransient<AccountCreateViewModel>();
 
 		return builder.Build();
 	}

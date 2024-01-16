@@ -1,4 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
+
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:models="clr-namespace:FinanceApp.Data.Models;assembly=FinanceApp.Data"
@@ -7,42 +8,44 @@
              x:Class="FinanceApp.MauiClient.View.Accounts"
              Title="{Binding Title}">
 
-    <VerticalStackLayout>
-        <Label>Select an Account</Label>
-        <CollectionView ItemsSource="{Binding Accounts}"
-                        ItemsLayout="HorizontalList"
-                        SelectionMode="None">
-            <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="models:Account">
-                    <Grid Padding="10">
-                        <Frame HeightRequest="300" WidthRequest="200" BackgroundColor="DarkGray">
-                            <Frame.GestureRecognizers>
-                                <TapGestureRecognizer
-                                    Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:AccountsViewModel}}, Path=SelectAccountCommand}"
-                                    CommandParameter="{Binding .}"/>
-                            </Frame.GestureRecognizers>
-                            <VerticalStackLayout VerticalOptions="Center"
-                                                 Padding="10">
-                                <Label Text="{Binding Name}" TextColor="White" FontSize="32" FontAttributes="Bold" HorizontalTextAlignment="Center" />
-                                <Label Text="{Binding Description}" TextColor="White" HorizontalTextAlignment="Center" />
-                            </VerticalStackLayout>
-                        </Frame>
-                    </Grid>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-            <CollectionView.Footer>
-                <Grid Padding="10" HorizontalOptions="Start">
-                    <Frame HeightRequest="300" WidthRequest="200" BackgroundColor="DarkGray">
-                        <Frame.GestureRecognizers>
-                            <TapGestureRecognizer
-                                Command="{Binding CreateAccountCommand}"
-                                CommandParameter="{Binding .}"/>
-                        </Frame.GestureRecognizers>
-                        <Label Text="+" TextColor="White" FontSize="32" FontAttributes="Bold" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
-                    </Frame>
-                </Grid>
-            </CollectionView.Footer>
-        </CollectionView>
-    </VerticalStackLayout>
+	<VerticalStackLayout>
+		<Label>Select an Account</Label>
+		<CollectionView ItemsSource="{Binding Accounts}"
+		                ItemsLayout="HorizontalList"
+		                SelectionMode="None">
+			<CollectionView.ItemTemplate>
+				<DataTemplate x:DataType="models:Account">
+					<Grid Padding="10">
+						<Frame HeightRequest="300" WidthRequest="200" BackgroundColor="DarkGray">
+							<Frame.GestureRecognizers>
+								<TapGestureRecognizer
+									Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:AccountsViewModel}}, Path=SelectAccountCommand}"
+									CommandParameter="{Binding .}" />
+							</Frame.GestureRecognizers>
+							<VerticalStackLayout VerticalOptions="Center"
+							                     Padding="10">
+								<Label Text="{Binding Name}" TextColor="White" FontSize="32" FontAttributes="Bold"
+								       HorizontalTextAlignment="Center" />
+								<Label Text="{Binding Description}" TextColor="White" HorizontalTextAlignment="Center" />
+							</VerticalStackLayout>
+						</Frame>
+					</Grid>
+				</DataTemplate>
+			</CollectionView.ItemTemplate>
+			<CollectionView.Footer>
+				<Grid Padding="10" HorizontalOptions="Start">
+					<Frame HeightRequest="300" WidthRequest="200" BackgroundColor="DarkGray">
+						<Frame.GestureRecognizers>
+							<TapGestureRecognizer
+								Command="{Binding CreateAccountCommand}"
+								CommandParameter="{Binding .}" />
+						</Frame.GestureRecognizers>
+						<Label Text="+" TextColor="White" FontSize="32" FontAttributes="Bold"
+						       HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+					</Frame>
+				</Grid>
+			</CollectionView.Footer>
+		</CollectionView>
+	</VerticalStackLayout>
 
 </ContentPage>

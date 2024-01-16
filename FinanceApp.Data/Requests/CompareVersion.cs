@@ -1,32 +1,21 @@
-﻿namespace FinanceApp.Data.Requests;
+﻿using FinanceApp.Data.Interfaces;
 
-public class CompareVersion
+namespace FinanceApp.Data.Requests;
+
+public class CompareVersion : IRequest
 {
 	public required Version SemanticVersion { get; init; }
+	public static string Flag => "<CompareVersion>";
 
-	public override string ToString()
-	{
-		return $"{nameof(SemanticVersion)}: {SemanticVersion}";
-	}
+	public override string ToString() => $"{nameof(SemanticVersion)}: {SemanticVersion}";
 
-	public override bool Equals(object? obj)
-	{
-		if (ReferenceEquals(null, obj))
-			return false;
-		if (ReferenceEquals(this, obj))
-			return true;
-		if (obj.GetType() != GetType())
-			return false;
-		return Equals((CompareVersion) obj);
-	}
+	public override int GetHashCode() => HashCode.Combine(SemanticVersion);
+}
 
-	private bool Equals(CompareVersion other)
-	{
-		return SemanticVersion.Equals(other.SemanticVersion);
-	}
+public class CompareVersionResponse : IResponse
+{
+	public required Version SemanticVersion { get; init; }
+	public required bool Success { get; init; }
 
-	public override int GetHashCode()
-	{
-		return HashCode.Combine(SemanticVersion);
-	}
+	public override string ToString() => $"{nameof(Success)}: {Success}, {nameof(SemanticVersion)}: {SemanticVersion}";
 }

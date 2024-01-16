@@ -1,31 +1,40 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
 
-    <IsPackable>false</IsPackable>
+		<IsPackable>false</IsPackable>
 
-    <LangVersion>11</LangVersion>
-  </PropertyGroup>
+		<LangVersion>12</LangVersion>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="coverlet.collector" Version="6.0.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="GitInfo" Version="3.3.3">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.2" />
-    <PackageReference Include="NUnit" Version="3.13.3" />
-    <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="coverlet.collector" Version="6.0.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="GitInfo" Version="3.3.3">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="7.0.15"/>
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0-preview-23577-04"/>
+		<PackageReference Include="NSubstitute" Version="5.1.0"/>
+		<PackageReference Include="NUnit" Version="4.0.1"/>
+		<PackageReference Include="NUnit3TestAdapter" Version="4.5.0"/>
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\FinanceApp.Server\FinanceApp.Server.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\FinanceApp.Data\FinanceApp.Data.csproj"/>
+		<ProjectReference Include="..\FinanceApp.Server\FinanceApp.Server.csproj"/>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Include="..\FinanceApp.Server\Utility\SemVer.cs">
+			<Link>Helpers\SemVer.cs</Link>
+		</Compile>
+	</ItemGroup>
 
 </Project>
