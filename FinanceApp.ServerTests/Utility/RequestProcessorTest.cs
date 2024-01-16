@@ -2,7 +2,6 @@
 using FinanceApp.Server.Interfaces;
 using FinanceApp.Server.Utility;
 using NSubstitute;
-using NUnit.Framework;
 
 namespace FinanceApp.ServerTests.Utility;
 

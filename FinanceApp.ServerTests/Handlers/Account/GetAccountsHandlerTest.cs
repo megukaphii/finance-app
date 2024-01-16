@@ -6,7 +6,6 @@ using FinanceApp.Server.Utility;
 using FinanceApp.ServerTests.Extensions;
 using FinanceApp.ServerTests.Helpers;
 using NSubstitute;
-using NUnit.Framework;
 
 namespace FinanceApp.ServerTests.Handlers.Account;
 

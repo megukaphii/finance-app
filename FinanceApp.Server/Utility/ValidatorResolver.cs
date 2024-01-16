@@ -1,34 +1,23 @@
 ﻿using FinanceApp.Data.Interfaces;
-using FinanceApp.Data.RequestPatterns;
-using FinanceApp.Data.Requests.Account;
-using FinanceApp.Data.Requests.Counterparty;
-using FinanceApp.Data.Requests.Transaction;
-using FinanceApp.Server.Extensions;
 using FinanceApp.Server.Interfaces;
 
 namespace FinanceApp.Server.Utility;
 
 public class ValidatorResolver : IValidatorResolver
 {
-	private readonly Dictionary<Type, object> _validators;
+	private readonly IServiceProvider _serviceProvider;
 
 	public ValidatorResolver(IServiceProvider serviceProvider)
 	{
-		_validators = new()
-		{
-			{ typeof(CreateAccount), serviceProvider.GetValidator<ISingleAccount>() },
-			{ typeof(GetAccounts), serviceProvider.GetValidator<IPageNumber>() },
-			{ typeof(SelectAccount), serviceProvider.GetValidator<IAccountId>() },
-			{ typeof(GetCounterparties), serviceProvider.GetValidator<IPageNumber>() },
-			{ typeof(CreateTransaction), serviceProvider.GetValidator<ISingleTransaction>() },
-			{ typeof(GetTransactions), serviceProvider.GetValidator<IPageNumber>() }
-		};
+		_serviceProvider = serviceProvider;
 	}
 
 	public IValidator<T> GetValidator<T>() where T : IRequest
 	{
-		// TODO - Use reflection to get the appropriate request pattern, then just resolve the IValidator from there
-		object validator = _validators[typeof(T)];
-		return (IValidator<T>)validator;
+		Type type = typeof(IValidator<>).MakeGenericType(typeof(T));
+		IValidator<T> validator = (IValidator<T>?)_serviceProvider.GetService(type) ??
+		                          throw new InvalidOperationException(
+			                          $"Could not find appropriate validator for {typeof(T).Name}");
+		return validator;
 	}
 }

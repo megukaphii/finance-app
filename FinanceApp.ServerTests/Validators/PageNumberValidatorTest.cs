@@ -1,7 +1,6 @@
 ﻿using FinanceApp.Data.RequestPatterns;
 using FinanceApp.Server.Validators;
 using NSubstitute;
-using NUnit.Framework;
 
 namespace FinanceApp.ServerTests.Validators;
 

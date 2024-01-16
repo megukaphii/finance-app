@@ -2,7 +2,6 @@
 using FinanceApp.Data.Utility;
 using FinanceApp.Server.Exceptions;
 using FinanceApp.Server.Utility;
-using NUnit.Framework;
 
 namespace FinanceApp.ServerTests.Utility;
 

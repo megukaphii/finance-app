@@ -1,7 +1,6 @@
 ﻿using FinanceApp.Data.Extensions;
 using FinanceApp.Data.Requests.Account;
 using FinanceApp.Data.Utility;
-using NUnit.Framework;
 
 namespace FinanceApp.ServerTests.Extensions;
 

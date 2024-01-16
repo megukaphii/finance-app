@@ -1,5 +1,4 @@
 ﻿using FinanceApp.Server.Extensions;
-using NUnit.Framework;
 
 namespace FinanceApp.ServerTests.Extensions;
 

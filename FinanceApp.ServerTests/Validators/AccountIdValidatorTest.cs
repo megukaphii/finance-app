@@ -5,7 +5,6 @@ using FinanceApp.Server.Validators;
 using FinanceApp.ServerTests.Extensions;
 using FinanceApp.ServerTests.Helpers;
 using NSubstitute;
-using NUnit.Framework;
 
 namespace FinanceApp.ServerTests.Validators;
 
