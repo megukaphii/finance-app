@@ -14,7 +14,7 @@ public class ValidatorResolver : IValidatorResolver
 
 	public IValidator<T> GetValidator<T>() where T : IRequest
 	{
-		Type type = typeof(IValidator<>).MakeGenericType(typeof(T));
+		Type type = typeof(IValidator<>).MakeGenericType(typeof(T).GetInterfaces().Single(parent => parent != typeof(IRequest)));
 		IValidator<T> validator = (IValidator<T>?)_serviceProvider.GetService(type) ??
 		                          throw new InvalidOperationException(
 			                          $"Could not find appropriate validator for {typeof(T).Name}");
