@@ -29,12 +29,12 @@ jobs:
             8.0.x
 
       - name: Setup Java
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v4
         with:
-          java-version: '11' # The JDK version to make available on the PATH.
+          java-version: '21'
 
       - name: Setup Android
-        uses: android-actions/setup-android@v1
+        uses: android-actions/setup-android@v3
 
       - name: Restore workloads
         run: dotnet workload restore
