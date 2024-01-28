@@ -4,9 +4,9 @@ namespace FinanceApp.ServerTests.Helpers;
 
 public static class DatabaseSeeder
 {
-	public static Account[] Accounts => new[]
-	{
-		new Account
+	public static Account[] Accounts =>
+	[
+		new()
 		{
 			Name = "Account 1",
 			Description = "Account 1",
@@ -18,11 +18,11 @@ public static class DatabaseSeeder
 			Description = "Account 2",
 			Value = 0
 		}
-	};
+	];
 
-	public static Counterparty[] Counterparties => new[]
-	{
-		new Counterparty
+	public static Counterparty[] Counterparties =>
+	[
+		new()
 		{
 			Name = "Counterparty 1"
 		},
@@ -30,30 +30,33 @@ public static class DatabaseSeeder
 		{
 			Name = "Counterparty 2"
 		}
-	};
+	];
 
 	public static Transaction[] GetTransactions(Account[] accounts, Counterparty[] counterparties)
 	{
-		return new[]
-		{
-			new Transaction
+		return
+		[
+			new()
 			{
 				Account = accounts[0],
 				Counterparty = counterparties[0],
-				Value = 200
+				Value = 200,
+				Timestamp = default
 			},
 			new()
 			{
 				Account = accounts[0],
 				Counterparty = counterparties[1],
-				Value = 100
+				Value = 100,
+				Timestamp = DateTime.Now + TimeSpan.FromDays(1)
 			},
 			new()
 			{
 				Account = accounts[1],
 				Counterparty = counterparties[1],
-				Value = 100
+				Value = 100,
+				Timestamp = DateTime.Now - TimeSpan.FromDays(1)
 			}
-		};
+		];
 	}
 }

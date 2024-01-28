@@ -9,6 +9,7 @@ public class CreateTransaction : ISingleTransaction
 
 	public required RequestField<decimal> Value { get; init; }
 	public required RequestField<Models.Counterparty> Counterparty { get; init; }
+	public required RequestField<DateTime> Timestamp { get; init; }
 
 	public override string ToString() => $"{Flag}[{nameof(Value)}: {Value}], [{nameof(Counterparty)}: {Counterparty}]";
 }

@@ -36,7 +36,8 @@ public class CreateTransactionHandler : IRequestHandler<CreateTransaction>
 				{
 					Account = client.Session.Account,
 					Counterparty = counterparty,
-					Value = request.Value.Value
+					Value = request.Value.Value,
+					Timestamp = request.Timestamp.Value
 				};
 				UnitOfWork.AttachAccount(created.Account);
 				await UnitOfWork.Repository<Data.Models.Transaction>().AddAsync(created);

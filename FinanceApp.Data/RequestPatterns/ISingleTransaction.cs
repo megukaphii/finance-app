@@ -7,4 +7,5 @@ public interface ISingleTransaction : IRequest
 {
 	public RequestField<decimal> Value { get; init; }
 	public RequestField<Counterparty> Counterparty { get; init; }
+    public RequestField<DateTime> Timestamp { get; init; }
 }

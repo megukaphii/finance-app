@@ -8,12 +8,12 @@ public class Transaction : IModel
 	public long Id { get; init; }
 	public required Account Account { get; init; }
 	public required Counterparty Counterparty { get; init; }
-
 	[DataType(DataType.Currency)]
 	public required decimal Value { get; init; }
+	public required DateTime Timestamp { get; init; }
 
 	public override string ToString() =>
-		$"{nameof(Id)}: {Id}, [{nameof(Account)}: [{Account}]], [{nameof(Counterparty)}: [{Counterparty}]], {nameof(Value)}: {Value}";
+		$"{nameof(Id)}: {Id}, [{nameof(Counterparty)}: {Counterparty}], {nameof(Value)}: {Value}, {nameof(Timestamp)}: {Timestamp}";
 
 	public override bool Equals(object? obj)
 	{

@@ -17,8 +17,9 @@
 					<Grid Padding="10">
 						<Frame HeightRequest="125" Padding="0" BackgroundColor="#222222">
 							<VerticalStackLayout Padding="10">
-								<Label Text="{Binding Counterparty.Name}" TextColor="White" />
-								<Label Text="{Binding Value}" TextColor="White" />
+                                <Label Text="{Binding Timestamp}" TextColor="White"/>
+                                <Label Text="{Binding Counterparty.Name}" TextColor="White"/>
+								<Label Text="{Binding Value}" TextColor="White"/>
 							</VerticalStackLayout>
 						</Frame>
 					</Grid>

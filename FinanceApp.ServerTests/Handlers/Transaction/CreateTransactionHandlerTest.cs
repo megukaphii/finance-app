@@ -54,11 +54,17 @@ public class CreateTransactionHandlerTest
 				unitOfWork.SaveChanges();
 			});
 		Data.Models.Transaction expectedTransaction = new()
-			{ Account = _mockSession.Account, Counterparty = new() { Name = "Test Party" }, Value = 123.45m };
+		{
+			Account = _mockSession.Account,
+			Counterparty = new() { Name = "Test Party" },
+			Value = 123.45m,
+			Timestamp = default
+		};
 		CreateTransaction request = new()
 		{
 			Counterparty = new() { Value = new() { Id = 1, Name = "Test Party" } },
-			Value = new() { Value = 123.45m }
+			Value = new() { Value = 123.45m },
+			Timestamp = new() { Value = default }
 		};
 
 		await _handler.HandleAsync(request, _mockClient);
@@ -75,7 +81,8 @@ public class CreateTransactionHandlerTest
 		CreateTransaction request = new()
 		{
 			Counterparty = new() { Value = new() { Id = 1, Name = "Test Party" } },
-			Value = new() { Value = 123.45m }
+			Value = new() { Value = 123.45m },
+			Timestamp = new() { Value = default }
 		};
 
 		await _handler.HandleAsync(request, _mockClient);
@@ -92,7 +99,8 @@ public class CreateTransactionHandlerTest
 		CreateTransaction request = new()
 		{
 			Counterparty = new() { Value = expectedCounterparty },
-			Value = new() { Value = 123.45m }
+			Value = new() { Value = 123.45m },
+			Timestamp = new() { Value = default }
 		};
 
 		await _handler.HandleAsync(request, _mockClient);
@@ -109,7 +117,8 @@ public class CreateTransactionHandlerTest
 		CreateTransaction request = new()
 		{
 			Counterparty = new() { Value = new() { Id = 1, Name = "New Party" } },
-			Value = new() { Value = 123.45m }
+			Value = new() { Value = 123.45m },
+			Timestamp = new() { Value = default }
 		};
 
 		await _handler.HandleAsync(request, _mockClient);

@@ -31,7 +31,9 @@
 			</CollectionView.ItemTemplate>
 		</CollectionView>
 		<Label Text="{Binding CounterpartyError}" TextColor="{StaticResource Error}" />
-		<Button Text="Quick Add" Command="{Binding SendTransactionCommand}" IsEnabled="{Binding IsNotBusy}" />
+        <DatePicker Date="{Binding Timestamp}"></DatePicker>
+        <Label Text="{Binding TimestampError}" TextColor="{StaticResource Error}"/>
+		<Button Text="Quick Add" Command="{Binding SendTransactionCommand}" IsEnabled="{Binding IsNotBusy}"/>
 	</VerticalStackLayout>
 
 </ContentPage>

@@ -29,6 +29,11 @@ public partial class QuickAddViewModel(ServerConnection serverConnection, IMemor
 	[ObservableProperty]
 	private bool _counterpartyFocused = true;
 
+    [ObservableProperty]
+    private DateTime _timestamp = DateTime.Now.Date;
+    [ObservableProperty]
+    private string _timestampError = string.Empty;
+
 	private List<Counterparty> Counterparties { get; } = [];
 	public ObservableCollection<Counterparty> CounterpartiesSearch { get; set; } = [];
 
@@ -51,6 +56,10 @@ public partial class QuickAddViewModel(ServerConnection serverConnection, IMemor
 					{
 						Name = Counterparty
 					}
+				},
+				Timestamp = new()
+				{
+					Value = Timestamp
 				}
 			};
 			CreateTransactionResponse transactionResponse =
@@ -60,9 +69,6 @@ public partial class QuickAddViewModel(ServerConnection serverConnection, IMemor
 				"OK");
 		} catch (ResponseException<CreateTransaction> ex) {
 			if (!string.IsNullOrEmpty(ex.Response.Value.Error)) ValueError = ex.Response.Value.Error;
-
-			if (!string.IsNullOrEmpty(ex.Response.Counterparty.Error))
-				CounterpartyError = ex.Response.Counterparty.Error;
 		} catch (Exception ex) {
 			await ServerConnection.DisconnectAsync();
 			await Shell.Current.GoToAsync($"//{nameof(Login)}", true);
