@@ -1,5 +1,6 @@
 ﻿using FinanceApp.Data;
 using FinanceApp.Data.Requests.Account;
+using FinanceApp.Server;
 using FinanceApp.Server.Handlers.Account;
 using FinanceApp.Server.Interfaces;
 using FinanceApp.Server.Utility;

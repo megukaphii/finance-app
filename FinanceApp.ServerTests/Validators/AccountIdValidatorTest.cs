@@ -1,5 +1,6 @@
 ﻿using FinanceApp.Data;
 using FinanceApp.Data.RequestPatterns;
+using FinanceApp.Server;
 using FinanceApp.Server.Utility;
 using FinanceApp.Server.Validators;
 using FinanceApp.ServerTests.Extensions;

@@ -3,18 +3,18 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace FinanceApp.Data.Migrations
+namespace FinanceApp.Server.Migrations
 {
     /// <inheritdoc />
-    public partial class TransactionTimestamps : Migration
+    public partial class TransactionUpdates : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterColumn<double>(
+            migrationBuilder.AlterColumn<decimal>(
                 name: "Value",
                 table: "Transactions",
-                type: "REAL",
+                type: "TEXT",
                 nullable: false,
                 oldClrType: typeof(int),
                 oldType: "INTEGER");
@@ -39,8 +39,8 @@ namespace FinanceApp.Data.Migrations
                 table: "Transactions",
                 type: "INTEGER",
                 nullable: false,
-                oldClrType: typeof(double),
-                oldType: "REAL");
+                oldClrType: typeof(decimal),
+                oldType: "TEXT");
         }
     }
 }

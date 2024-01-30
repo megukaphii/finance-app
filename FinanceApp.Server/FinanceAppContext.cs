@@ -1,7 +1,7 @@
 ﻿using FinanceApp.Data.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace FinanceApp.Data;
+namespace FinanceApp.Server;
 
 public sealed class FinanceAppContext : DbContext
 {

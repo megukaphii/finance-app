@@ -1,5 +1,6 @@
 ﻿using FinanceApp.Data;
 using FinanceApp.Data.Models;
+using FinanceApp.Server;
 using FinanceApp.ServerTests.Helpers;
 
 namespace FinanceApp.ServerTests.Extensions;
