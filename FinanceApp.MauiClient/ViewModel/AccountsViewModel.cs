@@ -16,7 +16,7 @@ public partial class AccountsViewModel(ServerConnection serverConnection, IMemor
 	[ObservableProperty]
 	private string _pageError = string.Empty;
 
-	public ObservableCollection<Account> Accounts { get; } = new();
+	public ObservableCollection<Account> Accounts { get; } = [];
 
 	public async Task LoadAccounts()
 	{
