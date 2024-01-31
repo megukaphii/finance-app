@@ -34,6 +34,9 @@ public partial class QuickAddViewModel(ServerConnection serverConnection, IMemor
     [ObservableProperty]
     private string _timestampError = string.Empty;
 
+    [ObservableProperty]
+    private string _selectedCounterparty = "Select Counterparty...";
+
 	private List<Counterparty> Counterparties { get; } = [];
 	public ObservableCollection<Counterparty> CounterpartiesSearch { get; set; } = [];
 
@@ -110,6 +113,9 @@ public partial class QuickAddViewModel(ServerConnection serverConnection, IMemor
 			IsBusy = false;
 		}
 	}
+
+	[RelayCommand]
+	private Task ViewCounterparties() => Shell.Current.GoToAsync(nameof(View.Counterparties), true);
 
 	[RelayCommand]
 	private void SelectCounterparty(Counterparty? selected)

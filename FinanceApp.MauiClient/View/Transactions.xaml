@@ -4,8 +4,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:models="clr-namespace:FinanceApp.Data.Models;assembly=FinanceApp.Data"
              xmlns:viewmodel="clr-namespace:FinanceApp.MauiClient.ViewModel"
-             x:DataType="viewmodel:TransactionListViewModel"
-             x:Class="FinanceApp.MauiClient.View.TransactionList"
+             x:DataType="viewmodel:TransactionsViewModel"
+             x:Class="FinanceApp.MauiClient.View.Transactions"
              Title="{Binding Title}">
 
 	<VerticalStackLayout>

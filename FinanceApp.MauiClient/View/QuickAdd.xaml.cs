@@ -20,7 +20,6 @@ public partial class QuickAdd : ContentPage
 	{
 		((QuickAddViewModel)BindingContext).CounterpartyFocused = true;
 		((QuickAddViewModel)BindingContext).GetCounterparties();
-		//((QuickAddViewModel)BindingContext).GetCounterpartiesCommand.ExecuteAsync(null);
 	}
 
 	private void CounterpartyName_OnUnfocused(object? sender, FocusEventArgs e)
