@@ -13,11 +13,11 @@ public partial class Counterparties : ContentPage
 
 	protected override void OnAppearing()
 	{
-		//((CounterpartiesViewModel)BindingContext).GetCounterparties();
+		((CounterpartiesViewModel)BindingContext).GetCounterparties();
 	}
 
 	private void CounterpartyName_OnTextChanged(object? sender, TextChangedEventArgs textChangedEventArgs)
 	{
-		//((CounterpartiesViewModel)BindingContext).SearchCounterparties();
+		((CounterpartiesViewModel)BindingContext).SearchCounterparties();
 	}
 }

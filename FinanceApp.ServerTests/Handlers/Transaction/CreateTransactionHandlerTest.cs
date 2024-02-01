@@ -1,5 +1,4 @@
-﻿using FinanceApp.Data;
-using FinanceApp.Data.Requests.Transaction;
+﻿using FinanceApp.Data.Requests.Transaction;
 using FinanceApp.Server;
 using FinanceApp.Server.Handlers.Transaction;
 using FinanceApp.Server.Interfaces;
@@ -73,6 +72,36 @@ public class CreateTransactionHandlerTest
 		Assert.That(addedTransaction, Is.EqualTo(expectedTransaction));
 		_mockUnitOfWork.Received().SaveChanges();
 		await _mockClient.Received().Send(Arg.Is<CreateTransactionResponse>(r => r.Success && r.Id > 0));
+	}
+
+	[Test]
+	public async Task CreateTransactionHandler_HandleAsync_MultipleTransactionsDoNotThrowException()
+	{
+		FinanceAppContext context = InMemoryDatabaseFactory.CreateNewDatabase();
+		UnitOfWork unitOfWork = new(context);
+		_handler = new(unitOfWork);
+		CreateTransaction request1 = new()
+		{
+			Counterparty = new() { Value = new() { Id = 0, Name = "Test Party" } },
+			Value = new() { Value = 123.45m },
+			Timestamp = new() { Value = default }
+		};
+		CreateTransaction request2 = new()
+		{
+			Counterparty = new() { Value = new() { Id = 0, Name = "Test Party" } },
+			Value = new() { Value = 123.45m },
+			Timestamp = new() { Value = default }
+		};
+
+		await _handler.HandleAsync(request1, _mockClient);
+
+		Assert.DoesNotThrowAsync(async () =>
+		{
+			context = InMemoryDatabaseFactory.CreateNewDatabase();
+			unitOfWork = new(context);
+			_handler = new(unitOfWork);
+			await _handler.HandleAsync(request2, _mockClient);
+		});
 	}
 
 	[Test]

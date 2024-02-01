@@ -10,7 +10,7 @@ public class Counterparty : IModel
 
 	[MinLength(2)]
 	[MaxLength(64)]
-	public required string Name { get; init; }
+	public required string Name { get; set; }
 
 	public override string ToString() => $"{nameof(Id)}: {Id}, {nameof(Name)}: {Name}";
 

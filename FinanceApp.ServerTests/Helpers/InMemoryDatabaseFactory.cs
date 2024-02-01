@@ -1,5 +1,4 @@
-﻿using FinanceApp.Data;
-using FinanceApp.Server;
+﻿using FinanceApp.Server;
 using Microsoft.EntityFrameworkCore;
 
 namespace FinanceApp.ServerTests.Helpers;
