@@ -1,5 +1,4 @@
-﻿using FinanceApp.Data;
-using FinanceApp.Data.Requests.Counterparty;
+﻿using FinanceApp.Data.Requests.Counterparty;
 using FinanceApp.Server;
 using FinanceApp.Server.Handlers.Counterparty;
 using FinanceApp.Server.Interfaces;
@@ -25,7 +24,7 @@ public class GetCounterpartiesHandlerTest
 	[Test]
 	public async Task HandleAsync_ReturnsCounterparties()
 	{
-		FinanceAppContext context = InMemoryDatabaseFactory.CreateNewDatabase();
+		FinanceAppContext context = new InMemoryDatabaseFactory().CreateNewDatabase();
 		context.LoadCounterparties();
 		UnitOfWork unitOfWork = new(context);
 		GetCounterpartiesHandler handler = new(unitOfWork);
@@ -44,7 +43,7 @@ public class GetCounterpartiesHandlerTest
 	[Test]
 	public async Task HandleAsync_ReturnsEmptyList()
 	{
-		FinanceAppContext context = InMemoryDatabaseFactory.CreateNewDatabase();
+		FinanceAppContext context = new InMemoryDatabaseFactory().CreateNewDatabase();
 		UnitOfWork unitOfWork = new(context);
 		GetCounterpartiesHandler handler = new(unitOfWork);
 		GetCounterparties request = new()

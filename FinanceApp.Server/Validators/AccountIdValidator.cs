@@ -15,6 +15,12 @@ public class AccountIdValidator : IValidator<IAccountId>
 
 	public async Task<bool> ValidateAsync(IAccountId request)
 	{
-		return await UnitOfWork.Repository<Account>().AnyAsync(account => account.Id == request.Id.Value);
+		bool failure = false;
+		if (!await UnitOfWork.Repository<Account>().AnyAsync(account => account.Id == request.Id.Value)) {
+			request.Id.Error = $"Account with {nameof(request.Id)} of {request.Id} does not exist";
+			failure = true;
+		}
+
+		return !failure;
 	}
 }

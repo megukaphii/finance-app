@@ -22,7 +22,7 @@ public class CreateTransactionHandlerTest
 	[SetUp]
 	public void SetUp()
 	{
-		_context = InMemoryDatabaseFactory.CreateNewDatabase();
+		_context = new InMemoryDatabaseFactory().CreateNewDatabase();
 		_context.LoadAccounts();
 
 		_mockClient = Substitute.For<IClient>();
@@ -77,7 +77,8 @@ public class CreateTransactionHandlerTest
 	[Test]
 	public async Task CreateTransactionHandler_HandleAsync_MultipleTransactionsDoNotThrowException()
 	{
-		FinanceAppContext context = InMemoryDatabaseFactory.CreateNewDatabase();
+		InMemoryDatabaseFactory databaseFactory = new();
+		FinanceAppContext context = databaseFactory.CreateNewDatabase();
 		UnitOfWork unitOfWork = new(context);
 		_handler = new(unitOfWork);
 		CreateTransaction request1 = new()
@@ -97,7 +98,7 @@ public class CreateTransactionHandlerTest
 
 		Assert.DoesNotThrowAsync(async () =>
 		{
-			context = InMemoryDatabaseFactory.CreateNewDatabase();
+			context = databaseFactory.GetExistingDatabase();
 			unitOfWork = new(context);
 			_handler = new(unitOfWork);
 			await _handler.HandleAsync(request2, _mockClient);

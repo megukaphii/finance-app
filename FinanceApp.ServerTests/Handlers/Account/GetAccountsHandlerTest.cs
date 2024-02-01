@@ -17,7 +17,7 @@ public class GetAccountsHandlerTest
 	[SetUp]
 	public void SetUp()
 	{
-		FinanceAppContext context = InMemoryDatabaseFactory.CreateNewDatabase();
+		FinanceAppContext context = new InMemoryDatabaseFactory().CreateNewDatabase();
 		context.LoadAccounts();
 
 		_mockClient = Substitute.For<IClient>();

@@ -1,5 +1,4 @@
-﻿using FinanceApp.Data;
-using FinanceApp.Data.RequestPatterns;
+﻿using FinanceApp.Data.RequestPatterns;
 using FinanceApp.Data.Requests.Account;
 using FinanceApp.Data.Requests.Counterparty;
 using FinanceApp.Data.Requests.Transaction;
@@ -39,12 +38,14 @@ public static class Program
 				services.AddTransient<IValidator<IAccountId>, AccountIdValidator>();
 				services.AddTransient<IValidator<IPageNumber>, PageNumberValidator>();
 				services.AddTransient<IValidator<ISingleAccount>, SingleAccountValidator>();
+				services.AddTransient<IValidator<ISingleCounterparty>, SingleCounterpartyValidator>();
 				services.AddTransient<IValidator<ISingleTransaction>, SingleTransactionValidator>();
 
 				services.AddTransient<IRequestHandler<CreateAccount>, CreateAccountHandler>();
 				services.AddTransient<IRequestHandler<GetAccounts>, GetAccountsHandler>();
 				services.AddTransient<IRequestHandler<SelectAccount>, SelectAccountHandler>();
 				services.AddTransient<IRequestHandler<GetCounterparties>, GetCounterpartiesHandler>();
+				services.AddTransient<IRequestHandler<UpdateCounterparty>, UpdateCounterpartyHandler>();
 				services.AddTransient<IRequestHandler<CreateTransaction>, CreateTransactionHandler>();
 				services.AddTransient<IRequestHandler<GetTransactions>, GetTransactionsHandler>();
 			})

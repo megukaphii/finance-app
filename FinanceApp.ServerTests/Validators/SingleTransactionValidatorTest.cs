@@ -12,7 +12,7 @@ namespace FinanceApp.ServerTests.Validators;
 public class SingleTransactionValidatorTests
 {
 	[SetUp]
-	public void Setup()
+	public void SetUp()
 	{
 		_singleTransactionValidator = new();
 	}
@@ -50,7 +50,7 @@ public class SingleTransactionValidatorTests
 		bool result = await _singleTransactionValidator.ValidateAsync(request);
 
 		Assert.That(result, Is.False);
-		Assert.That(request.Value.Error, Is.Not.Null);
+		Assert.That(request.Value.Error, Is.Not.Empty);
 	}
 
 	[Test]
@@ -64,7 +64,7 @@ public class SingleTransactionValidatorTests
 		bool result = await _singleTransactionValidator.ValidateAsync(request);
 
 		Assert.That(result, Is.False);
-		Assert.That(request.Value.Error, Is.Not.Null);
+		Assert.That(request.Value.Error, Is.Not.Empty);
 	}
 
 	[Test]
@@ -83,7 +83,7 @@ public class SingleTransactionValidatorTests
 		bool result = await _singleTransactionValidator.ValidateAsync(request);
 
 		Assert.That(result, Is.False);
-		Assert.That(request.Counterparty.Error, Is.Not.Null);
+		Assert.That(request.Counterparty.Error, Is.Not.Empty);
 	}
 
 	[Test]
@@ -97,6 +97,6 @@ public class SingleTransactionValidatorTests
 		bool result = await _singleTransactionValidator.ValidateAsync(request);
 
 		Assert.That(result, Is.False);
-		Assert.That(request.Counterparty.Error, Is.Not.Null);
+		Assert.That(request.Counterparty.Error, Is.Not.Empty);
 	}
 }

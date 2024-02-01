@@ -12,7 +12,7 @@ namespace FinanceApp.ServerTests.Validators;
 public class SingleAccountValidatorTests
 {
 	[SetUp]
-	public void Setup()
+	public void SetUp()
 	{
 		_singleAccountValidator = new();
 	}
@@ -55,7 +55,7 @@ public class SingleAccountValidatorTests
 		bool result = await _singleAccountValidator.ValidateAsync(request);
 
 		Assert.That(result, Is.False);
-		Assert.That(request.Name.Error, Is.Not.Null);
+		Assert.That(request.Name.Error, Is.Not.Empty);
 	}
 
 	[Test]
@@ -73,7 +73,7 @@ public class SingleAccountValidatorTests
 		bool result = await _singleAccountValidator.ValidateAsync(request);
 
 		Assert.That(result, Is.False);
-		Assert.That(request.Description.Error, Is.Not.Null);
+		Assert.That(request.Description.Error, Is.Not.Empty);
 	}
 
 	[Test]
@@ -93,8 +93,8 @@ public class SingleAccountValidatorTests
 		bool result = await _singleAccountValidator.ValidateAsync(request);
 
 		Assert.That(result, Is.False);
-		if (MinNameLength != 0) Assert.That(request.Name.Error, Is.Not.Null);
-		if (MinDescriptionLength != 0) Assert.That(request.Description.Error, Is.Not.Null);
+		if (MinNameLength != 0) Assert.That(request.Name.Error, Is.Not.Empty);
+		if (MinDescriptionLength != 0) Assert.That(request.Description.Error, Is.Not.Empty);
 	}
 
 	[Test]
@@ -107,7 +107,7 @@ public class SingleAccountValidatorTests
 		bool result = await _singleAccountValidator.ValidateAsync(request);
 
 		Assert.That(result, Is.False);
-		Assert.That(request.Name.Error, Is.Not.Null);
+		Assert.That(request.Name.Error, Is.Not.Empty);
 	}
 
 	[Test]
@@ -120,7 +120,7 @@ public class SingleAccountValidatorTests
 		bool result = await _singleAccountValidator.ValidateAsync(request);
 
 		Assert.That(result, Is.False);
-		Assert.That(request.Description.Error, Is.Not.Null);
+		Assert.That(request.Description.Error, Is.Not.Empty);
 	}
 
 	[Test]
@@ -133,7 +133,7 @@ public class SingleAccountValidatorTests
 		bool result = await _singleAccountValidator.ValidateAsync(request);
 
 		Assert.That(result, Is.False);
-		Assert.That(request.Name.Error, Is.Not.Null);
-		Assert.That(request.Description.Error, Is.Not.Null);
+		Assert.That(request.Name.Error, Is.Not.Empty);
+		Assert.That(request.Description.Error, Is.Not.Empty);
 	}
 }
