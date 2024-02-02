@@ -22,9 +22,10 @@ public partial class CounterpartiesViewModel(ServerConnection serverConnection, 
 	[ObservableProperty]
 	private string _searchError = string.Empty;
 
-	private ActiveCounterparty? _activeCounterparty;
-	private ActiveCounterparty? ActiveCounterparty
+	private TrackedCounterparty? _activeCounterparty;
+	private TrackedCounterparty? ActiveCounterparty
 	{
+		get => _activeCounterparty;
 		set
 		{
 			if (_activeCounterparty != null) _activeCounterparty.IsActive = false;
@@ -32,7 +33,7 @@ public partial class CounterpartiesViewModel(ServerConnection serverConnection, 
 		}
 	}
 	private List<Counterparty> Counterparties { get; } = [];
-	public ObservableCollection<ActiveCounterparty> CounterpartiesSearch { get; set; } = [];
+	public ObservableCollection<TrackedCounterparty> CounterpartiesSearch { get; set; } = [];
 
 	[RelayCommand]
 	public async Task GetCounterparties()
@@ -67,21 +68,46 @@ public partial class CounterpartiesViewModel(ServerConnection serverConnection, 
 	}
 
 	[RelayCommand]
-	private void SelectCounterparty(ActiveCounterparty? selected)
+	private void SelectCounterparty(TrackedCounterparty? selected)
 	{
+		ActiveCounterparty?.UndoChanges();
 		ActiveCounterparty = selected;
 		if (selected != null) selected.IsActive = true;
 	}
 
 	[RelayCommand]
-	private async Task UpdateCounterparty(ActiveCounterparty selected)
+	private async Task UpdateCounterparty(TrackedCounterparty selected)
 	{
-		// TODO - Send update counterparty request
-		await Shell.Current.DisplayAlert("Update", $"Updating {selected?.CounterpartyName}", "OK");
+		try {
+			IsBusy = true;
+			ClearErrors();
+
+			UpdateCounterparty request = new()
+			{
+				Id = new() { Value = selected.Counterparty.Id },
+				Name = new() { Value = selected.CounterpartyName }
+			};
+			UpdateCounterpartyResponse response =
+				await ServerConnection.SendMessageAsync<UpdateCounterparty, UpdateCounterpartyResponse>(request);
+
+			if (response.Success) {
+				ActiveCounterparty?.SaveChanges();
+				await Shell.Current.DisplayAlert("Updated", $"Successfully updated {selected.CounterpartyName}", "OK");
+			}
+		} catch (ResponseException<GetCounterparties> ex) {
+			PageError = ex.Message;
+		} catch (Exception ex) {
+			await ServerConnection.DisconnectAsync();
+			await Shell.Current.GoToAsync($"//{nameof(Login)}", true);
+			await Shell.Current.DisplayAlert("Error", ex.Message + " | Inner exception: " + ex.InnerException?.Message,
+				"OK");
+		} finally {
+			IsBusy = false;
+		}
 	}
 
 	[RelayCommand]
-	private async Task DeleteCounterparty(ActiveCounterparty selected)
+	private async Task DeleteCounterparty(TrackedCounterparty selected)
 	{
 		// TODO - Send delete counterparty request
 		await Shell.Current.DisplayAlert("Delete", $"Deleting {selected?.CounterpartyName}", "OK");

@@ -19,7 +19,7 @@
 				<LinearItemsLayout Orientation="Vertical" />
 			</CollectionView.ItemsLayout>
 			<CollectionView.ItemTemplate>
-				<DataTemplate x:DataType="classes:ActiveCounterparty">
+				<DataTemplate x:DataType="classes:TrackedCounterparty">
 					<Border HeightRequest="100" Padding="10,0" BackgroundColor="Black">
 						<VerticalStackLayout VerticalOptions="Center">
 							<Label Text="{Binding CounterpartyName}" IsVisible="{Binding IsInactive}" TextColor="White" FontSize="32" />
