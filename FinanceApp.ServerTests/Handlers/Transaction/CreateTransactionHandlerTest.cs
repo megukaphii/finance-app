@@ -5,6 +5,7 @@ using FinanceApp.Server.Interfaces;
 using FinanceApp.Server.Utility;
 using FinanceApp.ServerTests.Extensions;
 using FinanceApp.ServerTests.Helpers;
+using Microsoft.EntityFrameworkCore;
 using NSubstitute;
 
 namespace FinanceApp.ServerTests.Handlers.Transaction;
@@ -13,64 +14,53 @@ namespace FinanceApp.ServerTests.Handlers.Transaction;
 [TestOf(typeof(CreateTransactionHandler))]
 public class CreateTransactionHandlerTest
 {
-	[OneTimeSetUp]
-	public void OneTimeSetUp()
-	{
-		_mockSession = Substitute.For<ISession>();
-	}
-
 	[SetUp]
 	public void SetUp()
 	{
-		_context = new InMemoryDatabaseFactory().CreateNewDatabase();
-		_context.LoadAccounts();
+		FinanceAppContext context = _databaseFactory.CreateNewDatabase();
+		context.LoadAccounts();
+		context.LoadCounterparties();
 
 		_mockClient = Substitute.For<IClient>();
-		_mockClient.Session.Returns(_mockSession);
-		_mockSession.Account.Returns(_context.Accounts.Find(1L)!);
-		_mockSession.IsAccountSet().Returns(true);
+		ISession session = Substitute.For<ISession>();
+		session.Account.Returns(context.Accounts.Find(1L)!);
+		session.IsAccountSet().Returns(true);
+		_mockClient.Session.Returns(session);
 
-		_mockUnitOfWork = Substitute.For<IUnitOfWork>();
-		_handler = new(_mockUnitOfWork);
+		UnitOfWork unitOfWork = new(context);
+		_handler = new(unitOfWork);
 	}
 
-	private ISession _mockSession = null!;
+	private readonly InMemoryDatabaseFactory _databaseFactory = new();
 	private IClient _mockClient = null!;
-	private FinanceAppContext _context = null!;
-	private IUnitOfWork _mockUnitOfWork = null!;
 	private CreateTransactionHandler _handler = null!;
 
 	[Test]
 	public async Task CreateTransactionHandler_HandleAsync_CreatesTransactionSuccessfully()
 	{
-		Data.Models.Transaction addedTransaction = null!;
-		_mockUnitOfWork.Repository<Data.Models.Transaction>()
-			.When(x => x.AddAsync(Arg.Any<Data.Models.Transaction>()))
-			.Do(c =>
-			{
-				addedTransaction = c.Arg<Data.Models.Transaction>();
-				UnitOfWork unitOfWork = new(_context);
-				unitOfWork.Repository<Data.Models.Transaction>().AddAsync(addedTransaction);
-				unitOfWork.SaveChanges();
-			});
-		Data.Models.Transaction expectedTransaction = new()
-		{
-			Account = _mockSession.Account,
-			Counterparty = new() { Name = "Test Party" },
-			Value = 123.45m,
-			Timestamp = default
-		};
 		CreateTransaction request = new()
 		{
-			Counterparty = new() { Value = new() { Id = 1, Name = "Test Party" } },
+			Counterparty = new() { Value = 1L },
 			Value = new() { Value = 123.45m },
 			Timestamp = new() { Value = default }
 		};
+		Data.Models.Transaction expected = new()
+		{
+			Account = _mockClient.Session.Account,
+			Counterparty = DatabaseSeeder.Counterparties[0],
+			Value = 123.45m,
+			Timestamp = default
+		};
 
 		await _handler.HandleAsync(request, _mockClient);
+		FinanceAppContext context = _databaseFactory.GetExistingDatabase();
+		UnitOfWork unitOfWork = new(context);
+		Data.Models.Transaction? actual = await unitOfWork.Repository<Data.Models.Transaction>()
+			                                  .IncludeAll(transaction => transaction.Account,
+				                                  transaction => transaction.Counterparty)
+			                                  .FirstAsync(transaction => transaction.Id == 1L);
 
-		Assert.That(addedTransaction, Is.EqualTo(expectedTransaction));
-		_mockUnitOfWork.Received().SaveChanges();
+		Assert.That(actual, Is.EqualTo(expected));
 		await _mockClient.Received().Send(Arg.Is<CreateTransactionResponse>(r => r.Success && r.Id > 0));
 	}
 
@@ -83,13 +73,13 @@ public class CreateTransactionHandlerTest
 		_handler = new(unitOfWork);
 		CreateTransaction request1 = new()
 		{
-			Counterparty = new() { Value = new() { Id = 0, Name = "Test Party" } },
+			Counterparty = new() { Value = 1L },
 			Value = new() { Value = 123.45m },
 			Timestamp = new() { Value = default }
 		};
 		CreateTransaction request2 = new()
 		{
-			Counterparty = new() { Value = new() { Id = 0, Name = "Test Party" } },
+			Counterparty = new() { Value = 1L },
 			Value = new() { Value = 123.45m },
 			Timestamp = new() { Value = default }
 		};
@@ -108,53 +98,20 @@ public class CreateTransactionHandlerTest
 	[Test]
 	public async Task CreateTransactionHandler_HandleAsync_WhenAccountNotSet_DoesNotCreateTransaction()
 	{
-		_mockSession.IsAccountSet().Returns(false);
+		IUnitOfWork unitOfWork = Substitute.For<IUnitOfWork>();
+		_handler = new(unitOfWork);
+		_mockClient.Session.IsAccountSet().Returns(false);
 		CreateTransaction request = new()
 		{
-			Counterparty = new() { Value = new() { Id = 1, Name = "Test Party" } },
+			Counterparty = new() { Value = 1L },
 			Value = new() { Value = 123.45m },
 			Timestamp = new() { Value = default }
 		};
 
 		await _handler.HandleAsync(request, _mockClient);
 
-		await _mockUnitOfWork.Repository<Data.Models.Transaction>().DidNotReceive()
+		await unitOfWork.Repository<Data.Models.Transaction>().DidNotReceive()
 			.AddAsync(Arg.Any<Data.Models.Transaction>());
 		await _mockClient.Received().Send(Arg.Is<CreateTransactionResponse>(r => !r.Success && r.Id == 0));
-	}
-
-	[Test]
-	public async Task CreateTransactionHandler_HandleAsync_AddsNewCounterpartyWhenIdIsZero()
-	{
-		Data.Models.Counterparty expectedCounterparty = new() { Name = "New Party" };
-		CreateTransaction request = new()
-		{
-			Counterparty = new() { Value = expectedCounterparty },
-			Value = new() { Value = 123.45m },
-			Timestamp = new() { Value = default }
-		};
-
-		await _handler.HandleAsync(request, _mockClient);
-
-		await _mockUnitOfWork.Repository<Data.Models.Counterparty>().Received()
-			.AddAsync(Arg.Is<Data.Models.Counterparty>(c => c.Equals(expectedCounterparty)));
-		_mockUnitOfWork.Received().SaveChanges();
-		await _mockClient.Received().Send(Arg.Is<CreateTransactionResponse>(r => r.Success));
-	}
-
-	[Test]
-	public async Task CreateTransactionHandler_HandleAsync_DoesNotAddNewCounterpartyWhenIdIsNotZero()
-	{
-		CreateTransaction request = new()
-		{
-			Counterparty = new() { Value = new() { Id = 1, Name = "New Party" } },
-			Value = new() { Value = 123.45m },
-			Timestamp = new() { Value = default }
-		};
-
-		await _handler.HandleAsync(request, _mockClient);
-
-		await _mockUnitOfWork.Repository<Data.Models.Counterparty>().DidNotReceive()
-			.AddAsync(Arg.Any<Data.Models.Counterparty>());
 	}
 }

@@ -5,6 +5,8 @@ namespace FinanceApp.Data.Models;
 
 public class Counterparty : IModel
 {
+	public static Counterparty Empty => new() { Id = -1, Name = "Select Counterparty..." };
+
 	public long Id { get; init; }
 	public List<Transaction> Transactions { get; init; } = new();
 

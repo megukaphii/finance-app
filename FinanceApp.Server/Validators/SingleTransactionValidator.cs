@@ -1,18 +1,24 @@
 ﻿using FinanceApp.Data.Models;
 using FinanceApp.Data.RequestPatterns;
 using FinanceApp.Server.Interfaces;
-using FinanceApp.Server.Utility;
 
 namespace FinanceApp.Server.Validators;
 
 public class SingleTransactionValidator : IValidator<ISingleTransaction>
 {
+	public SingleTransactionValidator(IUnitOfWork unitOfWork)
+	{
+		UnitOfWork = unitOfWork;
+	}
+
+	private IUnitOfWork UnitOfWork { get; }
+
 	private const decimal MinValue = decimal.MinValue + 1;
 	private const decimal MaxValue = decimal.MaxValue - 1;
-	private static readonly int MinCounterpartyNameLength = PropertyHelpers.GetMinLength((Counterparty c) => c.Name);
-	private static readonly int MaxCounterpartyNameLength = PropertyHelpers.GetMaxLength((Counterparty c) => c.Name);
+	/*private static readonly int MinCounterpartyNameLength = PropertyHelpers.GetMinLength((Counterparty c) => c.Name);
+	private static readonly int MaxCounterpartyNameLength = PropertyHelpers.GetMaxLength((Counterparty c) => c.Name);*/
 
-	public Task<bool> ValidateAsync(ISingleTransaction request)
+	public async Task<bool> ValidateAsync(ISingleTransaction request)
 	{
 		bool failure = false;
 		switch (request.Value.Value) {
@@ -26,7 +32,14 @@ public class SingleTransactionValidator : IValidator<ISingleTransaction>
 				break;
 		}
 
-		if (request.Counterparty.Value.Name.Length < MinCounterpartyNameLength) {
+		if (!await UnitOfWork.Repository<Counterparty>()
+			     .AnyAsync(counterparty => counterparty.Id == request.Counterparty.Value)) {
+			request.Counterparty.Error =
+				$"Counterparty with {nameof(request.Counterparty.Value)} of {request.Counterparty.Value} does not exist";
+			failure = true;
+		}
+
+		/*if (request.Counterparty.Value.Name.Length < MinCounterpartyNameLength) {
 			request.Counterparty.Error = $"{nameof(request.Counterparty)} name length should be" +
 			                             $" more than {MinCounterpartyNameLength} characters";
 			failure = true;
@@ -34,8 +47,8 @@ public class SingleTransactionValidator : IValidator<ISingleTransaction>
 			request.Counterparty.Error = $"{nameof(request.Counterparty)} name length should be" +
 			                             $" less than {MaxCounterpartyNameLength} characters";
 			failure = true;
-		}
+		}*/
 
-		return Task.FromResult(!failure);
+		return !failure;
 	}
 }

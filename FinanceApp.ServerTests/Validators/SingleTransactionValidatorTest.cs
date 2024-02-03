@@ -1,8 +1,10 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using FinanceApp.Data.Models;
 using FinanceApp.Data.RequestPatterns;
+using FinanceApp.Server;
 using FinanceApp.Server.Utility;
 using FinanceApp.Server.Validators;
+using FinanceApp.ServerTests.Extensions;
+using FinanceApp.ServerTests.Helpers;
 using NSubstitute;
 
 namespace FinanceApp.ServerTests.Validators;
@@ -14,23 +16,21 @@ public class SingleTransactionValidatorTests
 	[SetUp]
 	public void SetUp()
 	{
-		_singleTransactionValidator = new();
-	}
+		FinanceAppContext context = new InMemoryDatabaseFactory().CreateNewDatabase();
+		context.LoadCounterparties();
 
-	private static readonly int MinCounterpartyNameLength = PropertyHelpers.GetMinLength((Counterparty c) => c.Name);
-	private static readonly int MaxCounterpartyNameLength = PropertyHelpers.GetMaxLength((Counterparty c) => c.Name);
-	private static readonly int SafeCounterpartyNameLength =
-		(MinCounterpartyNameLength + MaxCounterpartyNameLength) / 2;
+		UnitOfWork unitOfWork = new(context);
+		_singleTransactionValidator = new(unitOfWork);
+	}
 
 	private SingleTransactionValidator _singleTransactionValidator = null!;
 
 	[Test]
-	public async Task ValidateAsync_ShouldReturnTrue_WhenValueAndCounterpartyNameAreValid()
+	public async Task ValidateAsync_ShouldReturnTrue_WhenValueAndCounterpartyAreValid()
 	{
 		ISingleTransaction request = Substitute.For<ISingleTransaction>();
 		request.Value.Returns(new RequestField<decimal> { Value = 10M });
-		request.Counterparty.Returns(new RequestField<Counterparty>
-			{ Value = new() { Name = new('a', SafeCounterpartyNameLength) } });
+		request.Counterparty.Returns(new RequestField<long>{ Value = 1L });
 
 		bool result = await _singleTransactionValidator.ValidateAsync(request);
 
@@ -44,8 +44,7 @@ public class SingleTransactionValidatorTests
 	{
 		ISingleTransaction request = Substitute.For<ISingleTransaction>();
 		request.Value.Returns(new RequestField<decimal> { Value = decimal.MinValue });
-		request.Counterparty.Returns(new RequestField<Counterparty>
-			{ Value = new() { Name = new('a', SafeCounterpartyNameLength) } });
+		request.Counterparty.Returns(new RequestField<long>{ Value = 1L });
 
 		bool result = await _singleTransactionValidator.ValidateAsync(request);
 
@@ -58,8 +57,7 @@ public class SingleTransactionValidatorTests
 	{
 		ISingleTransaction request = Substitute.For<ISingleTransaction>();
 		request.Value.Returns(new RequestField<decimal> { Value = decimal.MaxValue });
-		request.Counterparty.Returns(new RequestField<Counterparty>
-			{ Value = new() { Name = new('a', SafeCounterpartyNameLength) } });
+		request.Counterparty.Returns(new RequestField<long>{ Value = 1L });
 
 		bool result = await _singleTransactionValidator.ValidateAsync(request);
 
@@ -69,30 +67,11 @@ public class SingleTransactionValidatorTests
 
 	[Test]
 	[ExcludeFromCodeCoverage]
-	public async Task ValidateAsync_ShouldReturnFalse_WhenCounterpartyNameIsTooShort()
-	{
-		if (MinCounterpartyNameLength == 0) {
-			Assert.Pass($"{nameof(MinCounterpartyNameLength)} is 0, validation cannot be failed");
-		}
-
-		ISingleTransaction request = Substitute.For<ISingleTransaction>();
-		request.Value.Returns(new RequestField<decimal> { Value = 10M });
-		request.Counterparty.Returns(new RequestField<Counterparty>
-			{ Value = new() { Name = new('a', MinCounterpartyNameLength - 1) } });
-
-		bool result = await _singleTransactionValidator.ValidateAsync(request);
-
-		Assert.That(result, Is.False);
-		Assert.That(request.Counterparty.Error, Is.Not.Empty);
-	}
-
-	[Test]
-	public async Task ValidateAsync_ShouldReturnFalse_WhenCounterpartyNameIsTooLong()
+	public async Task ValidateAsync_ShouldReturnFalse_WhenCounterpartyDoesntExist()
 	{
 		ISingleTransaction request = Substitute.For<ISingleTransaction>();
 		request.Value.Returns(new RequestField<decimal> { Value = 10M });
-		request.Counterparty.Returns(new RequestField<Counterparty>
-			{ Value = new() { Name = new('a', MaxCounterpartyNameLength + 1) } });
+		request.Counterparty.Returns(new RequestField<long>{ Value = -1L });
 
 		bool result = await _singleTransactionValidator.ValidateAsync(request);
 

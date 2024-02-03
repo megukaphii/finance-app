@@ -25,7 +25,7 @@ public partial class QuickAddViewModel(ServerConnection serverConnection, IMemor
     [ObservableProperty]
     private string _timestampError = string.Empty;
 
-    private Counterparty _counterparty = new() { Name = "Select Counterparty..." };
+    private Counterparty _counterparty = Counterparty.Empty;
     public Counterparty Counterparty
     {
 	    get => _counterparty;
@@ -47,27 +47,17 @@ public partial class QuickAddViewModel(ServerConnection serverConnection, IMemor
 	[RelayCommand]
 	private async Task SendTransaction()
 	{
+		if (Counterparty.Equals(Counterparty.Empty)) { CounterpartyError = "Please select a counterparty"; return; }
+
 		try {
 			IsBusy = true;
 			ClearErrors();
 
 			CreateTransaction request = new()
 			{
-				Value = new()
-				{
-					Value = Value
-				},
-				Counterparty = new()
-				{
-					Value = new()
-					{
-						Name = Counterparty.Name
-					}
-				},
-				Timestamp = new()
-				{
-					Value = Timestamp
-				}
+				Value = new() { Value = Value },
+				Counterparty = new() { Value = Counterparty.Id },
+				Timestamp = new() { Value = Timestamp }
 			};
 			CreateTransactionResponse transactionResponse =
 				await ServerConnection.SendMessageAsync<CreateTransaction, CreateTransactionResponse>(request);
@@ -87,11 +77,17 @@ public partial class QuickAddViewModel(ServerConnection serverConnection, IMemor
 	}
 
 	[RelayCommand]
-	private Task ViewCounterparties() => Shell.Current.GoToAsync(nameof(Counterparties), true);
+	private Task ViewCounterparties()
+	{
+		ClearErrors();
+		return Shell.Current.GoToAsync(nameof(Counterparties), true);
+	}
 
 	public override void ClearErrors()
 	{
 		PageError = string.Empty;
 		ValueError = string.Empty;
+		TimestampError = string.Empty;
+		CounterpartyError = string.Empty;
 	}
 }
