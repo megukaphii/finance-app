@@ -2,7 +2,6 @@
 
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:models="clr-namespace:FinanceApp.Data.Models;assembly=FinanceApp.Data"
              xmlns:viewmodel="clr-namespace:FinanceApp.MauiClient.ViewModel"
              x:DataType="viewmodel:QuickAddViewModel"
              x:Class="FinanceApp.MauiClient.View.QuickAdd"
@@ -11,26 +10,7 @@
 	<VerticalStackLayout>
 		<Entry Text="{Binding Value}" Placeholder="Value..." Keyboard="Numeric" />
 		<Label Text="{Binding ValueError}" TextColor="{StaticResource Error}" />
-		<Button Text="{Binding SelectedCounterparty}" Command="{Binding ViewCounterpartiesCommand}"/>
-		<Entry TextChanged="CounterpartyName_OnTextChanged" Focused="CounterpartyName_OnFocused"
-		       Unfocused="CounterpartyName_OnUnfocused" Text="{Binding Counterparty}" Placeholder="Counterparty..." />
-		<CollectionView
-			IsVisible="{Binding CounterpartyFocused}"
-			ItemsSource="{Binding CounterpartiesSearch}"
-			SelectionChangedCommand="{Binding SelectCounterpartyCommand}"
-			SelectionChangedCommandParameter="{Binding Path=SelectedItem, Source={RelativeSource Self}}"
-			SelectionMode="Single">
-			<CollectionView.ItemsLayout>
-				<LinearItemsLayout Orientation="Vertical" />
-			</CollectionView.ItemsLayout>
-			<CollectionView.ItemTemplate>
-				<DataTemplate x:DataType="models:Counterparty">
-					<Border HeightRequest="50" Padding="10,0" BackgroundColor="Black">
-						<Label Text="{Binding Name}" TextColor="White" VerticalTextAlignment="Center" />
-					</Border>
-				</DataTemplate>
-			</CollectionView.ItemTemplate>
-		</CollectionView>
+		<Button Text="{Binding Counterparty.Name}" Command="{Binding ViewCounterpartiesCommand}"/>
 		<Label Text="{Binding CounterpartyError}" TextColor="{StaticResource Error}" />
         <DatePicker Date="{Binding Timestamp}"></DatePicker>
         <Label Text="{Binding TimestampError}" TextColor="{StaticResource Error}"/>

@@ -36,6 +36,21 @@ public partial class CounterpartiesViewModel(ServerConnection serverConnection, 
 	public ObservableCollection<TrackedCounterparty> CounterpartiesSearch { get; set; } = [];
 
 	[RelayCommand]
+	private async Task SelectCounterparty(TrackedCounterparty selected)
+	{
+		ShellNavigationQueryParameters parameters = new() { { nameof(Counterparty), selected.Counterparty } };
+		await Shell.Current.GoToAsync("..", true, parameters);
+	}
+
+	[RelayCommand]
+	private void ActivateCounterparty(TrackedCounterparty selected)
+	{
+		ActiveCounterparty?.UndoChanges();
+		ActiveCounterparty = selected;
+		selected.IsActive = true;
+	}
+
+	[RelayCommand]
 	public async Task GetCounterparties()
 	{
 		try {
@@ -65,14 +80,6 @@ public partial class CounterpartiesViewModel(ServerConnection serverConnection, 
 		} finally {
 			IsBusy = false;
 		}
-	}
-
-	[RelayCommand]
-	private void SelectCounterparty(TrackedCounterparty? selected)
-	{
-		ActiveCounterparty?.UndoChanges();
-		ActiveCounterparty = selected;
-		if (selected != null) selected.IsActive = true;
 	}
 
 	[RelayCommand]
@@ -110,7 +117,7 @@ public partial class CounterpartiesViewModel(ServerConnection serverConnection, 
 	private async Task DeleteCounterparty(TrackedCounterparty selected)
 	{
 		// TODO - Send delete counterparty request
-		await Shell.Current.DisplayAlert("Delete", $"Deleting {selected?.CounterpartyName}", "OK");
+		await Shell.Current.DisplayAlert("Delete", $"Deleting {selected.CounterpartyName}", "OK");
 	}
 
 	public void SearchCounterparties()

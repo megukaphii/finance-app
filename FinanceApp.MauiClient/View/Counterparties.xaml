@@ -12,7 +12,7 @@
 		<Entry TextChanged="CounterpartyName_OnTextChanged" Text="{Binding Search}" Placeholder="Counterparty..." />
 		<CollectionView
 			ItemsSource="{Binding CounterpartiesSearch}"
-			SelectionChangedCommand="{Binding SelectCounterpartyCommand}"
+			SelectionChangedCommand="{Binding ActivateCounterpartyCommand}"
 			SelectionChangedCommandParameter="{Binding Path=SelectedItem, Source={RelativeSource Self}}"
 			SelectionMode="Single">
 			<CollectionView.ItemsLayout>
@@ -23,14 +23,17 @@
 					<Border HeightRequest="100" Padding="10,0" BackgroundColor="Black">
 						<VerticalStackLayout VerticalOptions="Center">
 							<Label Text="{Binding CounterpartyName}" IsVisible="{Binding IsInactive}" TextColor="White" FontSize="32" />
-							<Grid ColumnDefinitions="*,Auto,Auto" IsVisible="{Binding IsActive}">
+							<Grid ColumnDefinitions="*,Auto,Auto,Auto" IsVisible="{Binding IsActive}">
 								<Entry Grid.Column="0" Text="{Binding CounterpartyName}" TextColor="White" FontSize="32" />
-								<Button Grid.Column="1" Text="Save"
+								<Button Grid.Column="1" Text="Select"
+								        Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:CounterpartiesViewModel}}, Path=SelectCounterpartyCommand}"
+								        CommandParameter="{Binding .}" TextColor="White" BackgroundColor="DodgerBlue" Margin="10, 0, 0,0" />
+								<Button Grid.Column="2" Text="Save"
 								        Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:CounterpartiesViewModel}}, Path=UpdateCounterpartyCommand}"
-								        CommandParameter="{Binding .}" TextColor="White" BackgroundColor="DodgerBlue" Margin="10,0" />
-								<Button Grid.Column="2" Text="Delete"
+								        CommandParameter="{Binding .}" TextColor="White" BackgroundColor="DodgerBlue" Margin="10, 0, 0,0" />
+								<Button Grid.Column="3" Text="Delete"
 								        Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:CounterpartiesViewModel}}, Path=DeleteCounterpartyCommand}"
-								        CommandParameter="{Binding .}" TextColor="White" BackgroundColor="Red" />
+								        CommandParameter="{Binding .}" TextColor="White" BackgroundColor="Red" Margin="10, 0, 0,0" />
 							</Grid>
 						</VerticalStackLayout>
 					</Border>
