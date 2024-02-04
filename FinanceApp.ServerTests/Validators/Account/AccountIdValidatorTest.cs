@@ -1,22 +1,22 @@
-﻿using FinanceApp.Data;
-using FinanceApp.Data.RequestPatterns;
+﻿using FinanceApp.Data.RequestPatterns;
+using FinanceApp.Data.RequestPatterns.Account;
 using FinanceApp.Server;
 using FinanceApp.Server.Utility;
-using FinanceApp.Server.Validators;
+using FinanceApp.Server.Validators.Account;
 using FinanceApp.ServerTests.Extensions;
 using FinanceApp.ServerTests.Helpers;
 using NSubstitute;
 
-namespace FinanceApp.ServerTests.Validators;
+namespace FinanceApp.ServerTests.Validators.Account;
 
 [TestFixture]
 [TestOf(typeof(AccountIdValidator))]
-public class AccountIdValidatorTests
+public class AccountIdValidatorTest
 {
 	[SetUp]
 	public void SetUp()
 	{
-		FinanceAppContext context = InMemoryDatabaseFactory.CreateNewDatabase();
+		FinanceAppContext context = new InMemoryDatabaseFactory().CreateNewDatabase();
 		context.LoadAccounts();
 
 		UnitOfWork unitOfWork = new(context);
@@ -34,6 +34,7 @@ public class AccountIdValidatorTests
 		bool result = await _accountIdValidator.ValidateAsync(request);
 
 		Assert.That(result, Is.True);
+		Assert.That(request.Id.Error, Is.Empty);
 	}
 
 	[Test]
@@ -45,5 +46,6 @@ public class AccountIdValidatorTests
 		bool result = await _accountIdValidator.ValidateAsync(request);
 
 		Assert.That(result, Is.False);
+		Assert.That(request.Id.Error, Is.Not.Empty);
 	}
 }

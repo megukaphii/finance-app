@@ -5,12 +5,14 @@ namespace FinanceApp.Data.Models;
 
 public class Counterparty : IModel
 {
+	public static Counterparty Empty => new() { Id = -1, Name = "Select Counterparty..." };
+
 	public long Id { get; init; }
 	public List<Transaction> Transactions { get; init; } = new();
 
 	[MinLength(2)]
 	[MaxLength(64)]
-	public required string Name { get; init; }
+	public required string Name { get; set; }
 
 	public override string ToString() => $"{nameof(Id)}: {Id}, {nameof(Name)}: {Name}";
 

@@ -13,7 +13,7 @@ public class Transaction : IModel
 	public required DateTime Timestamp { get; init; }
 
 	public override string ToString() =>
-		$"{nameof(Id)}: {Id}, [{nameof(Counterparty)}: {Counterparty}], {nameof(Value)}: {Value}, {nameof(Timestamp)}: {Timestamp}";
+		$"{nameof(Id)}: {Id}, [{nameof(Account)}: {Account}], [{nameof(Counterparty)}: {Counterparty}], {nameof(Value)}: {Value}, {nameof(Timestamp)}: {Timestamp}";
 
 	public override bool Equals(object? obj)
 	{

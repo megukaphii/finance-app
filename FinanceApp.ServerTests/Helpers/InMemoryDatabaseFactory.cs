@@ -1,15 +1,22 @@
-﻿using FinanceApp.Data;
-using FinanceApp.Server;
+﻿using FinanceApp.Server;
 using Microsoft.EntityFrameworkCore;
 
 namespace FinanceApp.ServerTests.Helpers;
 
-public static class InMemoryDatabaseFactory
+public class InMemoryDatabaseFactory
 {
-	public static FinanceAppContext CreateNewDatabase()
+	private string _currentGuid = string.Empty;
+
+	public FinanceAppContext CreateNewDatabase()
+	{
+		_currentGuid = Guid.NewGuid().ToString();
+		return GetExistingDatabase();
+	}
+
+	public FinanceAppContext GetExistingDatabase()
 	{
 		DbContextOptions<FinanceAppContext> options = new DbContextOptionsBuilder<FinanceAppContext>()
-			.UseInMemoryDatabase(Guid.NewGuid().ToString())
+			.UseInMemoryDatabase(_currentGuid)
 			.Options;
 		FinanceAppContext context = new(options);
 		return context;

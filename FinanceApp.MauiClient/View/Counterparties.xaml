@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodel="clr-namespace:FinanceApp.MauiClient.ViewModel"
+             xmlns:classes="clr-namespace:FinanceApp.MauiClient.Classes"
+             x:DataType="viewmodel:CounterpartiesViewModel"
+             x:Class="FinanceApp.MauiClient.View.Counterparties"
+             Title="{Binding Title}">
+
+	<Grid RowDefinitions="64,*">
+		<Grid Grid.Row="0" ColumnDefinitions="*,Auto" VerticalOptions="Center" Padding="10">
+			<Entry Grid.Column="0" TextChanged="Search_OnTextChanged" Text="{Binding Search}" Placeholder="Counterparty..." />
+			<Button Grid.Column="1" Text="Create New" TextColor="White" BackgroundColor="DodgerBlue" Margin="10,0,0,0"
+			        Command="{Binding CreateCounterpartyCommand}" />
+		</Grid>
+		<CollectionView Grid.Row="1"
+		                ItemsSource="{Binding CounterpartiesSearch}"
+		                SelectionChangedCommand="{Binding ActivateCounterpartyCommand}"
+		                SelectionChangedCommandParameter="{Binding Path=SelectedItem, Source={RelativeSource Self}}"
+		                SelectionMode="Single">
+			<CollectionView.ItemsLayout>
+				<LinearItemsLayout Orientation="Vertical" />
+			</CollectionView.ItemsLayout>
+			<CollectionView.ItemTemplate>
+				<DataTemplate x:DataType="classes:TrackedCounterparty">
+					<Border HeightRequest="80" Padding="10,0" BackgroundColor="Black">
+						<VerticalStackLayout VerticalOptions="Center">
+							<Label Text="{Binding CounterpartyName}" IsVisible="{Binding IsInactive}" TextColor="White" FontSize="24" />
+							<Grid ColumnDefinitions="*,Auto,Auto,Auto" IsVisible="{Binding IsActive}">
+								<Entry Grid.Column="0" Text="{Binding CounterpartyName}" TextColor="White" FontSize="24" />
+								<Button Grid.Column="1" Text="Select" TextColor="White" BackgroundColor="DodgerBlue" Margin="10,0,0,0"
+								        IsVisible="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:CounterpartiesViewModel}}, Path=AllowSelect}"
+								        Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:CounterpartiesViewModel}}, Path=SelectCounterpartyCommand}"
+								        CommandParameter="{Binding .}" />
+								<Button Grid.Column="2" Text="Save" TextColor="White" BackgroundColor="DodgerBlue" Margin="10,0,0,0"
+								        Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:CounterpartiesViewModel}}, Path=UpdateCounterpartyCommand}"
+								        CommandParameter="{Binding .}" />
+								<Button Grid.Column="3" Text="Delete" TextColor="White" BackgroundColor="Red" Margin="10,0,0,0"
+								        Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:CounterpartiesViewModel}}, Path=DeleteCounterpartyCommand}"
+								        CommandParameter="{Binding .}" />
+							</Grid>
+						</VerticalStackLayout>
+					</Border>
+				</DataTemplate>
+			</CollectionView.ItemTemplate>
+		</CollectionView>
+	</Grid>
+
+</ContentPage>

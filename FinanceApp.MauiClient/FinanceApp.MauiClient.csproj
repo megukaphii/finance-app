@@ -70,7 +70,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Compile Update="View\TransactionList.xaml.cs">
+		<Compile Update="View\Transactions.xaml.cs">
 			<DependentUpon>TransactionList.xaml</DependentUpon>
 		</Compile>
 	</ItemGroup>
@@ -79,7 +79,7 @@
 		<MauiXaml Update="View\Login.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
-		<MauiXaml Update="View\TransactionList.xaml">
+		<MauiXaml Update="View\Transactions.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="View\QuickAdd.xaml">

@@ -12,17 +12,6 @@ public class CreateTransactionHandler : IRequestHandler<CreateTransaction>
 	public async Task HandleAsync(CreateTransaction request, IClient client)
 	{
 		using (UnitOfWork) {
-			Data.Models.Counterparty? counterparty = request.Counterparty.Value;
-			if (request.Counterparty.Value.Id == 0) {
-				counterparty = await UnitOfWork.Repository<Data.Models.Counterparty>()
-					               .FirstOrDefaultAsync(
-						               temp => temp.Name == request.Counterparty.Value.Name);
-				if (counterparty is null) {
-					await UnitOfWork.Repository<Data.Models.Counterparty>().AddAsync(request.Counterparty.Value);
-					counterparty = request.Counterparty.Value;
-				}
-			}
-
 			if (!client.Session.IsAccountSet()) {
 				CreateTransactionResponse response = new()
 				{
@@ -35,7 +24,7 @@ public class CreateTransactionHandler : IRequestHandler<CreateTransaction>
 				Data.Models.Transaction created = new()
 				{
 					Account = client.Session.Account,
-					Counterparty = counterparty,
+					Counterparty = (await UnitOfWork.Repository<Data.Models.Counterparty>().FindAsync(request.Counterparty.Value))!,
 					Value = request.Value.Value,
 					Timestamp = request.Timestamp.Value
 				};

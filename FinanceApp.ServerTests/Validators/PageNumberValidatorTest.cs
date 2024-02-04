@@ -6,7 +6,7 @@ namespace FinanceApp.ServerTests.Validators;
 
 [TestFixture]
 [TestOf(typeof(PageNumberValidator))]
-public class PageNumberValidatorTests
+public class PageNumberValidatorTest
 {
 	[SetUp]
 	public void SetUp()
@@ -37,7 +37,7 @@ public class PageNumberValidatorTests
 		bool result = await _pageNumberValidator.ValidateAsync(request);
 
 		Assert.That(result, Is.False);
-		Assert.That(request.Page.Error, Is.Not.Null);
+		Assert.That(request.Page.Error, Is.Not.Empty);
 	}
 
 	[Test]
@@ -49,6 +49,6 @@ public class PageNumberValidatorTests
 		bool result = await _pageNumberValidator.ValidateAsync(request);
 
 		Assert.That(result, Is.False);
-		Assert.That(request.Page.Error, Is.Not.Null);
+		Assert.That(request.Page.Error, Is.Not.Empty);
 	}
 }

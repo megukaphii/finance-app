@@ -10,7 +10,7 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace FinanceApp.MauiClient.ViewModel;
 
-public partial class TransactionListViewModel(ServerConnection serverConnection, IMemoryCache cache)
+public partial class TransactionsViewModel(ServerConnection serverConnection, IMemoryCache cache)
 	: BaseViewModel(serverConnection, cache)
 {
 	[ObservableProperty]

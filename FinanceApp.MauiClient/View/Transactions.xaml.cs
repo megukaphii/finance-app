@@ -2,9 +2,9 @@ using FinanceApp.MauiClient.ViewModel;
 
 namespace FinanceApp.MauiClient.View;
 
-public partial class TransactionList : ContentPage
+public partial class Transactions : ContentPage
 {
-	public TransactionList(TransactionListViewModel viewModel)
+	public Transactions(TransactionsViewModel viewModel)
 	{
 		InitializeComponent();
 		BindingContext = viewModel;
@@ -13,6 +13,6 @@ public partial class TransactionList : ContentPage
 
 	protected override void OnAppearing()
 	{
-		((TransactionListViewModel)BindingContext).LoadTransactions();
+		((TransactionsViewModel)BindingContext).LoadTransactions();
 	}
 }

@@ -1,5 +1,4 @@
-﻿using FinanceApp.Data;
-using FinanceApp.Data.Requests.Transaction;
+﻿using FinanceApp.Data.Requests.Transaction;
 using FinanceApp.Server;
 using FinanceApp.Server.Handlers.Transaction;
 using FinanceApp.Server.Interfaces;
@@ -17,25 +16,25 @@ public class GetTransactionsHandlerTest
 	[OneTimeSetUp]
 	public void OneTimeSetUp()
 	{
-		_mockSession = Substitute.For<ISession>();
+		_session = Substitute.For<ISession>();
 	}
 
 	[SetUp]
 	public void SetUp()
 	{
-		FinanceAppContext context = InMemoryDatabaseFactory.CreateNewDatabase();
+		FinanceAppContext context = new InMemoryDatabaseFactory().CreateNewDatabase();
 		context.LoadTransactions();
 
-		_mockClient = Substitute.For<IClient>();
-		_mockClient.Session.Returns(_mockSession);
-		_mockSession.Account.Returns(context.Accounts.Find(1L)!);
+		_client = Substitute.For<IClient>();
+		_client.Session.Returns(_session);
+		_session.Account.Returns(context.Accounts.Find(1L)!);
 
 		UnitOfWork unitOfWork = new(context);
 		_handler = new(unitOfWork);
 	}
 
-	private ISession _mockSession = null!;
-	private IClient _mockClient = null!;
+	private ISession _session = null!;
+	private IClient _client = null!;
 	private GetTransactionsHandler _handler = null!;
 
 	[Test]
@@ -47,9 +46,9 @@ public class GetTransactionsHandlerTest
 			.OrderBy(transaction => transaction.Id).ToList();
 		GetTransactions request = new() { Page = new() { Value = 1 } };
 
-		await _handler.HandleAsync(request, _mockClient);
+		await _handler.HandleAsync(request, _client);
 
-		await _mockClient.Received().Send(Arg.Is<GetTransactionsResponse>(response =>
+		await _client.Received().Send(Arg.Is<GetTransactionsResponse>(response =>
 			response.Success && response.Transactions.OrderBy(transaction => transaction.Id)
 				.SequenceEqual(expectedTransactions)));
 	}
@@ -57,7 +56,7 @@ public class GetTransactionsHandlerTest
 	[Test]
 	public async Task HandleAsync_WithEmptyAccount_ShouldNotSendTransactions()
 	{
-		_mockSession.Account = new()
+		_session.Account = new()
 		{
 			Name = "Empty Account",
 			Description = "Empty Account",
@@ -65,9 +64,9 @@ public class GetTransactionsHandlerTest
 		};
 		GetTransactions request = new() { Page = new() { Value = 1 } };
 
-		await _handler.HandleAsync(request, _mockClient);
+		await _handler.HandleAsync(request, _client);
 
-		await _mockClient.Received().Send(Arg.Is<GetTransactionsResponse>(response =>
+		await _client.Received().Send(Arg.Is<GetTransactionsResponse>(response =>
 			response.Success && response.Transactions.Count == 0));
 	}
 }

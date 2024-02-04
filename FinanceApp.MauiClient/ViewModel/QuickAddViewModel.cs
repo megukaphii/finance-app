@@ -1,9 +1,7 @@
-﻿using System.Collections.ObjectModel;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FinanceApp.Data.Exceptions;
 using FinanceApp.Data.Models;
-using FinanceApp.Data.Requests.Counterparty;
 using FinanceApp.Data.Requests.Transaction;
 using FinanceApp.MauiClient.Services;
 using FinanceApp.MauiClient.View;
@@ -12,7 +10,7 @@ using Microsoft.Extensions.Caching.Memory;
 namespace FinanceApp.MauiClient.ViewModel;
 
 public partial class QuickAddViewModel(ServerConnection serverConnection, IMemoryCache cache)
-	: BaseViewModel(serverConnection, cache)
+	: BaseViewModel(serverConnection, cache), IQueryAttributable
 {
 	[ObservableProperty]
 	private string _pageError = string.Empty;
@@ -22,45 +20,44 @@ public partial class QuickAddViewModel(ServerConnection serverConnection, IMemor
 	[ObservableProperty]
 	private string _valueError = string.Empty;
 
-	[ObservableProperty]
-	private string _counterparty = string.Empty;
-	[ObservableProperty]
-	private string _counterpartyError = string.Empty;
-	[ObservableProperty]
-	private bool _counterpartyFocused = true;
-
     [ObservableProperty]
     private DateTime _timestamp = DateTime.Now.Date;
     [ObservableProperty]
     private string _timestampError = string.Empty;
 
-	private List<Counterparty> Counterparties { get; } = [];
-	public ObservableCollection<Counterparty> CounterpartiesSearch { get; set; } = [];
+    private Counterparty _counterparty = Counterparty.Empty;
+    public Counterparty Counterparty
+    {
+	    get => _counterparty;
+	    private set
+	    {
+		    _counterparty = value;
+		    OnPropertyChanged();
+	    }
+    }
+    [ObservableProperty]
+    private string _counterpartyError = string.Empty;
+
+    public void ApplyQueryAttributes(IDictionary<string, object?> query)
+    {
+	    query.TryGetValue(nameof(Data.Models.Counterparty), out object? temp);
+	    if (temp != null) Counterparty = (Counterparty)temp;
+    }
 
 	[RelayCommand]
 	private async Task SendTransaction()
 	{
+		if (Counterparty.Equals(Counterparty.Empty)) { CounterpartyError = "Please select a counterparty"; return; }
+
 		try {
 			IsBusy = true;
 			ClearErrors();
 
 			CreateTransaction request = new()
 			{
-				Value = new()
-				{
-					Value = Value
-				},
-				Counterparty = new()
-				{
-					Value = new()
-					{
-						Name = Counterparty
-					}
-				},
-				Timestamp = new()
-				{
-					Value = Timestamp
-				}
+				Value = new() { Value = Value },
+				Counterparty = new() { Value = Counterparty.Id },
+				Timestamp = new() { Value = Timestamp }
 			};
 			CreateTransactionResponse transactionResponse =
 				await ServerConnection.SendMessageAsync<CreateTransaction, CreateTransactionResponse>(request);
@@ -80,56 +77,18 @@ public partial class QuickAddViewModel(ServerConnection serverConnection, IMemor
 	}
 
 	[RelayCommand]
-	public async Task GetCounterparties()
+	private Task ViewCounterparties()
 	{
-		try {
-			IsBusy = true;
-			ClearErrors();
-
-			GetCounterparties request = new()
-			{
-				Page = new()
-				{
-					Value = 0
-				}
-			};
-			GetCounterpartiesResponse response =
-				await ServerConnection.SendMessageAsync<GetCounterparties, GetCounterpartiesResponse>(request);
-
-			Counterparties.Clear();
-			foreach (Counterparty counterparty in response.Counterparties) Counterparties.Add(counterparty);
-			SearchCounterparties();
-		} catch (ResponseException<GetCounterparties> ex) {
-			PageError = ex.Message;
-		} catch (Exception ex) {
-			await ServerConnection.DisconnectAsync();
-			await Shell.Current.GoToAsync($"//{nameof(Login)}", true);
-			await Shell.Current.DisplayAlert("Error", ex.Message + " | Inner exception: " + ex.InnerException?.Message,
-				"OK");
-		} finally {
-			IsBusy = false;
-		}
-	}
-
-	[RelayCommand]
-	private void SelectCounterparty(Counterparty? selected)
-	{
-		if (selected is not null) Counterparty = selected.Name;
-	}
-
-	public void SearchCounterparties()
-	{
-		CounterpartiesSearch.Clear();
-		IEnumerable<Counterparty> temp = Counterparties.Where(counterparty =>
-			counterparty.Name.Contains(Counterparty, StringComparison.CurrentCultureIgnoreCase)
-		);
-		foreach (Counterparty counterparty in temp) CounterpartiesSearch.Add(counterparty);
+		ClearErrors();
+		ShellNavigationQueryParameters parameters = new() { { nameof(CounterpartiesViewModel.AllowSelect), true } };
+		return Shell.Current.GoToAsync(nameof(Counterparties), true, parameters);
 	}
 
 	public override void ClearErrors()
 	{
 		PageError = string.Empty;
 		ValueError = string.Empty;
+		TimestampError = string.Empty;
 		CounterpartyError = string.Empty;
 	}
 }

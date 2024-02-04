@@ -9,7 +9,7 @@
              Title="{Binding Title}">
 
 	<VerticalStackLayout>
-		<Label>Select an Account</Label>
+		<Label Margin="10">Select an Account</Label>
 		<CollectionView ItemsSource="{Binding Accounts}"
 		                ItemsLayout="HorizontalList"
 		                SelectionMode="None">

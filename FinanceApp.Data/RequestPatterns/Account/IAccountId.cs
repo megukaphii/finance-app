@@ -1,6 +1,6 @@
 ﻿using FinanceApp.Data.Interfaces;
 
-namespace FinanceApp.Data.RequestPatterns;
+namespace FinanceApp.Data.RequestPatterns.Account;
 
 public interface IAccountId : IRequest
 {
