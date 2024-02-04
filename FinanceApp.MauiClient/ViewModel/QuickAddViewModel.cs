@@ -80,7 +80,8 @@ public partial class QuickAddViewModel(ServerConnection serverConnection, IMemor
 	private Task ViewCounterparties()
 	{
 		ClearErrors();
-		return Shell.Current.GoToAsync(nameof(Counterparties), true);
+		ShellNavigationQueryParameters parameters = new() { { nameof(CounterpartiesViewModel.AllowSelect), true } };
+		return Shell.Current.GoToAsync(nameof(Counterparties), true, parameters);
 	}
 
 	public override void ClearErrors()

@@ -16,7 +16,7 @@ public partial class Counterparties : ContentPage
 		((CounterpartiesViewModel)BindingContext).GetCounterparties();
 	}
 
-	private void CounterpartyName_OnTextChanged(object? sender, TextChangedEventArgs textChangedEventArgs)
+	private void Search_OnTextChanged(object? sender, TextChangedEventArgs textChangedEventArgs)
 	{
 		((CounterpartiesViewModel)BindingContext).SearchCounterparties();
 	}

@@ -1,8 +1,8 @@
 ﻿using FinanceApp.Data.Interfaces;
 
-namespace FinanceApp.Data.RequestPatterns;
+namespace FinanceApp.Data.RequestPatterns.Transaction;
 
-public interface ISingleTransaction : IRequest
+public interface ITransactionFields : IRequest
 {
 	public RequestField<decimal> Value { get; init; }
 	public RequestField<long> Counterparty { get; init; }

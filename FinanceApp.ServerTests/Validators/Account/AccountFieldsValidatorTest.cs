@@ -1,39 +1,39 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using FinanceApp.Data.Models;
 using FinanceApp.Data.RequestPatterns;
+using FinanceApp.Data.RequestPatterns.Account;
 using FinanceApp.Server.Utility;
-using FinanceApp.Server.Validators;
+using FinanceApp.Server.Validators.Account;
 using NSubstitute;
 
-namespace FinanceApp.ServerTests.Validators;
+namespace FinanceApp.ServerTests.Validators.Account;
 
 [TestFixture]
-[TestOf(typeof(SingleAccountValidator))]
-public class SingleAccountValidatorTests
+[TestOf(typeof(AccountFieldsValidator))]
+public class AccountFieldsValidatorTest
 {
 	[SetUp]
 	public void SetUp()
 	{
-		_singleAccountValidator = new();
+		_accountFieldsValidator = new();
 	}
 
-	private static readonly int MinNameLength = PropertyHelpers.GetMinLength((Account a) => a.Name);
-	private static readonly int MaxNameLength = PropertyHelpers.GetMaxLength((Account a) => a.Name);
+	private static readonly int MinNameLength = PropertyHelpers.GetMinLength((Data.Models.Account a) => a.Name);
+	private static readonly int MaxNameLength = PropertyHelpers.GetMaxLength((Data.Models.Account a) => a.Name);
 	private static readonly int SafeNameLength = (MinNameLength + MaxNameLength) / 2;
-	private static readonly int MinDescriptionLength = PropertyHelpers.GetMinLength((Account a) => a.Description);
-	private static readonly int MaxDescriptionLength = PropertyHelpers.GetMaxLength((Account a) => a.Description);
+	private static readonly int MinDescriptionLength = PropertyHelpers.GetMinLength((Data.Models.Account a) => a.Description);
+	private static readonly int MaxDescriptionLength = PropertyHelpers.GetMaxLength((Data.Models.Account a) => a.Description);
 	private static readonly int SafeDescriptionLength = (MinDescriptionLength + MaxDescriptionLength) / 2;
 
-	private SingleAccountValidator _singleAccountValidator = null!;
+	private AccountFieldsValidator _accountFieldsValidator = null!;
 
 	[Test]
 	public async Task ValidateAsync_ShouldReturnTrue_WhenNameAndDescriptionAreWithinValidLengths()
 	{
-		ISingleAccount request = Substitute.For<ISingleAccount>();
+		IAccountFields request = Substitute.For<IAccountFields>();
 		request.Name.Returns(new RequestField<string> { Value = new('a', SafeNameLength) });
 		request.Description.Returns(new RequestField<string> { Value = new('a', SafeDescriptionLength) });
 
-		bool result = await _singleAccountValidator.ValidateAsync(request);
+		bool result = await _accountFieldsValidator.ValidateAsync(request);
 
 		Assert.That(result, Is.True);
 		Assert.That(request.Name.Error, Is.Empty);
@@ -48,11 +48,11 @@ public class SingleAccountValidatorTests
 			Assert.Pass($"{nameof(MinNameLength)} is 0, validation cannot be failed");
 		}
 
-		ISingleAccount request = Substitute.For<ISingleAccount>();
+		IAccountFields request = Substitute.For<IAccountFields>();
 		request.Name.Returns(new RequestField<string> { Value = new('a', MinNameLength - 1) });
 		request.Description.Returns(new RequestField<string> { Value = new('a', SafeDescriptionLength) });
 
-		bool result = await _singleAccountValidator.ValidateAsync(request);
+		bool result = await _accountFieldsValidator.ValidateAsync(request);
 
 		Assert.That(result, Is.False);
 		Assert.That(request.Name.Error, Is.Not.Empty);
@@ -66,11 +66,11 @@ public class SingleAccountValidatorTests
 			Assert.Pass($"{nameof(MinDescriptionLength)} is 0, validation cannot be failed");
 		}
 
-		ISingleAccount request = Substitute.For<ISingleAccount>();
+		IAccountFields request = Substitute.For<IAccountFields>();
 		request.Name.Returns(new RequestField<string> { Value = new('a', SafeNameLength) });
 		request.Description.Returns(new RequestField<string> { Value = new('a', MinDescriptionLength - 1) });
 
-		bool result = await _singleAccountValidator.ValidateAsync(request);
+		bool result = await _accountFieldsValidator.ValidateAsync(request);
 
 		Assert.That(result, Is.False);
 		Assert.That(request.Description.Error, Is.Not.Empty);
@@ -85,12 +85,12 @@ public class SingleAccountValidatorTests
 				$"{nameof(MinNameLength)} and {nameof(MinDescriptionLength)} is 0, validation cannot be failed");
 		}
 
-		ISingleAccount request = Substitute.For<ISingleAccount>();
+		IAccountFields request = Substitute.For<IAccountFields>();
 		request.Name.Returns(new RequestField<string> { Value = new('a', int.Max(MinNameLength - 1, 0)) });
 		request.Description.Returns(new RequestField<string>
 			{ Value = new('a', int.Max(MinDescriptionLength - 1, 0)) });
 
-		bool result = await _singleAccountValidator.ValidateAsync(request);
+		bool result = await _accountFieldsValidator.ValidateAsync(request);
 
 		Assert.That(result, Is.False);
 		if (MinNameLength != 0) Assert.That(request.Name.Error, Is.Not.Empty);
@@ -100,11 +100,11 @@ public class SingleAccountValidatorTests
 	[Test]
 	public async Task ValidateAsync_ShouldReturnFalse_WhenNameIsTooLong()
 	{
-		ISingleAccount request = Substitute.For<ISingleAccount>();
+		IAccountFields request = Substitute.For<IAccountFields>();
 		request.Name.Returns(new RequestField<string> { Value = new('a', MaxNameLength + 1) });
 		request.Description.Returns(new RequestField<string> { Value = new('a', SafeDescriptionLength) });
 
-		bool result = await _singleAccountValidator.ValidateAsync(request);
+		bool result = await _accountFieldsValidator.ValidateAsync(request);
 
 		Assert.That(result, Is.False);
 		Assert.That(request.Name.Error, Is.Not.Empty);
@@ -113,11 +113,11 @@ public class SingleAccountValidatorTests
 	[Test]
 	public async Task ValidateAsync_ShouldReturnFalse_WhenDescriptionIsTooLong()
 	{
-		ISingleAccount request = Substitute.For<ISingleAccount>();
+		IAccountFields request = Substitute.For<IAccountFields>();
 		request.Name.Returns(new RequestField<string> { Value = new('a', SafeNameLength) });
 		request.Description.Returns(new RequestField<string> { Value = new('a', MaxDescriptionLength + 1) });
 
-		bool result = await _singleAccountValidator.ValidateAsync(request);
+		bool result = await _accountFieldsValidator.ValidateAsync(request);
 
 		Assert.That(result, Is.False);
 		Assert.That(request.Description.Error, Is.Not.Empty);
@@ -126,11 +126,11 @@ public class SingleAccountValidatorTests
 	[Test]
 	public async Task ValidateAsync_ShouldReturnFalse_WhenNameAndDescriptionIsTooLong()
 	{
-		ISingleAccount request = Substitute.For<ISingleAccount>();
+		IAccountFields request = Substitute.For<IAccountFields>();
 		request.Name.Returns(new RequestField<string> { Value = new('a', MaxNameLength + 1) });
 		request.Description.Returns(new RequestField<string> { Value = new('a', MaxDescriptionLength + 1) });
 
-		bool result = await _singleAccountValidator.ValidateAsync(request);
+		bool result = await _accountFieldsValidator.ValidateAsync(request);
 
 		Assert.That(result, Is.False);
 		Assert.That(request.Name.Error, Is.Not.Empty);

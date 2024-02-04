@@ -1,24 +1,24 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using FinanceApp.Data.Models;
 using FinanceApp.Data.RequestPatterns;
+using FinanceApp.Data.RequestPatterns.Counterparty;
 using FinanceApp.Server;
 using FinanceApp.Server.Utility;
-using FinanceApp.Server.Validators;
+using FinanceApp.Server.Validators.Counterparty;
 using FinanceApp.ServerTests.Extensions;
 using FinanceApp.ServerTests.Helpers;
 using NSubstitute;
 
-namespace FinanceApp.ServerTests.Validators;
+namespace FinanceApp.ServerTests.Validators.Counterparty;
 
 [TestFixture]
-[TestOf(typeof(SingleCounterpartyValidator))]
-public class SingleCounterpartyValidatorTests
+[TestOf(typeof(CounterpartyFullValidator))]
+public class CounterpartyFullValidatorTest
 {
-	private static readonly int MinNameLength = PropertyHelpers.GetMinLength((Counterparty a) => a.Name);
-	private static readonly int MaxNameLength = PropertyHelpers.GetMaxLength((Counterparty a) => a.Name);
+	private static readonly int MinNameLength = PropertyHelpers.GetMinLength((Data.Models.Counterparty a) => a.Name);
+	private static readonly int MaxNameLength = PropertyHelpers.GetMaxLength((Data.Models.Counterparty a) => a.Name);
 	private static readonly int SafeNameLength = (MinNameLength + MaxNameLength) / 2;
 
-	private SingleCounterpartyValidator _singleCounterpartyValidator = null!;
+	private CounterpartyFullValidator _counterpartyFullValidator = null!;
 
 	[SetUp]
 	public void SetUp()
@@ -27,17 +27,17 @@ public class SingleCounterpartyValidatorTests
 		context.LoadCounterparties();
 
 		UnitOfWork unitOfWork = new(context);
-		_singleCounterpartyValidator = new(unitOfWork);
+		_counterpartyFullValidator = new(unitOfWork);
 	}
 
 	[Test]
 	public async Task ValidateAsync_ShouldReturnTrue_WhenCounterpartyExists()
 	{
-		ISingleCounterparty request = Substitute.For<ISingleCounterparty>();
+		ICounterpartyFull request = Substitute.For<ICounterpartyFull>();
 		request.Id.Returns(new RequestField<long> { Value = 1 });
 		request.Name.Returns(new RequestField<string> { Value = new('a', SafeNameLength) });
 
-		bool result = await _singleCounterpartyValidator.ValidateAsync(request);
+		bool result = await _counterpartyFullValidator.ValidateAsync(request);
 
 		Assert.That(result, Is.True);
 		Assert.That(request.Id.Error, Is.Empty);
@@ -46,11 +46,11 @@ public class SingleCounterpartyValidatorTests
 	[Test]
 	public async Task ValidateAsync_ShouldReturnFalse_WhenCounterpartyDoesNotExist()
 	{
-		ISingleCounterparty request = Substitute.For<ISingleCounterparty>();
+		ICounterpartyFull request = Substitute.For<ICounterpartyFull>();
 		request.Id.Returns(new RequestField<long> { Value = 99 });
 		request.Name.Returns(new RequestField<string> { Value = new('a', SafeNameLength) });
 
-		bool result = await _singleCounterpartyValidator.ValidateAsync(request);
+		bool result = await _counterpartyFullValidator.ValidateAsync(request);
 
 		Assert.That(result, Is.False);
 		Assert.That(request.Id.Error, Is.Not.Empty);
@@ -59,11 +59,11 @@ public class SingleCounterpartyValidatorTests
 	[Test]
 	public async Task ValidateAsync_ShouldReturnTrue_WhenNameIsWithinValidLengths()
 	{
-		ISingleCounterparty request = Substitute.For<ISingleCounterparty>();
+		ICounterpartyFull request = Substitute.For<ICounterpartyFull>();
 		request.Id.Returns(new RequestField<long> { Value = 1 });
 		request.Name.Returns(new RequestField<string> { Value = new('a', SafeNameLength) });
 
-		bool result = await _singleCounterpartyValidator.ValidateAsync(request);
+		bool result = await _counterpartyFullValidator.ValidateAsync(request);
 
 		Assert.That(result, Is.True);
 		Assert.That(request.Name.Error, Is.Empty);
@@ -77,11 +77,11 @@ public class SingleCounterpartyValidatorTests
 			Assert.Pass($"{nameof(MinNameLength)} is 0, validation cannot be failed");
 		}
 
-		ISingleCounterparty request = Substitute.For<ISingleCounterparty>();
+		ICounterpartyFull request = Substitute.For<ICounterpartyFull>();
 		request.Id.Returns(new RequestField<long> { Value = 1 });
 		request.Name.Returns(new RequestField<string> { Value = new('a', MinNameLength - 1) });
 
-		bool result = await _singleCounterpartyValidator.ValidateAsync(request);
+		bool result = await _counterpartyFullValidator.ValidateAsync(request);
 
 		Assert.That(result, Is.False);
 		Assert.That(request.Name.Error, Is.Not.Empty);
@@ -90,11 +90,11 @@ public class SingleCounterpartyValidatorTests
 	[Test]
 	public async Task ValidateAsync_ShouldReturnFalse_WhenNameIsTooLong()
 	{
-		ISingleCounterparty request = Substitute.For<ISingleCounterparty>();
+		ICounterpartyFull request = Substitute.For<ICounterpartyFull>();
 		request.Id.Returns(new RequestField<long> { Value = 1 });
 		request.Name.Returns(new RequestField<string> { Value = new('a', MaxNameLength + 1) });
 
-		bool result = await _singleCounterpartyValidator.ValidateAsync(request);
+		bool result = await _counterpartyFullValidator.ValidateAsync(request);
 
 		Assert.That(result, Is.False);
 		Assert.That(request.Name.Error, Is.Not.Empty);
@@ -108,11 +108,11 @@ public class SingleCounterpartyValidatorTests
 			Assert.Pass($"{nameof(MinNameLength)} is 0, validation cannot be failed");
 		}
 
-		ISingleCounterparty request = Substitute.For<ISingleCounterparty>();
+		ICounterpartyFull request = Substitute.For<ICounterpartyFull>();
 		request.Id.Returns(new RequestField<long> { Value = 99 });
 		request.Name.Returns(new RequestField<string> { Value = new('a', MinNameLength - 1) });
 
-		bool result = await _singleCounterpartyValidator.ValidateAsync(request);
+		bool result = await _counterpartyFullValidator.ValidateAsync(request);
 
 		Assert.That(result, Is.False);
 		Assert.That(request.Id.Error, Is.Not.Empty);
@@ -122,11 +122,11 @@ public class SingleCounterpartyValidatorTests
 	[Test]
 	public async Task ValidateAsync_ShouldReturnFalse_WhenCounterpartyDoesNotExistAndNameIsTooLong()
 	{
-		ISingleCounterparty request = Substitute.For<ISingleCounterparty>();
+		ICounterpartyFull request = Substitute.For<ICounterpartyFull>();
 		request.Id.Returns(new RequestField<long> { Value = 99 });
 		request.Name.Returns(new RequestField<string> { Value = new('a', MaxNameLength + 1) });
 
-		bool result = await _singleCounterpartyValidator.ValidateAsync(request);
+		bool result = await _counterpartyFullValidator.ValidateAsync(request);
 
 		Assert.That(result, Is.False);
 		Assert.That(request.Id.Error, Is.Not.Empty);

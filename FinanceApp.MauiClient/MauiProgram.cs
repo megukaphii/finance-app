@@ -25,21 +25,21 @@ public static class MauiProgram
 		builder.Services.AddMemoryCache();
 		builder.Services.AddSingleton<ServerConnection>();
 
-		builder.Services.AddSingleton<Login>();
 		builder.Services.AddSingleton<Accounts>();
+		builder.Services.AddSingleton<Login>();
 		builder.Services.AddSingleton<Transactions>();
 
-		builder.Services.AddSingleton<LoginViewModel>();
 		builder.Services.AddSingleton<AccountsViewModel>();
+		builder.Services.AddSingleton<LoginViewModel>();
 		builder.Services.AddSingleton<TransactionsViewModel>();
 
-		builder.Services.AddTransient<QuickAdd>();
 		builder.Services.AddTransient<AccountCreate>();
 		builder.Services.AddTransient<Counterparties>();
+		builder.Services.AddTransient<QuickAdd>();
 
-		builder.Services.AddTransient<QuickAddViewModel>();
 		builder.Services.AddTransient<AccountCreateViewModel>();
 		builder.Services.AddTransient<CounterpartiesViewModel>();
+		builder.Services.AddTransient<QuickAddViewModel>();
 
 		return builder.Build();
 	}

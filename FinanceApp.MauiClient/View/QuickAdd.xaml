@@ -7,7 +7,7 @@
              x:Class="FinanceApp.MauiClient.View.QuickAdd"
              Title="{Binding Title}">
 
-	<VerticalStackLayout>
+	<VerticalStackLayout Padding="10">
 		<Entry Text="{Binding Value}" Placeholder="Value..." Keyboard="Numeric" />
 		<Label Text="{Binding ValueError}" TextColor="{StaticResource Error}" />
 		<Button Text="{Binding Counterparty.Name}" Command="{Binding ViewCounterpartiesCommand}"/>

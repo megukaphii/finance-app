@@ -1,5 +1,6 @@
 ﻿using FinanceApp.Data.Interfaces;
 using FinanceApp.Data.RequestPatterns;
+using FinanceApp.Data.RequestPatterns.Account;
 
 namespace FinanceApp.Data.Requests.Account;
 

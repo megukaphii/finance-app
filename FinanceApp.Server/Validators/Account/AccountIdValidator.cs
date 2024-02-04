@@ -1,8 +1,7 @@
-﻿using FinanceApp.Data.Models;
-using FinanceApp.Data.RequestPatterns;
+﻿using FinanceApp.Data.RequestPatterns.Account;
 using FinanceApp.Server.Interfaces;
 
-namespace FinanceApp.Server.Validators;
+namespace FinanceApp.Server.Validators.Account;
 
 public class AccountIdValidator : IValidator<IAccountId>
 {
@@ -16,7 +15,7 @@ public class AccountIdValidator : IValidator<IAccountId>
 	public async Task<bool> ValidateAsync(IAccountId request)
 	{
 		bool failure = false;
-		if (!await UnitOfWork.Repository<Account>().AnyAsync(account => account.Id == request.Id.Value)) {
+		if (!await UnitOfWork.Repository<Data.Models.Account>().AnyAsync(account => account.Id == request.Id.Value)) {
 			request.Id.Error = $"Account with {nameof(request.Id)} of {request.Id} does not exist";
 			failure = true;
 		}

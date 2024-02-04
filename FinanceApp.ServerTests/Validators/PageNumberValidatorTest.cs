@@ -6,7 +6,7 @@ namespace FinanceApp.ServerTests.Validators;
 
 [TestFixture]
 [TestOf(typeof(PageNumberValidator))]
-public class PageNumberValidatorTests
+public class PageNumberValidatorTest
 {
 	[SetUp]
 	public void SetUp()

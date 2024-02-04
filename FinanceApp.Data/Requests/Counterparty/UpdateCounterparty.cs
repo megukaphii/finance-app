@@ -1,9 +1,10 @@
 ﻿using FinanceApp.Data.Interfaces;
 using FinanceApp.Data.RequestPatterns;
+using FinanceApp.Data.RequestPatterns.Counterparty;
 
 namespace FinanceApp.Data.Requests.Counterparty;
 
-public class UpdateCounterparty : ISingleCounterparty
+public class UpdateCounterparty : ICounterpartyFull
 {
 	public static string Flag => "<UpdateCounterparty>";
 

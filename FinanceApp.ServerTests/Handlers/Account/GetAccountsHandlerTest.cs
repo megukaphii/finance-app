@@ -20,13 +20,13 @@ public class GetAccountsHandlerTest
 		FinanceAppContext context = new InMemoryDatabaseFactory().CreateNewDatabase();
 		context.LoadAccounts();
 
-		_mockClient = Substitute.For<IClient>();
+		_client = Substitute.For<IClient>();
 
 		UnitOfWork unitOfWork = new(context);
 		_handler = new(unitOfWork);
 	}
 
-	private IClient _mockClient = null!;
+	private IClient _client = null!;
 	private GetAccountsHandler _handler = null!;
 
 	[TestCase(1)]
@@ -40,10 +40,10 @@ public class GetAccountsHandlerTest
 			Page = new() { Value = page }
 		};
 
-		await _handler.HandleAsync(request, _mockClient);
+		await _handler.HandleAsync(request, _client);
 
 		// TODO - Update when we add actual pagination
-		await _mockClient.Received().Send(Arg.Is<GetAccountsResponse>(r =>
+		await _client.Received().Send(Arg.Is<GetAccountsResponse>(r =>
 			r.Success && r.Accounts.OrderBy(account => account.Id).SequenceEqual(expectedAccounts)));
 	}
 }

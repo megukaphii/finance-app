@@ -12,7 +12,7 @@ using Microsoft.Extensions.Caching.Memory;
 namespace FinanceApp.MauiClient.ViewModel;
 
 public partial class CounterpartiesViewModel(ServerConnection serverConnection, IMemoryCache cache)
-	: BaseViewModel(serverConnection, cache)
+	: BaseViewModel(serverConnection, cache), IQueryAttributable
 {
 	[ObservableProperty]
 	private string _pageError = string.Empty;
@@ -21,6 +21,9 @@ public partial class CounterpartiesViewModel(ServerConnection serverConnection, 
 	private string _search = string.Empty;
 	[ObservableProperty]
 	private string _searchError = string.Empty;
+
+	[ObservableProperty]
+	private bool _allowSelect;
 
 	private TrackedCounterparty? _activeCounterparty;
 	private TrackedCounterparty? ActiveCounterparty
@@ -35,6 +38,12 @@ public partial class CounterpartiesViewModel(ServerConnection serverConnection, 
 	private List<Counterparty> Counterparties { get; } = [];
 	public ObservableCollection<TrackedCounterparty> CounterpartiesSearch { get; set; } = [];
 
+	public void ApplyQueryAttributes(IDictionary<string, object> query)
+	{
+		query.TryGetValue(nameof(AllowSelect), out object? temp);
+		if (temp != null) AllowSelect = (bool)temp;
+	}
+
 	[RelayCommand]
 	private async Task SelectCounterparty(TrackedCounterparty selected)
 	{
@@ -43,11 +52,11 @@ public partial class CounterpartiesViewModel(ServerConnection serverConnection, 
 	}
 
 	[RelayCommand]
-	private void ActivateCounterparty(TrackedCounterparty selected)
+	private void ActivateCounterparty(TrackedCounterparty? selected)
 	{
 		ActiveCounterparty?.UndoChanges();
 		ActiveCounterparty = selected;
-		selected.IsActive = true;
+		if (selected != null) selected.IsActive = true;
 	}
 
 	[RelayCommand]
@@ -71,6 +80,37 @@ public partial class CounterpartiesViewModel(ServerConnection serverConnection, 
 			foreach (Counterparty counterparty in response.Counterparties) Counterparties.Add(counterparty);
 			SearchCounterparties();
 		} catch (ResponseException<GetCounterparties> ex) {
+			PageError = ex.Message;
+		} catch (Exception ex) {
+			await ServerConnection.DisconnectAsync();
+			await Shell.Current.GoToAsync($"//{nameof(Login)}", true);
+			await Shell.Current.DisplayAlert("Error", ex.Message + " | Inner exception: " + ex.InnerException?.Message,
+				"OK");
+		} finally {
+			IsBusy = false;
+		}
+	}
+
+	[RelayCommand]
+	private async Task CreateCounterparty()
+	{
+		try {
+			IsBusy = true;
+			ClearErrors();
+
+			CreateCounterparty request = new()
+			{
+				Name = new() { Value = Search }
+			};
+			CreateCounterpartyResponse response =
+				await ServerConnection.SendMessageAsync<CreateCounterparty, CreateCounterpartyResponse>(request);
+
+			if (response.Success) {
+				Counterparties.Add(new() { Id = response.Id, Name = Search });
+				Search = string.Empty;
+				SearchCounterparties();
+			}
+		} catch (ResponseException<CreateCounterparty> ex) {
 			PageError = ex.Message;
 		} catch (Exception ex) {
 			await ServerConnection.DisconnectAsync();
@@ -122,8 +162,8 @@ public partial class CounterpartiesViewModel(ServerConnection serverConnection, 
 
 	public void SearchCounterparties()
 	{
-		CounterpartiesSearch.Clear();
 		ActiveCounterparty = null;
+		CounterpartiesSearch.Clear();
 		IEnumerable<Counterparty> temp = Counterparties.Where(counterparty =>
 			counterparty.Name.Contains(Search, StringComparison.CurrentCultureIgnoreCase)
 		);

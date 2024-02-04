@@ -1,23 +1,22 @@
-﻿using FinanceApp.Data.Models;
-using FinanceApp.Data.RequestPatterns;
+﻿using FinanceApp.Data.RequestPatterns.Counterparty;
 using FinanceApp.Server.Interfaces;
 using FinanceApp.Server.Utility;
 
-namespace FinanceApp.Server.Validators;
+namespace FinanceApp.Server.Validators.Counterparty;
 
-public class SingleCounterpartyValidator : IValidator<ISingleCounterparty>
+public class CounterpartyFullValidator : IValidator<ICounterpartyFull>
 {
-	public SingleCounterpartyValidator(IUnitOfWork unitOfWork)
+	public CounterpartyFullValidator(IUnitOfWork unitOfWork)
 	{
 		UnitOfWork = unitOfWork;
 	}
 
-	private static readonly int MinNameLength = PropertyHelpers.GetMinLength((Counterparty a) => a.Name);
-	private static readonly int MaxNameLength = PropertyHelpers.GetMaxLength((Counterparty a) => a.Name);
+	private static readonly int MinNameLength = PropertyHelpers.GetMinLength((Data.Models.Counterparty a) => a.Name);
+	private static readonly int MaxNameLength = PropertyHelpers.GetMaxLength((Data.Models.Counterparty a) => a.Name);
 
 	private IUnitOfWork UnitOfWork { get; }
 
-	public async Task<bool> ValidateAsync(ISingleCounterparty request)
+	public async Task<bool> ValidateAsync(ICounterpartyFull request)
 	{
 		bool failure = false;
 		if (request.Name.Value.Length < MinNameLength) {
@@ -28,7 +27,7 @@ public class SingleCounterpartyValidator : IValidator<ISingleCounterparty>
 			failure = true;
 		}
 
-		if (!await UnitOfWork.Repository<Counterparty>().AnyAsync(counterparty => counterparty.Id == request.Id.Value)) {
+		if (!await UnitOfWork.Repository<Data.Models.Counterparty>().AnyAsync(counterparty => counterparty.Id == request.Id.Value)) {
 			request.Id.Error = $"Counterparty with {nameof(request.Id)} of {request.Id} does not exist";
 			failure = true;
 		}

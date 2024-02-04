@@ -1,16 +1,17 @@
 ﻿using FinanceApp.Data.RequestPatterns;
+using FinanceApp.Data.RequestPatterns.Account;
 using FinanceApp.Server;
 using FinanceApp.Server.Utility;
-using FinanceApp.Server.Validators;
+using FinanceApp.Server.Validators.Account;
 using FinanceApp.ServerTests.Extensions;
 using FinanceApp.ServerTests.Helpers;
 using NSubstitute;
 
-namespace FinanceApp.ServerTests.Validators;
+namespace FinanceApp.ServerTests.Validators.Account;
 
 [TestFixture]
 [TestOf(typeof(AccountIdValidator))]
-public class AccountIdValidatorTests
+public class AccountIdValidatorTest
 {
 	[SetUp]
 	public void SetUp()

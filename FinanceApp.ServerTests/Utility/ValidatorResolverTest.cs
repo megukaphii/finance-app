@@ -1,6 +1,10 @@
 ﻿using System.Reflection;
 using FinanceApp.Data.RequestPatterns;
+using FinanceApp.Data.RequestPatterns.Account;
+using FinanceApp.Data.RequestPatterns.Counterparty;
+using FinanceApp.Data.RequestPatterns.Transaction;
 using FinanceApp.Data.Requests.Account;
+using FinanceApp.Data.Requests.Counterparty;
 using FinanceApp.Data.Requests.Transaction;
 using FinanceApp.Server.Interfaces;
 using FinanceApp.Server.Utility;
@@ -27,10 +31,12 @@ public class ValidatorResolverTests
 	{
 		get
 		{
+			yield return [typeof(IAccountFields), typeof(CreateAccount)];
 			yield return [typeof(IAccountId), typeof(SelectAccount)];
+			yield return [typeof(ICounterpartyFields), typeof(CreateCounterparty)];
+			yield return [typeof(ICounterpartyFull), typeof(UpdateCounterparty)];
+			yield return [typeof(ITransactionFields), typeof(CreateTransaction)];
 			yield return [typeof(IPageNumber), typeof(GetAccounts)];
-			yield return [typeof(ISingleAccount), typeof(CreateAccount)];
-			yield return [typeof(ISingleTransaction), typeof(CreateTransaction)];
 		}
 	}
 

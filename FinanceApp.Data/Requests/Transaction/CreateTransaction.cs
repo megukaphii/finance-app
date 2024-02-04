@@ -1,9 +1,10 @@
 ﻿using FinanceApp.Data.Interfaces;
 using FinanceApp.Data.RequestPatterns;
+using FinanceApp.Data.RequestPatterns.Transaction;
 
 namespace FinanceApp.Data.Requests.Transaction;
 
-public class CreateTransaction : ISingleTransaction
+public class CreateTransaction : ITransactionFields
 {
 	public static string Flag => "<CreateTransaction>";
 

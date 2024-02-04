@@ -12,12 +12,12 @@ namespace FinanceApp.ServerTests.Handlers.Counterparty;
 [TestOf(typeof(UpdateCounterpartyHandler))]
 public class UpdateCounterpartyHandlerTest
 {
-	private IClient _mockClient = null!;
+	private IClient _client = null!;
 
 	[SetUp]
 	public void SetUp()
 	{
-		_mockClient = Substitute.For<IClient>();
+		_client = Substitute.For<IClient>();
 	}
 
 	[Test]
@@ -36,13 +36,13 @@ public class UpdateCounterpartyHandlerTest
 			Name = new() { Value = "NewName" }
 		};
 
-		await handler.HandleAsync(request, _mockClient);
+		await handler.HandleAsync(request, _client);
 		context = databaseFactory.GetExistingDatabase();
 		unitOfWork = new(context);
 		Data.Models.Counterparty? updatedCounterparty =
 			await unitOfWork.Repository<Data.Models.Counterparty>().FindAsync(mockCounterparty.Id);
 
 		Assert.That(request.Name.Value, Is.EqualTo(updatedCounterparty?.Name));
-		await _mockClient.Received().Send(Arg.Is<UpdateCounterpartyResponse>(response => response.Success));
+		await _client.Received().Send(Arg.Is<UpdateCounterpartyResponse>(response => response.Success));
 	}
 }

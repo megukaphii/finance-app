@@ -1,17 +1,18 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using FinanceApp.Data.RequestPatterns;
+using FinanceApp.Data.RequestPatterns.Transaction;
 using FinanceApp.Server;
 using FinanceApp.Server.Utility;
-using FinanceApp.Server.Validators;
+using FinanceApp.Server.Validators.Transaction;
 using FinanceApp.ServerTests.Extensions;
 using FinanceApp.ServerTests.Helpers;
 using NSubstitute;
 
-namespace FinanceApp.ServerTests.Validators;
+namespace FinanceApp.ServerTests.Validators.Transaction;
 
 [TestFixture]
-[TestOf(typeof(SingleTransactionValidator))]
-public class SingleTransactionValidatorTests
+[TestOf(typeof(TransactionFieldsValidator))]
+public class TransactionFieldsValidatorTest
 {
 	[SetUp]
 	public void SetUp()
@@ -20,19 +21,19 @@ public class SingleTransactionValidatorTests
 		context.LoadCounterparties();
 
 		UnitOfWork unitOfWork = new(context);
-		_singleTransactionValidator = new(unitOfWork);
+		_transactionFieldsValidator = new(unitOfWork);
 	}
 
-	private SingleTransactionValidator _singleTransactionValidator = null!;
+	private TransactionFieldsValidator _transactionFieldsValidator = null!;
 
 	[Test]
 	public async Task ValidateAsync_ShouldReturnTrue_WhenValueAndCounterpartyAreValid()
 	{
-		ISingleTransaction request = Substitute.For<ISingleTransaction>();
+		ITransactionFields request = Substitute.For<ITransactionFields>();
 		request.Value.Returns(new RequestField<decimal> { Value = 10M });
 		request.Counterparty.Returns(new RequestField<long>{ Value = 1L });
 
-		bool result = await _singleTransactionValidator.ValidateAsync(request);
+		bool result = await _transactionFieldsValidator.ValidateAsync(request);
 
 		Assert.That(result, Is.True);
 		Assert.That(request.Value.Error, Is.Empty);
@@ -42,11 +43,11 @@ public class SingleTransactionValidatorTests
 	[Test]
 	public async Task ValidateAsync_ShouldReturnFalse_WhenValueIsTooLow()
 	{
-		ISingleTransaction request = Substitute.For<ISingleTransaction>();
+		ITransactionFields request = Substitute.For<ITransactionFields>();
 		request.Value.Returns(new RequestField<decimal> { Value = decimal.MinValue });
 		request.Counterparty.Returns(new RequestField<long>{ Value = 1L });
 
-		bool result = await _singleTransactionValidator.ValidateAsync(request);
+		bool result = await _transactionFieldsValidator.ValidateAsync(request);
 
 		Assert.That(result, Is.False);
 		Assert.That(request.Value.Error, Is.Not.Empty);
@@ -55,11 +56,11 @@ public class SingleTransactionValidatorTests
 	[Test]
 	public async Task ValidateAsync_ShouldReturnFalse_WhenValueIsTooHigh()
 	{
-		ISingleTransaction request = Substitute.For<ISingleTransaction>();
+		ITransactionFields request = Substitute.For<ITransactionFields>();
 		request.Value.Returns(new RequestField<decimal> { Value = decimal.MaxValue });
 		request.Counterparty.Returns(new RequestField<long>{ Value = 1L });
 
-		bool result = await _singleTransactionValidator.ValidateAsync(request);
+		bool result = await _transactionFieldsValidator.ValidateAsync(request);
 
 		Assert.That(result, Is.False);
 		Assert.That(request.Value.Error, Is.Not.Empty);
@@ -69,11 +70,11 @@ public class SingleTransactionValidatorTests
 	[ExcludeFromCodeCoverage]
 	public async Task ValidateAsync_ShouldReturnFalse_WhenCounterpartyDoesntExist()
 	{
-		ISingleTransaction request = Substitute.For<ISingleTransaction>();
+		ITransactionFields request = Substitute.For<ITransactionFields>();
 		request.Value.Returns(new RequestField<decimal> { Value = 10M });
 		request.Counterparty.Returns(new RequestField<long>{ Value = -1L });
 
-		bool result = await _singleTransactionValidator.ValidateAsync(request);
+		bool result = await _transactionFieldsValidator.ValidateAsync(request);
 
 		Assert.That(result, Is.False);
 		Assert.That(request.Counterparty.Error, Is.Not.Empty);

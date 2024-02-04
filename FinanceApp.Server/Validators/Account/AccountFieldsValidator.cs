@@ -1,19 +1,18 @@
-﻿using FinanceApp.Data.Models;
-using FinanceApp.Data.RequestPatterns;
+﻿using FinanceApp.Data.RequestPatterns.Account;
 using FinanceApp.Server.Interfaces;
 using FinanceApp.Server.Utility;
 
-namespace FinanceApp.Server.Validators;
+namespace FinanceApp.Server.Validators.Account;
 
-public class SingleAccountValidator : IValidator<ISingleAccount>
+public class AccountFieldsValidator : IValidator<IAccountFields>
 {
 	// TODO - Are these cached (I don't think so)? Should they be cached (wouldn't hurt)?
-	private static readonly int MinNameLength = PropertyHelpers.GetMinLength((Account a) => a.Name);
-	private static readonly int MaxNameLength = PropertyHelpers.GetMaxLength((Account a) => a.Name);
-	private static readonly int MinDescriptionLength = PropertyHelpers.GetMinLength((Account a) => a.Description);
-	private static readonly int MaxDescriptionLength = PropertyHelpers.GetMaxLength((Account a) => a.Description);
+	private static readonly int MinNameLength = PropertyHelpers.GetMinLength((Data.Models.Account a) => a.Name);
+	private static readonly int MaxNameLength = PropertyHelpers.GetMaxLength((Data.Models.Account a) => a.Name);
+	private static readonly int MinDescriptionLength = PropertyHelpers.GetMinLength((Data.Models.Account a) => a.Description);
+	private static readonly int MaxDescriptionLength = PropertyHelpers.GetMaxLength((Data.Models.Account a) => a.Description);
 
-	public Task<bool> ValidateAsync(ISingleAccount request)
+	public Task<bool> ValidateAsync(IAccountFields request)
 	{
 		bool failure = false;
 		if (request.Name.Value.Length < MinNameLength) {
