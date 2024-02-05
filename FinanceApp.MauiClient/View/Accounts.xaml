@@ -27,6 +27,7 @@
 								<Label Text="{Binding Name}" TextColor="White" FontSize="32" FontAttributes="Bold"
 								       HorizontalTextAlignment="Center" />
 								<Label Text="{Binding Description}" TextColor="White" HorizontalTextAlignment="Center" />
+								<Label Text="{Binding Value}" TextColor="White" HorizontalTextAlignment="Center" />
 							</VerticalStackLayout>
 						</Frame>
 					</Grid>

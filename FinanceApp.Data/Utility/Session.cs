@@ -1,7 +1,7 @@
-﻿using FinanceApp.Data.Models;
-using FinanceApp.Server.Interfaces;
+﻿using FinanceApp.Data.Interfaces;
+using FinanceApp.Data.Models;
 
-namespace FinanceApp.Server.Utility;
+namespace FinanceApp.Data.Utility;
 
 public class Session : ISession
 {

@@ -22,7 +22,8 @@ public class GetTransactionsHandler : IRequestHandler<GetTransactions>
 			GetTransactionsResponse response = new()
 			{
 				Success = true,
-				Transactions = transactions
+				Transactions = transactions,
+				Value = client.Session.Account.Value
 			};
 
 			await client.Send(response);

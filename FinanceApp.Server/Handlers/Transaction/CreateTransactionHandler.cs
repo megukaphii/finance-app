@@ -21,6 +21,7 @@ public class CreateTransactionHandler : IRequestHandler<CreateTransaction>
 
 				await client.Send(response);
 			} else {
+				UnitOfWork.AttachAccount(client.Session.Account);
 				Data.Models.Transaction created = new()
 				{
 					Account = client.Session.Account,
@@ -28,8 +29,8 @@ public class CreateTransactionHandler : IRequestHandler<CreateTransaction>
 					Value = request.Value.Value,
 					Timestamp = request.Timestamp.Value
 				};
-				UnitOfWork.AttachAccount(created.Account);
 				await UnitOfWork.Repository<Data.Models.Transaction>().AddAsync(created);
+				client.Session.Account.Value += created.Value;
 				UnitOfWork.SaveChanges();
 
 				CreateTransactionResponse response = new()

@@ -16,7 +16,10 @@ public partial class TransactionsViewModel(ServerConnection serverConnection, IM
 	[ObservableProperty]
 	private string _pageError = string.Empty;
 
-	public ObservableCollection<Transaction> Transactions { get; } = new();
+	[ObservableProperty]
+	private string _value = string.Empty;
+
+	public ObservableCollection<Transaction> Transactions { get; } = [];
 
 	[RelayCommand]
 	public async Task LoadTransactions()
@@ -35,6 +38,7 @@ public partial class TransactionsViewModel(ServerConnection serverConnection, IM
 			GetTransactionsResponse response =
 				await ServerConnection.SendMessageAsync<GetTransactions, GetTransactionsResponse>(request);
 
+			Value = response.Value.ToString("C");
 			Transactions.Clear();
 			foreach (Transaction transaction in response.Transactions)
 				// TODO - This fires off an event with each add, figure out how to add range instead (refer to MonkeyFinder James Montemagno tutorial)
