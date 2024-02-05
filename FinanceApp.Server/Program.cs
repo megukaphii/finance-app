@@ -41,12 +41,12 @@ public static class Program
 				services.AddTransient<DbContext, FinanceAppContext>();
 				services.AddTransient<IUnitOfWork, UnitOfWork>();
 
-				services.AddTransient<IValidator<IAccountId>, AccountIdValidator>();
-				services.AddTransient<IValidator<IPageNumber>, PageNumberValidator>();
 				services.AddTransient<IValidator<IAccountFields>, AccountFieldsValidator>();
+				services.AddTransient<IValidator<IAccountId>, AccountIdValidator>();
 				services.AddTransient<IValidator<ICounterpartyFields>, CounterpartyFieldsValidator>();
 				services.AddTransient<IValidator<ICounterpartyFull>, CounterpartyFullValidator>();
 				services.AddTransient<IValidator<ITransactionFields>, TransactionFieldsValidator>();
+				services.AddTransient<IValidator<IPageNumber>, PageNumberValidator>();
 
 				services.AddTransient<IRequestHandler<CreateAccount>, CreateAccountHandler>();
 				services.AddTransient<IRequestHandler<GetAccounts>, GetAccountsHandler>();

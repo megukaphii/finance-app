@@ -39,18 +39,20 @@ public static class RequestResolver
 	private static void CacheRequestTypes()
 	{
 		if (RequestTypes.Count == 0)
-			RequestTypes.AddRange(AppDomain.CurrentDomain.GetAssemblies()
+			RequestTypes.AddRange(AppDomain.CurrentDomain.GetAssemblies().Where(assembly =>
+					assembly.GetName().FullName.StartsWith(GetBaseNamespace(typeof(IRequest).Namespace!)))
 				.SelectMany(assembly => assembly.GetTypes())
-				.Where(t =>
-				{
-					IEnumerable<Type> allInterfaces = t.GetInterfaces();
-					IEnumerable<Type> immediateInterfaces =
-						allInterfaces.Except(allInterfaces.SelectMany(immediateInterface =>
-							immediateInterface.GetInterfaces()));
+				.Where(t => typeof(IRequest).IsAssignableFrom(t) && t != typeof(IRequest) && !t.IsInterface));
+	}
 
-					return typeof(IRequest).IsAssignableFrom(t) &&
-					       t != typeof(IRequest) &&
-					       !immediateInterfaces.Contains(typeof(IRequest));
-				}));
+	private static string GetBaseNamespace(string fullNamespace)
+	{
+		string[] namespaceParts = fullNamespace.Split('.');
+		if (namespaceParts.Length >= 2) {
+			return namespaceParts[0] + "." + namespaceParts[1];
+		} else {
+			// Return the full Namespace if it doesn't have atleast 2 parts
+			return fullNamespace;
+		}
 	}
 }

@@ -11,15 +11,16 @@ public class CounterpartyFieldsValidator : IValidator<ICounterpartyFields>
 
 	public Task<bool> ValidateAsync(ICounterpartyFields request)
 	{
-		bool failure = false;
+		bool success = true;
+
 		if (request.Name.Value.Length < MinNameLength) {
 			request.Name.Error = $"{nameof(request.Name)} should be more than {MinNameLength} characters";
-			failure = true;
+			success = false;
 		} else if (request.Name.Value.Length > MaxNameLength) {
 			request.Name.Error = $"{nameof(request.Name)} should be less than {MaxNameLength} characters";
-			failure = true;
+			success = false;
 		}
 
-		return Task.FromResult(!failure);
+		return Task.FromResult(success);
 	}
 }
