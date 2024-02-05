@@ -51,7 +51,6 @@ public static class RequestResolver
 		if (namespaceParts.Length >= 2) {
 			return namespaceParts[0] + "." + namespaceParts[1];
 		} else {
-			// Return the full Namespace if it doesn't have atleast 2 parts
 			return fullNamespace;
 		}
 	}
