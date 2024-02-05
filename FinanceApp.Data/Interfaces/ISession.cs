@@ -1,6 +1,6 @@
 ﻿using FinanceApp.Data.Models;
 
-namespace FinanceApp.Server.Interfaces;
+namespace FinanceApp.Data.Interfaces;
 
 public interface ISession
 {

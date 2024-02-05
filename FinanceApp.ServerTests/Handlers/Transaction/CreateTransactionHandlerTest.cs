@@ -1,4 +1,5 @@
-﻿using FinanceApp.Data.Requests.Transaction;
+﻿using FinanceApp.Data.Interfaces;
+using FinanceApp.Data.Requests.Transaction;
 using FinanceApp.Server;
 using FinanceApp.Server.Handlers.Transaction;
 using FinanceApp.Server.Interfaces;
@@ -67,8 +68,7 @@ public class CreateTransactionHandlerTest
 	[Test]
 	public async Task CreateTransactionHandler_HandleAsync_MultipleTransactionsDoNotThrowException()
 	{
-		InMemoryDatabaseFactory databaseFactory = new();
-		FinanceAppContext context = databaseFactory.CreateNewDatabase();
+		FinanceAppContext context = _databaseFactory.GetExistingDatabase();
 		UnitOfWork unitOfWork = new(context);
 		_handler = new(unitOfWork);
 		CreateTransaction request1 = new()
@@ -88,11 +88,46 @@ public class CreateTransactionHandlerTest
 
 		Assert.DoesNotThrowAsync(async () =>
 		{
-			context = databaseFactory.GetExistingDatabase();
+			context = _databaseFactory.GetExistingDatabase();
 			unitOfWork = new(context);
 			_handler = new(unitOfWork);
 			await _handler.HandleAsync(request2, _client);
 		});
+	}
+
+	[Test]
+	public async Task CreateTransactionHandler_HandleAsync_TracksAccountValueCorrectly()
+	{
+		CreateTransaction request1 = new()
+		{
+			Counterparty = new() { Value = 1L },
+			Value = new() { Value = 123.45m },
+			Timestamp = new() { Value = default }
+		};
+		CreateTransaction request2 = new()
+		{
+			Counterparty = new() { Value = 1L },
+			Value = new() { Value = 543.21m },
+			Timestamp = new() { Value = default }
+		};
+		CreateTransaction request3 = new()
+		{
+			Counterparty = new() { Value = 1L },
+			Value = new() { Value = -321.45m },
+			Timestamp = new() { Value = default }
+		};
+
+		await _handler.HandleAsync(request1, _client);
+		FinanceAppContext context = _databaseFactory.GetExistingDatabase();
+		UnitOfWork unitOfWork = new(context);
+		_handler = new(unitOfWork);
+		await _handler.HandleAsync(request2, _client);
+		context = _databaseFactory.GetExistingDatabase();
+		unitOfWork = new(context);
+		_handler = new(unitOfWork);
+		await _handler.HandleAsync(request3, _client);
+
+		Assert.That(_client.Session.Account.Value, Is.EqualTo(request1.Value.Value + request2.Value.Value + request3.Value.Value));
 	}
 
 	[Test]

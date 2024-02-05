@@ -1,7 +1,7 @@
 ﻿using FinanceApp.Data.Requests.Account;
+using FinanceApp.Data.Utility;
 using FinanceApp.Server.Handlers.Account;
 using FinanceApp.Server.Interfaces;
-using FinanceApp.Server.Utility;
 using NSubstitute;
 
 namespace FinanceApp.ServerTests.Handlers.Account;

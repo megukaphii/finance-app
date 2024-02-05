@@ -16,6 +16,7 @@ public class GetTransactionsResponse : IResponse
 {
 	public required List<Models.Transaction> Transactions { get; init; }
 	public required bool Success { get; init; }
+	public required decimal Value { get; init; }
 
 	public override string ToString() =>
 		$"{nameof(Success)}: {Success}, Count: {Transactions.Count}, [{nameof(Transactions)}: {string.Join(", ", Transactions)}]";
