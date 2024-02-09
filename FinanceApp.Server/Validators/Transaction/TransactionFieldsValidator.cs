@@ -17,15 +17,16 @@ public class TransactionFieldsValidator : IValidator<ITransactionFields>
 
 	public async Task<bool> ValidateAsync(ITransactionFields request)
 	{
-		bool failure = false;
+		bool success = true;
+
 		switch (request.Value.Value) {
 			case < MinValue:
 				request.Value.Error = $"{nameof(request.Value)} should be greater than {MinValue}";
-				failure = true;
+				success = false;
 				break;
 			case > MaxValue:
 				request.Value.Error = $"{nameof(request.Value)} should be less than {MaxValue}";
-				failure = true;
+				success = false;
 				break;
 		}
 
@@ -33,9 +34,9 @@ public class TransactionFieldsValidator : IValidator<ITransactionFields>
 			     .AnyAsync(counterparty => counterparty.Id == request.Counterparty.Value)) {
 			request.Counterparty.Error =
 				$"Counterparty with {nameof(request.Counterparty.Value)} of {request.Counterparty.Value} does not exist";
-			failure = true;
+			success = false;
 		}
 
-		return !failure;
+		return success;
 	}
 }

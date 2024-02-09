@@ -14,27 +14,28 @@ public class AccountFieldsValidator : IValidator<IAccountFields>
 
 	public Task<bool> ValidateAsync(IAccountFields request)
 	{
-		bool failure = false;
+		bool success = true;
+
 		if (request.Name.Value.Length < MinNameLength) {
 			request.Name.Error =
 				$"{nameof(request.Name)} should be more than {MinNameLength} characters";
-			failure = true;
+			success = false;
 		} else if (request.Name.Value.Length > MaxNameLength) {
 			request.Name.Error =
 				$"{nameof(request.Name)} should be less than {MaxNameLength} characters";
-			failure = true;
+			success = false;
 		}
 
 		if (request.Description.Value.Length < MinDescriptionLength) {
 			request.Description.Error =
 				$"{nameof(request.Description)} should be more than {MinDescriptionLength} characters";
-			failure = true;
+			success = false;
 		} else if (request.Description.Value.Length > MaxDescriptionLength) {
 			request.Description.Error =
 				$"{nameof(request.Description)} should be less than {MaxDescriptionLength} characters";
-			failure = true;
+			success = false;
 		}
 
-		return Task.FromResult(!failure);
+		return Task.FromResult(success);
 	}
 }

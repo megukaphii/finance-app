@@ -1,9 +1,6 @@
-﻿using FinanceApp.Data.Interfaces;
+﻿namespace FinanceApp.Data.RequestPatterns.Counterparty;
 
-namespace FinanceApp.Data.RequestPatterns.Counterparty;
-
-public interface ICounterpartyFull : IRequest
+public interface ICounterpartyFull : ICounterpartyFields
 {
 	public RequestField<long> Id { get; init; }
-	public RequestField<string> Name { get; init; }
 }

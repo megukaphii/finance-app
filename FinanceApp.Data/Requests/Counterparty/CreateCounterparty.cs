@@ -8,7 +8,7 @@ public class CreateCounterparty : ICounterpartyFields
 {
 	public static string Flag => "<CreateCounterparty>";
 
-	public required RequestField<string> Name { get; set; }
+	public required RequestField<string> Name { get; init; }
 
 	public override string ToString() => $"{Flag}[{nameof(Name)}: {Name}]";
 }

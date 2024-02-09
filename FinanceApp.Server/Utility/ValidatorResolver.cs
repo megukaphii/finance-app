@@ -14,7 +14,11 @@ public class ValidatorResolver : IValidatorResolver
 
 	public IValidator<T> GetValidator<T>() where T : IRequest
 	{
-		Type type = typeof(IValidator<>).MakeGenericType(typeof(T).GetInterfaces().Single(parent => parent != typeof(IRequest)));
+		// TODO - Cache validator type for T?
+		IEnumerable<Type> allInterfaces = typeof(T).GetInterfaces();
+		Type immediateInterface = allInterfaces
+			.Except(allInterfaces.SelectMany(immediateInterface => immediateInterface.GetInterfaces())).Single();
+		Type type = typeof(IValidator<>).MakeGenericType(immediateInterface);
 		IValidator<T> validator = (IValidator<T>?)_serviceProvider.GetService(type) ??
 		                          throw new InvalidOperationException(
 			                          $"Could not find appropriate validator for {typeof(T).Name}");
