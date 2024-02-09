@@ -9,6 +9,7 @@ public class Counterparty : IModel
 
 	public long Id { get; init; }
 	public List<Transaction> Transactions { get; init; } = new();
+	public List<Subscription> Subscriptions { get; init; } = new();
 
 	[MinLength(2)]
 	[MaxLength(64)]
@@ -25,5 +26,5 @@ public class Counterparty : IModel
 
 	private bool Equals(Counterparty other) => (Id == other.Id || Id == 0 || other.Id == 0) && Name == other.Name;
 
-	public override int GetHashCode() => HashCode.Combine(Id, Transactions, Name);
+	public override int GetHashCode() => HashCode.Combine(Id, Transactions);
 }
