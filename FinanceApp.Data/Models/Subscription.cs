@@ -11,10 +11,11 @@ public class Subscription
 	[MinLength(2)]
 	[MaxLength(64)]
 	public required string Name { get; set; } = string.Empty;
-	public int FrequencyCounter { get; init; }
-	public Frequency FrequencyMeasure { get; init; }
-	public DateTime StartDate { get; init; }
-	public DateTime EndDate { get; init; }
+	[Range(1,365)]
+	public required int FrequencyCounter { get; init; }
+	public required Frequency FrequencyMeasure { get; init; }
+	public required DateTime StartDate { get; init; }
+	public required DateTime EndDate { get; init; }
 	public required Account Account { get; init; }
 	public required Counterparty Counterparty { get; init; }
 	[DataType(DataType.Currency)]
