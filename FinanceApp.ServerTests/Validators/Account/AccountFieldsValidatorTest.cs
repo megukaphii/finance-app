@@ -20,14 +20,16 @@ public class AccountFieldsValidatorTest
 	private static readonly int MinNameLength = PropertyHelpers.GetMinLength((Data.Models.Account a) => a.Name);
 	private static readonly int MaxNameLength = PropertyHelpers.GetMaxLength((Data.Models.Account a) => a.Name);
 	private static readonly int SafeNameLength = (MinNameLength + MaxNameLength) / 2;
-	private static readonly int MinDescriptionLength = PropertyHelpers.GetMinLength((Data.Models.Account a) => a.Description);
-	private static readonly int MaxDescriptionLength = PropertyHelpers.GetMaxLength((Data.Models.Account a) => a.Description);
+	private static readonly int MinDescriptionLength =
+		PropertyHelpers.GetMinLength((Data.Models.Account a) => a.Description);
+	private static readonly int MaxDescriptionLength =
+		PropertyHelpers.GetMaxLength((Data.Models.Account a) => a.Description);
 	private static readonly int SafeDescriptionLength = (MinDescriptionLength + MaxDescriptionLength) / 2;
 
 	private AccountFieldsValidator _accountFieldsValidator = null!;
 
 	[Test]
-	public async Task ValidateAsync_ShouldReturnTrue_WhenNameAndDescriptionAreWithinValidLengths()
+	public async Task ValidateAsync_ShouldReturnTrue_WhenNameAndDescriptionAreOfValidLength()
 	{
 		IAccountFields request = Substitute.For<IAccountFields>();
 		request.Name.Returns(new RequestField<string> { Value = new('a', SafeNameLength) });
@@ -78,7 +80,7 @@ public class AccountFieldsValidatorTest
 
 	[Test]
 	[ExcludeFromCodeCoverage]
-	public async Task ValidateAsync_ShouldReturnFalse_WhenNameAndDescriptionIsTooShort()
+	public async Task ValidateAsync_ShouldReturnFalse_WhenNameAndDescriptionAreTooShort()
 	{
 		if (MinNameLength == 0 && MinDescriptionLength == 0) {
 			Assert.Pass(
@@ -124,7 +126,7 @@ public class AccountFieldsValidatorTest
 	}
 
 	[Test]
-	public async Task ValidateAsync_ShouldReturnFalse_WhenNameAndDescriptionIsTooLong()
+	public async Task ValidateAsync_ShouldReturnFalse_WhenNameAndDescriptionAreTooLong()
 	{
 		IAccountFields request = Substitute.For<IAccountFields>();
 		request.Name.Returns(new RequestField<string> { Value = new('a', MaxNameLength + 1) });

@@ -12,8 +12,11 @@ public class SubscriptionFieldsValidator : IValidator<ISubscriptionFields>
 		PropertyHelpers.GetMinValue((Data.Models.Subscription a) => a.FrequencyCounter);
 	private static readonly int MaxFrequencyCounterValue =
 		PropertyHelpers.GetMaxValue((Data.Models.Subscription a) => a.FrequencyCounter);
+	public SubscriptionFieldsValidator(IUnitOfWork unitOfWork) => UnitOfWork = unitOfWork;
 
-	public Task<bool> ValidateAsync(ISubscriptionFields request)
+	private IUnitOfWork UnitOfWork { get; }
+
+	public async Task<bool> ValidateAsync(ISubscriptionFields request)
 	{
 		bool success = true;
 
@@ -28,13 +31,20 @@ public class SubscriptionFieldsValidator : IValidator<ISubscriptionFields>
 		if (request.FrequencyCounter.Value < MinFrequencyCounterValue) {
 			request.FrequencyCounter.Error =
 				$"{nameof(request.FrequencyCounter)} should be greater than {MinFrequencyCounterValue}";
-		} else if (request.FrequencyCounter.Value < MaxFrequencyCounterValue) {
+			success = false;
+		} else if (request.FrequencyCounter.Value > MaxFrequencyCounterValue) {
 			request.FrequencyCounter.Error =
 				$"{nameof(request.FrequencyCounter)} should be less than {MaxFrequencyCounterValue}";
+			success = false;
 		}
 
-		
+		if (!await UnitOfWork.Repository<Data.Models.Counterparty>()
+			     .AnyAsync(counterparty => counterparty.Id == request.Counterparty.Value)) {
+			request.Counterparty.Error =
+				$"Counterparty with {nameof(Data.Models.Counterparty.Id)} of {request.Counterparty.Value} does not exist";
+			success = false;
+		}
 
-		return Task.FromResult(success);
+		return success;
 	}
 }

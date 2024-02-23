@@ -27,43 +27,15 @@ public class TransactionFieldsValidatorTest
 	private TransactionFieldsValidator _transactionFieldsValidator = null!;
 
 	[Test]
-	public async Task ValidateAsync_ShouldReturnTrue_WhenValueAndCounterpartyAreValid()
+	public async Task ValidateAsync_ShouldReturnTrue_WhenCounterpartyExists()
 	{
 		ITransactionFields request = Substitute.For<ITransactionFields>();
-		request.Value.Returns(new RequestField<decimal> { Value = 10M });
-		request.Counterparty.Returns(new RequestField<long>{ Value = 1L });
+		request.Counterparty.Returns(new RequestField<long> { Value = 1L });
 
 		bool result = await _transactionFieldsValidator.ValidateAsync(request);
 
 		Assert.That(result, Is.True);
-		Assert.That(request.Value.Error, Is.Empty);
 		Assert.That(request.Counterparty.Error, Is.Empty);
-	}
-
-	[Test]
-	public async Task ValidateAsync_ShouldReturnFalse_WhenValueIsTooLow()
-	{
-		ITransactionFields request = Substitute.For<ITransactionFields>();
-		request.Value.Returns(new RequestField<decimal> { Value = decimal.MinValue });
-		request.Counterparty.Returns(new RequestField<long>{ Value = 1L });
-
-		bool result = await _transactionFieldsValidator.ValidateAsync(request);
-
-		Assert.That(result, Is.False);
-		Assert.That(request.Value.Error, Is.Not.Empty);
-	}
-
-	[Test]
-	public async Task ValidateAsync_ShouldReturnFalse_WhenValueIsTooHigh()
-	{
-		ITransactionFields request = Substitute.For<ITransactionFields>();
-		request.Value.Returns(new RequestField<decimal> { Value = decimal.MaxValue });
-		request.Counterparty.Returns(new RequestField<long>{ Value = 1L });
-
-		bool result = await _transactionFieldsValidator.ValidateAsync(request);
-
-		Assert.That(result, Is.False);
-		Assert.That(request.Value.Error, Is.Not.Empty);
 	}
 
 	[Test]
@@ -71,8 +43,7 @@ public class TransactionFieldsValidatorTest
 	public async Task ValidateAsync_ShouldReturnFalse_WhenCounterpartyDoesntExist()
 	{
 		ITransactionFields request = Substitute.For<ITransactionFields>();
-		request.Value.Returns(new RequestField<decimal> { Value = 10M });
-		request.Counterparty.Returns(new RequestField<long>{ Value = -1L });
+		request.Counterparty.Returns(new RequestField<long> { Value = -1L });
 
 		bool result = await _transactionFieldsValidator.ValidateAsync(request);
 

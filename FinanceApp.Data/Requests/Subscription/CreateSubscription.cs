@@ -14,7 +14,7 @@ public class CreateSubscription : ISubscriptionFields
 	public required RequestField<Frequency> FrequencyMeasure { get; init; }
 	public required RequestField<DateTime> StartDate { get; init; }
 	public required RequestField<DateTime> EndDate { get; init; }
-	public required RequestField<Models.Counterparty> Counterparty { get; init; }
+	public required RequestField<long> Counterparty { get; init; }
 	public required RequestField<decimal> Value { get; init; }
 
 	public override string ToString() =>

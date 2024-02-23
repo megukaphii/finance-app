@@ -10,6 +10,6 @@ public interface ISubscriptionFields : IRequest
 	public RequestField<Frequency> FrequencyMeasure { get; init; }
 	public RequestField<DateTime> StartDate { get; init; }
 	public RequestField<DateTime> EndDate { get; init; }
-	public RequestField<Models.Counterparty> Counterparty { get; init; }
+	public RequestField<long> Counterparty { get; init; }
 	public RequestField<decimal> Value { get; init; }
 }
