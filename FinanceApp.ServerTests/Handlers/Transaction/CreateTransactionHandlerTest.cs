@@ -56,10 +56,10 @@ public class CreateTransactionHandlerTest
 		await _handler.HandleAsync(request, _client);
 		FinanceAppContext context = _databaseFactory.GetExistingDatabase();
 		UnitOfWork unitOfWork = new(context);
-		Data.Models.Transaction? actual = await unitOfWork.Repository<Data.Models.Transaction>()
-			                                  .IncludeAll(transaction => transaction.Account,
-				                                  transaction => transaction.Counterparty)
-			                                  .FirstAsync(transaction => transaction.Id == 1L);
+		Data.Models.Transaction actual = await unitOfWork.Repository<Data.Models.Transaction>()
+			                                 .IncludeAll(transaction => transaction.Account,
+				                                 transaction => transaction.Counterparty)
+			                                 .FirstAsync(transaction => transaction.Id == 1L);
 
 		Assert.That(actual, Is.EqualTo(expected));
 		await _client.Received().Send(Arg.Is<CreateTransactionResponse>(r => r.Success && r.Id > 0));
@@ -127,7 +127,8 @@ public class CreateTransactionHandlerTest
 		_handler = new(unitOfWork);
 		await _handler.HandleAsync(request3, _client);
 
-		Assert.That(_client.Session.Account.Value, Is.EqualTo(request1.Value.Value + request2.Value.Value + request3.Value.Value));
+		Assert.That(_client.Session.Account.Value,
+			Is.EqualTo(request1.Value.Value + request2.Value.Value + request3.Value.Value));
 	}
 
 	[Test]

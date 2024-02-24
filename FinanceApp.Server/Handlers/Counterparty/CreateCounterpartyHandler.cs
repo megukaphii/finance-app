@@ -1,5 +1,4 @@
-﻿using FinanceApp.Data.Requests.Account;
-using FinanceApp.Data.Requests.Counterparty;
+﻿using FinanceApp.Data.Requests.Counterparty;
 using FinanceApp.Server.Interfaces;
 
 namespace FinanceApp.Server.Handlers.Counterparty;
@@ -22,8 +21,8 @@ public class CreateCounterpartyHandler : IRequestHandler<CreateCounterparty>
 
 			CreateCounterpartyResponse response = new()
 			{
-				Id = created.Id,
-				Success = true
+				Success = true,
+				Id = created.Id
 			};
 
 			await client.Send(response);

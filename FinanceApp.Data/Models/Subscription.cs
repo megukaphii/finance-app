@@ -1,28 +1,29 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using FinanceApp.Data.Enums;
+using FinanceApp.Data.Interfaces;
 
 namespace FinanceApp.Data.Models;
 
-public class Subscription
+public class Subscription : IModel
 {
 	public long Id { get; init; }
 	public List<Transaction> Transactions { get; init; } = new();
 
+	public required Account Account { get; init; }
+	public required Counterparty Counterparty { get; init; }
 	[MinLength(2)]
 	[MaxLength(64)]
 	public required string Name { get; set; } = string.Empty;
-	[Range(1,365)]
+	public required decimal Value { get; init; }
+	[Range(1, 365)]
 	public required int FrequencyCounter { get; init; }
 	public required Frequency FrequencyMeasure { get; init; }
 	public required DateTime StartDate { get; init; }
 	public required DateTime EndDate { get; init; }
-	public required Account Account { get; init; }
-	public required Counterparty Counterparty { get; init; }
-	[DataType(DataType.Currency)]
-	public required decimal Value { get; init; }
 
+	[DataType(DataType.Currency)]
 	public override string ToString() =>
-		$"{nameof(Id)}: {Id}, {nameof(Name)}: {Name}, {nameof(FrequencyCounter)}: {FrequencyCounter}, {nameof(FrequencyMeasure)}: {FrequencyMeasure}, {nameof(StartDate)}: {StartDate}, {nameof(EndDate)}: {EndDate}, [{nameof(Account)}: {Account}], [{nameof(Counterparty)}: {Counterparty}], {nameof(Value)}: {Value}";
+		$"{nameof(Id)}: {Id}, [{nameof(Account)}: {Account}], [{nameof(Counterparty)}: {Counterparty}], {nameof(Name)}: {Name}, {nameof(Value)}: {Value}, {nameof(FrequencyCounter)}: {FrequencyCounter}, {nameof(FrequencyMeasure)}: {FrequencyMeasure}, {nameof(StartDate)}: {StartDate}, {nameof(EndDate)}: {EndDate}";
 
 	public override bool Equals(object? obj)
 	{

@@ -20,34 +20,37 @@ public partial class QuickAddViewModel(ServerConnection serverConnection, IMemor
 	[ObservableProperty]
 	private string _valueError = string.Empty;
 
-    [ObservableProperty]
-    private DateTime _timestamp = DateTime.Now.Date;
-    [ObservableProperty]
-    private string _timestampError = string.Empty;
+	[ObservableProperty]
+	private DateTime _timestamp = DateTime.Today.Date;
+	[ObservableProperty]
+	private string _timestampError = string.Empty;
 
-    private Counterparty _counterparty = Counterparty.Empty;
-    public Counterparty Counterparty
-    {
-	    get => _counterparty;
-	    private set
-	    {
-		    _counterparty = value;
-		    OnPropertyChanged();
-	    }
-    }
-    [ObservableProperty]
-    private string _counterpartyError = string.Empty;
+	private Counterparty _counterparty = Counterparty.Empty;
+	[ObservableProperty]
+	private string _counterpartyError = string.Empty;
+	public Counterparty Counterparty
+	{
+		get => _counterparty;
+		private set
+		{
+			_counterparty = value;
+			OnPropertyChanged();
+		}
+	}
 
-    public void ApplyQueryAttributes(IDictionary<string, object?> query)
-    {
-	    query.TryGetValue(nameof(Data.Models.Counterparty), out object? temp);
-	    if (temp != null) Counterparty = (Counterparty)temp;
-    }
+	public void ApplyQueryAttributes(IDictionary<string, object?> query)
+	{
+		query.TryGetValue(nameof(Data.Models.Counterparty), out object? temp);
+		if (temp != null) Counterparty = (Counterparty)temp;
+	}
 
 	[RelayCommand]
 	private async Task SendTransaction()
 	{
-		if (Counterparty.Equals(Counterparty.Empty)) { CounterpartyError = "Please select a counterparty"; return; }
+		if (Counterparty.Equals(Counterparty.Empty)) {
+			CounterpartyError = "Please select a counterparty";
+			return;
+		}
 
 		try {
 			IsBusy = true;

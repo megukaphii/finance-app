@@ -1,18 +1,22 @@
 ﻿using FinanceApp.Data.RequestPatterns;
 using FinanceApp.Data.RequestPatterns.Account;
 using FinanceApp.Data.RequestPatterns.Counterparty;
+using FinanceApp.Data.RequestPatterns.Subscription;
 using FinanceApp.Data.RequestPatterns.Transaction;
 using FinanceApp.Data.Requests.Account;
 using FinanceApp.Data.Requests.Counterparty;
+using FinanceApp.Data.Requests.Subscription;
 using FinanceApp.Data.Requests.Transaction;
 using FinanceApp.Server.Handlers.Account;
 using FinanceApp.Server.Handlers.Counterparty;
+using FinanceApp.Server.Handlers.Subscription;
 using FinanceApp.Server.Handlers.Transaction;
 using FinanceApp.Server.Interfaces;
 using FinanceApp.Server.Utility;
 using FinanceApp.Server.Validators;
 using FinanceApp.Server.Validators.Account;
 using FinanceApp.Server.Validators.Counterparty;
+using FinanceApp.Server.Validators.Subscription;
 using FinanceApp.Server.Validators.Transaction;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -45,6 +49,7 @@ public static class Program
 				services.AddTransient<IValidator<IAccountId>, AccountIdValidator>();
 				services.AddTransient<IValidator<ICounterpartyFields>, CounterpartyFieldsValidator>();
 				services.AddTransient<IValidator<ICounterpartyFull>, CounterpartyFullValidator>();
+				services.AddTransient<IValidator<ISubscriptionFields>, SubscriptionFieldsValidator>();
 				services.AddTransient<IValidator<ITransactionFields>, TransactionFieldsValidator>();
 				services.AddTransient<IValidator<IPageNumber>, PageNumberValidator>();
 
@@ -54,6 +59,7 @@ public static class Program
 				services.AddTransient<IRequestHandler<CreateCounterparty>, CreateCounterpartyHandler>();
 				services.AddTransient<IRequestHandler<GetCounterparties>, GetCounterpartiesHandler>();
 				services.AddTransient<IRequestHandler<UpdateCounterparty>, UpdateCounterpartyHandler>();
+				services.AddTransient<IRequestHandler<CreateSubscription>, CreateSubscriptionHandler>();
 				services.AddTransient<IRequestHandler<CreateTransaction>, CreateTransactionHandler>();
 				services.AddTransient<IRequestHandler<GetTransactions>, GetTransactionsHandler>();
 			})

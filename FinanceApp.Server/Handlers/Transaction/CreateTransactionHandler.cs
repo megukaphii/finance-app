@@ -15,8 +15,8 @@ public class CreateTransactionHandler : IRequestHandler<CreateTransaction>
 			if (!client.Session.IsAccountSet()) {
 				CreateTransactionResponse response = new()
 				{
-					Id = 0,
-					Success = false
+					Success = false,
+					Id = 0
 				};
 
 				await client.Send(response);
@@ -25,7 +25,8 @@ public class CreateTransactionHandler : IRequestHandler<CreateTransaction>
 				Data.Models.Transaction created = new()
 				{
 					Account = client.Session.Account,
-					Counterparty = (await UnitOfWork.Repository<Data.Models.Counterparty>().FindAsync(request.Counterparty.Value))!,
+					Counterparty = (await UnitOfWork.Repository<Data.Models.Counterparty>()
+						                .FindAsync(request.Counterparty.Value))!,
 					Value = request.Value.Value,
 					Timestamp = request.Timestamp.Value
 				};
@@ -35,8 +36,8 @@ public class CreateTransactionHandler : IRequestHandler<CreateTransaction>
 
 				CreateTransactionResponse response = new()
 				{
-					Id = created.Id,
-					Success = true
+					Success = true,
+					Id = created.Id
 				};
 
 				await client.Send(response);

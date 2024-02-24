@@ -9,16 +9,16 @@ public class CreateSubscription : ISubscriptionFields
 {
 	public static string Flag => "<CreateSubscription>";
 
+	public required RequestField<long> Counterparty { get; init; }
 	public required RequestField<string> Name { get; init; }
+	public required RequestField<decimal> Value { get; init; }
 	public required RequestField<int> FrequencyCounter { get; init; }
 	public required RequestField<Frequency> FrequencyMeasure { get; init; }
 	public required RequestField<DateTime> StartDate { get; init; }
 	public required RequestField<DateTime> EndDate { get; init; }
-	public required RequestField<long> Counterparty { get; init; }
-	public required RequestField<decimal> Value { get; init; }
 
 	public override string ToString() =>
-		$"{Flag}[{nameof(Name)}: {Name}, {nameof(FrequencyCounter)}: {FrequencyCounter}, {nameof(FrequencyMeasure)}: {FrequencyMeasure}, {nameof(StartDate)}: {StartDate}, {nameof(EndDate)}: {EndDate}, [{nameof(Counterparty)}: {Counterparty}], {nameof(Value)}: {Value}]";
+		$"{Flag}[[{nameof(Counterparty)}: {Counterparty}], {nameof(Name)}: {Name}, {nameof(Value)}: {Value}, {nameof(FrequencyCounter)}: {FrequencyCounter}, {nameof(FrequencyMeasure)}: {FrequencyMeasure}, {nameof(StartDate)}: {StartDate}, {nameof(EndDate)}: {EndDate}]";
 }
 
 public class CreateSubscriptionResponse : IResponse
