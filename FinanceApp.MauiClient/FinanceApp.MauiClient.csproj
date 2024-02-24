@@ -26,7 +26,7 @@
 		<ApplicationId>com.corymacdonald.financeapp</ApplicationId>
 
 		<!-- Versions -->
-		<ApplicationDisplayVersion>0.5.0</ApplicationDisplayVersion>
+		<ApplicationDisplayVersion>0.5.1</ApplicationDisplayVersion>
 		<ApplicationVersion>1</ApplicationVersion>
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">11.0</SupportedOSPlatformVersion>
@@ -67,24 +67,6 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\FinanceApp.Data\FinanceApp.Data.csproj"/>
-	</ItemGroup>
-
-	<ItemGroup>
-		<Compile Update="View\Transactions.xaml.cs">
-			<DependentUpon>TransactionList.xaml</DependentUpon>
-		</Compile>
-	</ItemGroup>
-
-	<ItemGroup>
-		<MauiXaml Update="View\Login.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</MauiXaml>
-		<MauiXaml Update="View\Transactions.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</MauiXaml>
-		<MauiXaml Update="View\QuickAdd.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</MauiXaml>
 	</ItemGroup>
 
 	<!-- Build Properties must be defined within these property groups to ensure successful publishing

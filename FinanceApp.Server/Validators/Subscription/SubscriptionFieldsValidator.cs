@@ -20,6 +20,13 @@ public class SubscriptionFieldsValidator : IValidator<ISubscriptionFields>
 	{
 		bool success = true;
 
+		if (!await UnitOfWork.Repository<Data.Models.Counterparty>()
+			     .AnyAsync(counterparty => counterparty.Id == request.Counterparty.Value)) {
+			request.Counterparty.Error =
+				$"Counterparty with {nameof(Data.Models.Counterparty.Id)} of {request.Counterparty.Value} does not exist";
+			success = false;
+		}
+
 		if (request.Name.Value.Length < MinNameLength) {
 			request.Name.Error = $"{nameof(request.Name)} should be more than {MinNameLength} characters";
 			success = false;
@@ -38,10 +45,8 @@ public class SubscriptionFieldsValidator : IValidator<ISubscriptionFields>
 			success = false;
 		}
 
-		if (!await UnitOfWork.Repository<Data.Models.Counterparty>()
-			     .AnyAsync(counterparty => counterparty.Id == request.Counterparty.Value)) {
-			request.Counterparty.Error =
-				$"Counterparty with {nameof(Data.Models.Counterparty.Id)} of {request.Counterparty.Value} does not exist";
+		if (request.StartDate.Value >= request.EndDate.Value && request.EndDate.Value != DateTime.UnixEpoch) {
+			request.StartDate.Error = $"{nameof(request.StartDate)} should be before {nameof(request.EndDate)}";
 			success = false;
 		}
 

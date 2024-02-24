@@ -43,6 +43,8 @@ public class SubscriptionFieldsValidatorTest
 		request.Counterparty.Returns(new RequestField<long> { Value = 1L });
 		request.Name.Returns(new RequestField<string> { Value = new('a', SafeNameLength) });
 		request.FrequencyCounter.Returns(new RequestField<int> { Value = SafeFrequencyCounterValue });
+		request.StartDate.Returns(new RequestField<DateTime> { Value = DateTime.Today });
+		request.EndDate.Returns(new RequestField<DateTime> { Value = DateTime.Today + TimeSpan.FromDays(1) });
 
 		bool result = await _subscriptionFieldsValidator.ValidateAsync(request);
 
@@ -50,9 +52,27 @@ public class SubscriptionFieldsValidatorTest
 		Assert.That(request.Counterparty.Error, Is.Empty);
 		Assert.That(request.Name.Error, Is.Empty);
 		Assert.That(request.FrequencyCounter.Error, Is.Empty);
+		Assert.That(request.StartDate.Error, Is.Empty);
 	}
 
 	// TODO - Turn into single test with array of requests passed in and asserted against
+	[Test]
+	[ExcludeFromCodeCoverage]
+	public async Task ValidateAsync_ShouldReturnFalse_WhenCounterpartyDoesntExist()
+	{
+		ISubscriptionFields request = Substitute.For<ISubscriptionFields>();
+		request.Counterparty.Returns(new RequestField<long> { Value = -1L });
+		request.Name.Returns(new RequestField<string> { Value = new('a', SafeNameLength) });
+		request.FrequencyCounter.Returns(new RequestField<int> { Value = SafeFrequencyCounterValue });
+		request.StartDate.Returns(new RequestField<DateTime> { Value = DateTime.Today });
+		request.EndDate.Returns(new RequestField<DateTime> { Value = DateTime.Today + TimeSpan.FromDays(1) });
+
+		bool result = await _subscriptionFieldsValidator.ValidateAsync(request);
+
+		Assert.That(result, Is.False);
+		Assert.That(request.Counterparty.Error, Is.Not.Empty);
+	}
+
 	[Test]
 	[ExcludeFromCodeCoverage]
 	public async Task ValidateAsync_ShouldReturnFalse_WhenNameIsTooShort()
@@ -63,6 +83,8 @@ public class SubscriptionFieldsValidatorTest
 		request.Counterparty.Returns(new RequestField<long> { Value = 1L });
 		request.Name.Returns(new RequestField<string> { Value = new('a', MinNameLength - 1) });
 		request.FrequencyCounter.Returns(new RequestField<int> { Value = SafeFrequencyCounterValue });
+		request.StartDate.Returns(new RequestField<DateTime> { Value = DateTime.Today });
+		request.EndDate.Returns(new RequestField<DateTime> { Value = DateTime.Today + TimeSpan.FromDays(1) });
 
 		bool result = await _subscriptionFieldsValidator.ValidateAsync(request);
 
@@ -77,6 +99,8 @@ public class SubscriptionFieldsValidatorTest
 		request.Counterparty.Returns(new RequestField<long> { Value = 1L });
 		request.Name.Returns(new RequestField<string> { Value = new('a', MaxNameLength + 1) });
 		request.FrequencyCounter.Returns(new RequestField<int> { Value = SafeFrequencyCounterValue });
+		request.StartDate.Returns(new RequestField<DateTime> { Value = DateTime.Today });
+		request.EndDate.Returns(new RequestField<DateTime> { Value = DateTime.Today + TimeSpan.FromDays(1) });
 
 		bool result = await _subscriptionFieldsValidator.ValidateAsync(request);
 
@@ -91,6 +115,8 @@ public class SubscriptionFieldsValidatorTest
 		request.Counterparty.Returns(new RequestField<long> { Value = 1L });
 		request.Name.Returns(new RequestField<string> { Value = new('a', SafeNameLength) });
 		request.FrequencyCounter.Returns(new RequestField<int> { Value = MinFrequencyCounterValue - 1 });
+		request.StartDate.Returns(new RequestField<DateTime> { Value = DateTime.Today });
+		request.EndDate.Returns(new RequestField<DateTime> { Value = DateTime.Today + TimeSpan.FromDays(1) });
 
 		bool result = await _subscriptionFieldsValidator.ValidateAsync(request);
 
@@ -105,6 +131,8 @@ public class SubscriptionFieldsValidatorTest
 		request.Counterparty.Returns(new RequestField<long> { Value = 1L });
 		request.Name.Returns(new RequestField<string> { Value = new('a', SafeNameLength) });
 		request.FrequencyCounter.Returns(new RequestField<int> { Value = MaxFrequencyCounterValue + 1 });
+		request.StartDate.Returns(new RequestField<DateTime> { Value = DateTime.Today });
+		request.EndDate.Returns(new RequestField<DateTime> { Value = DateTime.Today + TimeSpan.FromDays(1) });
 
 		bool result = await _subscriptionFieldsValidator.ValidateAsync(request);
 
@@ -113,17 +141,34 @@ public class SubscriptionFieldsValidatorTest
 	}
 
 	[Test]
-	[ExcludeFromCodeCoverage]
-	public async Task ValidateAsync_ShouldReturnFalse_WhenCounterpartyDoesntExist()
+	public async Task ValidateAsync_ShouldReturnTrue_WhenEndDateIsUnixEpoch()
 	{
 		ISubscriptionFields request = Substitute.For<ISubscriptionFields>();
-		request.Counterparty.Returns(new RequestField<long> { Value = -1L });
+		request.Counterparty.Returns(new RequestField<long> { Value = 1L });
 		request.Name.Returns(new RequestField<string> { Value = new('a', SafeNameLength) });
 		request.FrequencyCounter.Returns(new RequestField<int> { Value = SafeFrequencyCounterValue });
+		request.StartDate.Returns(new RequestField<DateTime> { Value = DateTime.Today });
+		request.EndDate.Returns(new RequestField<DateTime> { Value = DateTime.UnixEpoch });
+
+		bool result = await _subscriptionFieldsValidator.ValidateAsync(request);
+
+		Assert.That(result, Is.True);
+		Assert.That(request.StartDate.Error, Is.Empty);
+	}
+
+	[Test]
+	public async Task ValidateAsync_ShouldReturnFalse_WhenStartDateIsAfterEndDate()
+	{
+		ISubscriptionFields request = Substitute.For<ISubscriptionFields>();
+		request.Counterparty.Returns(new RequestField<long> { Value = 1L });
+		request.Name.Returns(new RequestField<string> { Value = new('a', SafeNameLength) });
+		request.FrequencyCounter.Returns(new RequestField<int> { Value = SafeFrequencyCounterValue });
+		request.StartDate.Returns(new RequestField<DateTime> { Value = DateTime.Today + TimeSpan.FromDays(1) });
+		request.EndDate.Returns(new RequestField<DateTime> { Value = DateTime.Today });
 
 		bool result = await _subscriptionFieldsValidator.ValidateAsync(request);
 
 		Assert.That(result, Is.False);
-		Assert.That(request.Counterparty.Error, Is.Not.Empty);
+		Assert.That(request.StartDate.Error, Is.Not.Empty);
 	}
 }

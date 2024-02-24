@@ -36,10 +36,14 @@ public static class MauiProgram
 		builder.Services.AddTransient<AccountCreate>();
 		builder.Services.AddTransient<Counterparties>();
 		builder.Services.AddTransient<QuickAdd>();
+		builder.Services.AddTransient<SubscriptionCreate>();
+		builder.Services.AddTransient<Subscriptions>();
 
 		builder.Services.AddTransient<AccountCreateViewModel>();
 		builder.Services.AddTransient<CounterpartiesViewModel>();
 		builder.Services.AddTransient<QuickAddViewModel>();
+		builder.Services.AddTransient<SubscriptionCreateViewModel>();
+		builder.Services.AddTransient<SubscriptionsViewModel>();
 
 		return builder.Build();
 	}
