@@ -15,8 +15,9 @@
 			<CollectionView.ItemTemplate>
 				<DataTemplate x:DataType="models:Subscription">
 					<Grid Padding="10">
-						<Frame HeightRequest="125" Padding="0" BackgroundColor="#222222">
-							<VerticalStackLayout Padding="10">
+						<Frame HeightRequest="150" Padding="10" BackgroundColor="#222222">
+							<VerticalStackLayout VerticalOptions="Center">
+								<Label Text="{Binding Name}" FontSize="24" TextColor="White" />
 								<HorizontalStackLayout>
 									<Label Text="{Binding StartDate}" TextColor="White" />
 									<Label Text="-" TextColor="White" />
@@ -24,7 +25,7 @@
 								</HorizontalStackLayout>
 								<Label Text="{Binding Counterparty.Name}" TextColor="White" />
 								<Label Text="{Binding Value}" TextColor="White" />
-								<HorizontalStackLayout Spacing="10">
+								<HorizontalStackLayout Spacing="5">
 									<Label Text="{Binding FrequencyCounter}" TextColor="White" />
 									<Label Text="{Binding FrequencyMeasure}" TextColor="White" />
 								</HorizontalStackLayout>

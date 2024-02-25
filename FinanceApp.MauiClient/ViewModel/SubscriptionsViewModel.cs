@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FinanceApp.Data.Exceptions;
 using FinanceApp.Data.Models;
+using FinanceApp.Data.Requests.Subscription;
 using FinanceApp.Data.Requests.Transaction;
 using FinanceApp.MauiClient.Services;
 using FinanceApp.MauiClient.View;
@@ -27,19 +28,18 @@ public partial class SubscriptionsViewModel(ServerConnection serverConnection, I
 			IsBusy = true;
 			ClearErrors();
 
-			/*GetTransactions request = new()
+			GetSubscriptions request = new()
 			{
 				Page = new() { Value = 0 }
 			};
 
-			GetTransactionsResponse response =
-				await ServerConnection.SendMessageAsync<GetTransactions, GetTransactionsResponse>(request);
+			GetSubscriptionsResponse response =
+				await ServerConnection.SendMessageAsync<GetSubscriptions, GetSubscriptionsResponse>(request);
 
-			Value = response.Value.ToString("C");
-			Transactions.Clear();
-			foreach (Transaction transaction in response.Transactions)
+			Subscriptions.Clear();
+			foreach (Subscription subscription in response.Subscriptions)
 				// TODO - This fires off an event with each add, figure out how to add range instead (refer to MonkeyFinder James Montemagno tutorial)
-				Transactions.Add(transaction);*/
+				Subscriptions.Add(subscription);
 		} catch (ResponseException<GetTransactions> ex) {
 			if (!string.IsNullOrEmpty(ex.Response.Page.Error)) PageError = ex.Response.Page.Error;
 		} catch (Exception ex) {

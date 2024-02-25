@@ -60,6 +60,7 @@ public static class Program
 				services.AddTransient<IRequestHandler<GetCounterparties>, GetCounterpartiesHandler>();
 				services.AddTransient<IRequestHandler<UpdateCounterparty>, UpdateCounterpartyHandler>();
 				services.AddTransient<IRequestHandler<CreateSubscription>, CreateSubscriptionHandler>();
+				services.AddTransient<IRequestHandler<GetSubscriptions>, GetSubscriptionsHandler>();
 				services.AddTransient<IRequestHandler<CreateTransaction>, CreateTransactionHandler>();
 				services.AddTransient<IRequestHandler<GetTransactions>, GetTransactionsHandler>();
 			})

@@ -1,4 +1,5 @@
-﻿using FinanceApp.Data.Models;
+﻿using FinanceApp.Data.Enums;
+using FinanceApp.Data.Models;
 
 namespace FinanceApp.ServerTests.Helpers;
 
@@ -59,4 +60,41 @@ public static class DatabaseSeeder
 			}
 		];
 	}
+
+	public static Subscription[] GetSubscriptions(Account[] accounts, Counterparty[] counterparties) =>
+	[
+		new()
+		{
+			Account = accounts[0],
+			Counterparty = counterparties[0],
+			Name = "Subscription 1",
+			Value = 12.99m,
+			FrequencyCounter = 1,
+			FrequencyMeasure = Frequency.Monthly,
+			StartDate = DateTime.Today,
+			EndDate = DateTime.UnixEpoch
+		},
+		new()
+		{
+			Account = accounts[0],
+			Counterparty = counterparties[1],
+			Name = "Subscription 2",
+			Value = 18.99m,
+			FrequencyCounter = 1,
+			FrequencyMeasure = Frequency.Yearly,
+			StartDate = DateTime.Today,
+			EndDate = DateTime.Today + TimeSpan.FromDays(365 * 5 + 30)
+		},
+		new()
+		{
+			Account = accounts[1],
+			Counterparty = counterparties[1],
+			Name = "Subscription 3",
+			Value = 5.99m,
+			FrequencyCounter = 2,
+			FrequencyMeasure = Frequency.Weekly,
+			StartDate = DateTime.Today,
+			EndDate = DateTime.UnixEpoch
+		}
+	];
 }

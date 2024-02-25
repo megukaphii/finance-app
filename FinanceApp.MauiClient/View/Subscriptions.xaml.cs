@@ -13,6 +13,6 @@ public partial class Subscriptions : ContentPage
 
 	protected override void OnAppearing()
 	{
-		//((SubscriptionsViewModel)BindingContext).LoadTransactions();
+		((SubscriptionsViewModel)BindingContext).LoadSubscriptions();
 	}
 }
