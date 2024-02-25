@@ -8,21 +8,42 @@
              Title="{Binding Title}"
              Shell.PresentationMode="ModalAnimated">
 
-	<VerticalStackLayout Padding="10" Spacing="10">
-		<Entry Text="{Binding Value}" Placeholder="Value..." Keyboard="Numeric" />
-		<Label Text="{Binding ValueError}" TextColor="{StaticResource Error}" />
-		<Button Text="{Binding Counterparty.Name}" Command="{Binding ViewCounterpartiesCommand}" />
-		<Label Text="{Binding CounterpartyError}" TextColor="{StaticResource Error}" />
-		<Entry Text="{Binding Name}" Placeholder="Name..." />
-		<Label Text="{Binding NameError}" TextColor="{StaticResource Error}" />
-		<Entry Text="{Binding FrequencyCounter}" Placeholder="Frequency" Keyboard="Numeric" />
-		<Label Text="{Binding FrequencyCounterError}" TextColor="{StaticResource Error}" />
-		<Picker ItemsSource="{Binding Frequencies}" SelectedItem="{Binding FrequencyMeasure}" Title="Time frame" />
-		<DatePicker Date="{Binding StartDate}" />
-		<Label Text="{Binding StartDateError}" TextColor="{StaticResource Error}" />
-		<DatePicker Date="{Binding EndDate}" />
-		<Label Text="{Binding EndDateError}" TextColor="{StaticResource Error}" />
-		<Button Text="Save" Command="{Binding CreateAccountCommand}" IsEnabled="{Binding IsNotBusy}" />
+	<VerticalStackLayout Padding="10" Spacing="5">
+		<VerticalStackLayout>
+			<Label Text="Value" TextColor="White" />
+			<Entry Text="{Binding Value}" Placeholder="Value..." Keyboard="Numeric" />
+			<Label Text="{Binding ValueError}" TextColor="{StaticResource Error}" />
+		</VerticalStackLayout>
+		<VerticalStackLayout>
+			<Button Text="{Binding Counterparty.Name}" Command="{Binding ViewCounterpartiesCommand}" />
+			<Label Text="{Binding CounterpartyError}" TextColor="{StaticResource Error}" />
+		</VerticalStackLayout>
+		<VerticalStackLayout>
+			<Label Text="Name" TextColor="White" />
+			<Entry Text="{Binding Name}" Placeholder="Name..." />
+			<Label Text="{Binding NameError}" TextColor="{StaticResource Error}" />
+		</VerticalStackLayout>
+		<VerticalStackLayout>
+			<Label Text="Frequency" TextColor="White" />
+			<Entry Text="{Binding FrequencyCounter}" Placeholder="Frequency" Keyboard="Numeric" />
+			<Label Text="{Binding FrequencyCounterError}" TextColor="{StaticResource Error}" />
+		</VerticalStackLayout>
+		<VerticalStackLayout>
+			<Label Text="Time Frame" TextColor="White" />
+			<Picker ItemsSource="{Binding Frequencies}" SelectedItem="{Binding FrequencyMeasure}" />
+			<Label Text="{Binding FrequencyMeasureError}" TextColor="{StaticResource Error}" />
+		</VerticalStackLayout>
+		<VerticalStackLayout>
+			<Label Text="Start Date" TextColor="White" />
+			<DatePicker Date="{Binding StartDate}" />
+			<Label Text="{Binding StartDateError}" TextColor="{StaticResource Error}" />
+		</VerticalStackLayout>
+		<VerticalStackLayout>
+			<Label Text="End Date" TextColor="White" />
+			<DatePicker Date="{Binding EndDate}" />
+			<Label Text="{Binding EndDateError}" TextColor="{StaticResource Error}" />
+		</VerticalStackLayout>
+		<Button Text="Save" Command="{Binding CreateSubscriptionCommand}" IsEnabled="{Binding IsNotBusy}" />
 	</VerticalStackLayout>
 
 </ContentPage>

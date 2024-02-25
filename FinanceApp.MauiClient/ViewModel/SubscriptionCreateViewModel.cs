@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using FinanceApp.Data.Enums;
 using FinanceApp.Data.Exceptions;
 using FinanceApp.Data.Models;
-using FinanceApp.Data.Requests.Account;
+using FinanceApp.Data.Requests.Subscription;
 using FinanceApp.MauiClient.Services;
 using FinanceApp.MauiClient.View;
 using Microsoft.Extensions.Caching.Memory;
@@ -14,7 +14,7 @@ public partial class SubscriptionCreateViewModel(ServerConnection serverConnecti
 	: BaseViewModel(serverConnection, cache), IQueryAttributable
 {
 	[ObservableProperty]
-	private string _value = string.Empty;
+	private decimal _value;
 	[ObservableProperty]
 	private string _valueError = string.Empty;
 
@@ -66,35 +66,45 @@ public partial class SubscriptionCreateViewModel(ServerConnection serverConnecti
 	}
 
 	[RelayCommand]
-	private async Task CreateAccount()
+	private async Task CreateSubscription()
 	{
 		try {
-			/*IsBusy = true;
+			IsBusy = true;
 			ClearErrors();
 
-			CreateAccount request = new()
-			{
-				Name = new()
+			if (!Enum.TryParse(FrequencyMeasure, out Frequency frequency)) {
+				FrequencyMeasureError = "Invalid time frame";
+			} else {
+				CreateSubscription request = new()
 				{
-					Value = Name
-				},
-				Description = new()
-				{
-					Value = EventLogTags.Description
+					Counterparty = new() { Value = Counterparty.Id },
+					Name = new() { Value = Name },
+					Value = new() { Value = Value },
+					FrequencyCounter = new() { Value = FrequencyCounter },
+					FrequencyMeasure = new() { Value = frequency },
+					StartDate = new() { Value = StartDate },
+					EndDate = new() { Value = EndDate }
+				};
+				CreateSubscriptionResponse response =
+					await ServerConnection.SendMessageAsync<CreateSubscription, CreateSubscriptionResponse>(request);
+
+				if (response.Success) {
+					await Shell.Current.DisplayAlert("Created Subscription",
+						$"Successfully created subscription {response}", "OK");
+					await Shell.Current.GoToAsync("..", true);
 				}
-			};
-			CreateAccountResponse response =
-				await ServerConnection.SendMessageAsync<CreateAccount, CreateAccountResponse>(request);
-			if (response.Success) {
-				await Shell.Current.DisplayAlert("Created Transaction", $"Successfully created account {response}",
-					"OK");
-
-				await Shell.Current.GoToAsync("..", true);
-			}*/
-		} catch (ResponseException<CreateAccount> ex) {
+			}
+		} catch (ResponseException<CreateSubscription> ex) {
+			if (!string.IsNullOrEmpty(ex.Response.Value.Error)) ValueError = ex.Response.Value.Error;
+			if (!string.IsNullOrEmpty(ex.Response.Counterparty.Error))
+				CounterpartyError = ex.Response.Counterparty.Error;
 			if (!string.IsNullOrEmpty(ex.Response.Name.Error)) NameError = ex.Response.Name.Error;
-
-			if (!string.IsNullOrEmpty(ex.Response.Description.Error)) NameError = ex.Response.Description.Error;
+			if (!string.IsNullOrEmpty(ex.Response.FrequencyCounter.Error))
+				FrequencyCounterError = ex.Response.FrequencyCounter.Error;
+			if (!string.IsNullOrEmpty(ex.Response.FrequencyMeasure.Error))
+				FrequencyMeasureError = ex.Response.FrequencyMeasure.Error;
+			if (!string.IsNullOrEmpty(ex.Response.StartDate.Error)) StartDateError = ex.Response.StartDate.Error;
+			if (!string.IsNullOrEmpty(ex.Response.EndDate.Error)) EndDateError = ex.Response.EndDate.Error;
 		} catch (Exception ex) {
 			await ServerConnection.DisconnectAsync();
 			await Shell.Current.GoToAsync($"//{nameof(Login)}", true);
@@ -115,7 +125,12 @@ public partial class SubscriptionCreateViewModel(ServerConnection serverConnecti
 
 	public override void ClearErrors()
 	{
+		ValueError = string.Empty;
+		CounterpartyError = string.Empty;
 		NameError = string.Empty;
-		//DescriptionError = string.Empty;
+		FrequencyCounterError = string.Empty;
+		FrequencyMeasureError = string.Empty;
+		StartDateError = string.Empty;
+		EndDateError = string.Empty;
 	}
 }

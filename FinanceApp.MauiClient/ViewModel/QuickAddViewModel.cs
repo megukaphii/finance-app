@@ -62,11 +62,13 @@ public partial class QuickAddViewModel(ServerConnection serverConnection, IMemor
 				Counterparty = new() { Value = Counterparty.Id },
 				Timestamp = new() { Value = Timestamp }
 			};
-			CreateTransactionResponse transactionResponse =
+			CreateTransactionResponse response =
 				await ServerConnection.SendMessageAsync<CreateTransaction, CreateTransactionResponse>(request);
-			await Shell.Current.DisplayAlert("Created Transaction",
-				$"Successfully created transaction {transactionResponse}",
-				"OK");
+
+			if (response.Success)
+				await Shell.Current.DisplayAlert("Created Transaction",
+					$"Successfully created transaction {response}",
+					"OK");
 		} catch (ResponseException<CreateTransaction> ex) {
 			if (!string.IsNullOrEmpty(ex.Response.Value.Error)) ValueError = ex.Response.Value.Error;
 		} catch (Exception ex) {
