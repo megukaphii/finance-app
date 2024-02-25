@@ -8,7 +8,7 @@ public partial class Subscriptions : ContentPage
 	{
 		InitializeComponent();
 		BindingContext = viewModel;
-		viewModel.Title = "Subscription List";
+		viewModel.Title = "Subscriptions";
 	}
 
 	protected override void OnAppearing()
