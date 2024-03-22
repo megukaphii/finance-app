@@ -38,6 +38,7 @@ public static class Program
 			{
 				services.AddMemoryCache();
 				services.AddHostedService<FinanceServer>();
+				services.AddHostedService<SubscriptionRunner>();
 
 				services.AddSingleton<IValidatorResolver, ValidatorResolver>();
 				services.AddSingleton<IRequestProcessor, RequestProcessor>();

@@ -25,7 +25,7 @@ public class CreateSubscriptionHandlerTest
 
 		_client = Substitute.For<IClient>();
 		ISession session = Substitute.For<ISession>();
-		session.Account.Returns(context.Accounts.Find(1L)!);
+		session.AccountId.Returns(1L);
 		session.IsAccountSet().Returns(true);
 		_client.Session.Returns(session);
 
@@ -52,7 +52,7 @@ public class CreateSubscriptionHandlerTest
 		};
 		Data.Models.Subscription expected = new()
 		{
-			Account = _client.Session.Account,
+			Account = DatabaseSeeder.Accounts[0],
 			Counterparty = DatabaseSeeder.Counterparties[0],
 			Name = "Test",
 			Value = 123.45m,
@@ -93,8 +93,7 @@ public class CreateSubscriptionHandlerTest
 
 		await _handler.HandleAsync(request, _client);
 
-		await unitOfWork.Repository<Data.Models.Subscription>().DidNotReceive()
-			.AddAsync(Arg.Any<Data.Models.Subscription>());
+		await unitOfWork.Repository<Data.Models.Subscription>().DidNotReceive().AddAsync(Arg.Any<Data.Models.Subscription>());
 		await _client.Received().Send(Arg.Is<CreateSubscriptionResponse>(r => !r.Success && r.Id == 0));
 	}
 }

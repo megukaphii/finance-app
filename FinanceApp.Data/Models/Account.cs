@@ -24,7 +24,7 @@ public class Account : IModel
 	public required decimal Value { get; set; }
 
 	public override string ToString() =>
-		$"{nameof(Id)}: {Id}, {nameof(Name)}: {Name}, {nameof(Description)}: {Description.Truncate(64)}, {nameof(Value)}:, {Value}";
+		$"{nameof(Id)}: {Id}, {nameof(Name)}: {Name}, {nameof(Description)}: {Description.Truncate(64)}, {nameof(Value)}: {Value}";
 
 	public override bool Equals(object? obj)
 	{

@@ -13,17 +13,26 @@ public class GetSubscriptionsHandler : IRequestHandler<GetSubscriptions>
 	public async Task HandleAsync(GetSubscriptions request, IClient client)
 	{
 		using (UnitOfWork) {
-			List<Data.Models.Subscription> subscriptions =
-				await UnitOfWork.Repository<Data.Models.Subscription>()
-					.Include(subscription => subscription.Counterparty)
-					.Where(subscription => subscription.Account.Equals(client.Session.Account))
-					.ToListAsync();
+			GetSubscriptionsResponse response;
+			if (client.Session.IsAccountSet()) {
+				List<Data.Models.Subscription> subscriptions =
+					await UnitOfWork.Repository<Data.Models.Subscription>()
+						.Include(subscription => subscription.Counterparty)
+						.Where(subscription => subscription.Account.Id.Equals(client.Session.AccountId))
+						.ToListAsync();
 
-			GetSubscriptionsResponse response = new()
-			{
-				Success = true,
-				Subscriptions = subscriptions
-			};
+				response = new()
+				{
+					Success = true,
+					Subscriptions = subscriptions
+				};
+			} else {
+				response = new()
+				{
+					Success = false,
+					Subscriptions = new()
+				};
+			}
 
 			await client.Send(response);
 		}

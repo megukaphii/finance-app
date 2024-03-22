@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FinanceApp.Server.Migrations
 {
     [DbContext(typeof(FinanceAppContext))]
-    [Migration("20240209044908_CreateSubscriptions")]
+    [Migration("20240313000421_CreateSubscriptions")]
     partial class CreateSubscriptions
     {
         /// <inheritdoc />
@@ -98,7 +98,7 @@ namespace FinanceApp.Server.Migrations
 
                     b.HasIndex("CounterpartyId");
 
-                    b.ToTable("Subscription");
+                    b.ToTable("Subscriptions");
                 });
 
             modelBuilder.Entity("FinanceApp.Data.Models.Transaction", b =>

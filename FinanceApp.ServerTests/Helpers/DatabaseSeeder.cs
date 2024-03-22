@@ -49,14 +49,14 @@ public static class DatabaseSeeder
 				Account = accounts[0],
 				Counterparty = counterparties[1],
 				Value = 100,
-				Timestamp = DateTime.Now + TimeSpan.FromDays(1)
+				Timestamp = DateTime.Today + TimeSpan.FromDays(1)
 			},
 			new()
 			{
 				Account = accounts[1],
 				Counterparty = counterparties[1],
 				Value = 100,
-				Timestamp = DateTime.Now - TimeSpan.FromDays(1)
+				Timestamp = DateTime.Today - TimeSpan.FromDays(1)
 			}
 		];
 	}
@@ -77,23 +77,56 @@ public static class DatabaseSeeder
 		new()
 		{
 			Account = accounts[0],
-			Counterparty = counterparties[1],
+			Counterparty = counterparties[0],
 			Name = "Subscription 2",
-			Value = 18.99m,
+			Value = 119.99m,
 			FrequencyCounter = 1,
 			FrequencyMeasure = Frequency.Yearly,
-			StartDate = DateTime.Today,
-			EndDate = DateTime.Today + TimeSpan.FromDays(365 * 5 + 30)
+			StartDate = DateTime.Today.AddYears(-1),
+			EndDate = DateTime.Today
+		},
+		new()
+		{
+			Account = accounts[0],
+			Counterparty = counterparties[1],
+			Name = "Subscription 3",
+			Value = 10m,
+			FrequencyCounter = 2,
+			FrequencyMeasure = Frequency.Weekly,
+			StartDate = DateTime.Today.AddDays(2),
+			EndDate = DateTime.UnixEpoch
+		},
+		new()
+		{
+			Account = accounts[1],
+			Counterparty = counterparties[0],
+			Name = "Subscription 4",
+			Value = 14.99m,
+			FrequencyCounter = 2,
+			FrequencyMeasure = Frequency.Monthly,
+			StartDate = DateTime.Today.AddMonths(-6),
+			EndDate = DateTime.UnixEpoch
 		},
 		new()
 		{
 			Account = accounts[1],
 			Counterparty = counterparties[1],
-			Name = "Subscription 3",
-			Value = 5.99m,
+			Name = "Subscription 5",
+			Value = 169.99m,
+			FrequencyCounter = 3,
+			FrequencyMeasure = Frequency.Yearly,
+			StartDate = DateTime.Today.AddYears(-3),
+			EndDate = DateTime.Today.AddYears(3)
+		},
+		new()
+		{
+			Account = accounts[1],
+			Counterparty = counterparties[1],
+			Name = "Subscription 6",
+			Value = 2m,
 			FrequencyCounter = 2,
-			FrequencyMeasure = Frequency.Weekly,
-			StartDate = DateTime.Today,
+			FrequencyMeasure = Frequency.Daily,
+			StartDate = DateTime.Today.AddDays(-3),
 			EndDate = DateTime.UnixEpoch
 		}
 	];

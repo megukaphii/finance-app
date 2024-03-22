@@ -28,7 +28,8 @@ public class GetSubscriptionsHandlerTest
 
 		_client = Substitute.For<IClient>();
 		_client.Session.Returns(_session);
-		_session.Account.Returns(context.Accounts.Find(1L)!);
+		_session.AccountId.Returns(1L);
+		_session.IsAccountSet().Returns(true);
 
 		UnitOfWork unitOfWork = new(context);
 		_handler = new(unitOfWork);
@@ -57,17 +58,11 @@ public class GetSubscriptionsHandlerTest
 	[Test]
 	public async Task HandleAsync_WithEmptyAccount_ShouldNotSendSubscriptions()
 	{
-		_session.Account = new()
-		{
-			Name = "Empty Account",
-			Description = "Empty Account",
-			Value = 0
-		};
+		_session.IsAccountSet().Returns(false);
 		GetSubscriptions request = new() { Page = new() { Value = 1 } };
 
 		await _handler.HandleAsync(request, _client);
 
-		await _client.Received().Send(Arg.Is<GetSubscriptionsResponse>(response =>
-			response.Success && response.Subscriptions.Count == 0));
+		await _client.Received().Send(Arg.Is<GetSubscriptionsResponse>(response => !response.Success && response.Subscriptions.Count == 0));
 	}
 }

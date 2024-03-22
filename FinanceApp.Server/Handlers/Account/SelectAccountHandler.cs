@@ -12,11 +12,19 @@ public class SelectAccountHandler : IRequestHandler<SelectAccount>
 	public async Task HandleAsync(SelectAccount request, IClient client)
 	{
 		using (UnitOfWork) {
-			client.Session.Account = (await UnitOfWork.Repository<Data.Models.Account>().FindAsync(request.Id.Value))!;
-			SelectAccountResponse response = new()
-			{
-				Success = true
-			};
+			SelectAccountResponse response;
+			if (await UnitOfWork.Repository<Data.Models.Account>().AnyAsync(account => account.Id == request.Id.Value)) {
+				client.Session.AccountId = request.Id.Value;
+				response = new()
+				{
+					Success = true
+				};
+			} else {
+				response = new()
+				{
+					Success = false
+				};
+			}
 
 			await client.Send(response);
 		}

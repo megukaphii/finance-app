@@ -11,22 +11,14 @@ public class CreateSubscriptionHandler : IRequestHandler<CreateSubscription>
 
 	public async Task HandleAsync(CreateSubscription request, IClient client)
 	{
+		// TODO - Create new transaction if subscription starts today
 		using (UnitOfWork) {
-			if (!client.Session.IsAccountSet()) {
-				CreateSubscriptionResponse response = new()
-				{
-					Success = false,
-					Id = 0
-				};
-
-				await client.Send(response);
-			} else {
-				UnitOfWork.AttachAccount(client.Session.Account);
+			CreateSubscriptionResponse response;
+			if (client.Session.IsAccountSet()) {
 				Data.Models.Subscription created = new()
 				{
-					Account = client.Session.Account,
-					Counterparty = (await UnitOfWork.Repository<Data.Models.Counterparty>()
-						                .FindAsync(request.Counterparty.Value))!,
+					Account = (await UnitOfWork.Repository<Data.Models.Account>().FindAsync(client.Session.AccountId))!,
+					Counterparty = (await UnitOfWork.Repository<Data.Models.Counterparty>().FindAsync(request.Counterparty.Value))!,
 					Name = request.Name.Value,
 					Value = request.Value.Value,
 					FrequencyCounter = request.FrequencyCounter.Value,
@@ -37,14 +29,20 @@ public class CreateSubscriptionHandler : IRequestHandler<CreateSubscription>
 				await UnitOfWork.Repository<Data.Models.Subscription>().AddAsync(created);
 				UnitOfWork.SaveChanges();
 
-				CreateSubscriptionResponse response = new()
+				response = new()
 				{
 					Success = true,
 					Id = created.Id
 				};
-
-				await client.Send(response);
+			} else {
+				response = new()
+				{
+					Success = false,
+					Id = 0
+				};
 			}
+
+			await client.Send(response);
 		}
 	}
 }

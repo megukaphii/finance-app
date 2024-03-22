@@ -120,7 +120,6 @@ public class FinanceServer : IHostedService
 			if (e.InnerException is not null)
 				message +=
 					$"\nInner Exception: [{e.InnerException.GetType().Name} {e.InnerException.Message}\n{e.InnerException.StackTrace}";
-
 			client.WriteLine(message);
 		} finally {
 			await RemoveClientAsync(client);

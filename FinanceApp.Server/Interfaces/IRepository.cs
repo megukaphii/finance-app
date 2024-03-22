@@ -6,15 +6,15 @@ namespace FinanceApp.Server.Interfaces;
 
 public interface IRepository<T> where T : IModel
 {
+	IIncludableQueryable<T, object> Include(Expression<Func<T, object>> include);
+	IIncludableQueryable<T, object> IncludeAll(params Expression<Func<T, object>>[] includes);
+	IQueryable<T> OrderBy<TKey>(Expression<Func<T, TKey>> expression);
 	ValueTask<T?> FindAsync(long id);
 	Task<T> FirstAsync(Expression<Func<T, bool>> predicate);
 	Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate);
+	Task<bool> AnyAsync(Expression<Func<T, bool>> predicate);
+	IQueryable<T> Where(Expression<Func<T, bool>> predicate);
 	Task<List<T>> AllAsync();
-	public Task<bool> AnyAsync(Expression<Func<T, bool>> predicate);
-	IIncludableQueryable<T, object> Include(Expression<Func<T, object>> include);
-	IIncludableQueryable<T, object> IncludeAll(params Expression<Func<T, object>>[] includes);
 	Task AddAsync(T entity);
-	void Update(T entity);
 	void Delete(T entity);
-	void Attach(T entity);
 }

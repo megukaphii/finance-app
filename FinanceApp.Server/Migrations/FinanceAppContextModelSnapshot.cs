@@ -95,7 +95,7 @@ namespace FinanceApp.Server.Migrations
 
                     b.HasIndex("CounterpartyId");
 
-                    b.ToTable("Subscription");
+                    b.ToTable("Subscriptions");
                 });
 
             modelBuilder.Entity("FinanceApp.Data.Models.Transaction", b =>
