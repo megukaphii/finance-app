@@ -45,6 +45,7 @@ public static class Program
 
 				services.AddTransient<DbContext, FinanceAppContext>();
 				services.AddTransient<IUnitOfWork, UnitOfWork>();
+				services.AddTransient<ISubscriptionManager, SubscriptionManager>();
 
 				services.AddTransient<IValidator<IAccountFields>, AccountFieldsValidator>();
 				services.AddTransient<IValidator<IAccountId>, AccountIdValidator>();
