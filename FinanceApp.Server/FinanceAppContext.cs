@@ -22,7 +22,7 @@ public sealed class FinanceAppContext : DbContext
 	protected override void OnConfiguring(DbContextOptionsBuilder options)
 	{
 		if (!options.IsConfigured) {
-			options.UseSqlite("Data Source=test.db");
+			options.UseSqlite(Directory.Exists("/Database") ? "Data Source=/Database/Finance.db" : "Data Source=test.db");
 		}
 	}
 }
