@@ -61,6 +61,7 @@ public class CreateSubscriptionHandlerTest
 			StartDate = DateTime.Today,
 			EndDate = DateTime.UnixEpoch
 		};
+		expected.Account.Value = 123.45m;
 
 		await _handler.HandleAsync(request, _client);
 		FinanceAppContext context = _databaseFactory.GetExistingDatabase();
