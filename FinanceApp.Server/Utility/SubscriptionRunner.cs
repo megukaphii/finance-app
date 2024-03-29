@@ -20,7 +20,7 @@ public class SubscriptionRunner : IHostedService, IDisposable
 	public Task StartAsync(CancellationToken cancellationToken)
 	{
 		DateTime now = DateTime.Now;
-		DateTime midnight = new DateTime(now.Year, now.Month, now.Day).AddDays(1);
+		DateTime midnight = DateTime.Today.AddDays(1);
 		TimeSpan timeUntilMidnight = midnight - now;
 		_timer = new(RunSubscriptions, null, timeUntilMidnight, TimeSpan.FromDays(1));
 		return Task.CompletedTask;
@@ -32,10 +32,14 @@ public class SubscriptionRunner : IHostedService, IDisposable
 		return Task.CompletedTask;
 	}
 
-	private void RunSubscriptions(object? state)
+	private async void RunSubscriptions(object? state)
 	{
-		using IServiceScope scope = _scopeFactory.CreateScope();
-		ISubscriptionManager subscriptionManager = scope.ServiceProvider.GetRequiredService<ISubscriptionManager>();
-		subscriptionManager.ApplyDueSubscriptions();
+		try {
+			using IServiceScope scope = _scopeFactory.CreateScope();
+			ISubscriptionManager subscriptionManager = scope.ServiceProvider.GetRequiredService<ISubscriptionManager>();
+			await subscriptionManager.ApplyDueSubscriptions();
+		} catch (Exception ex) {
+			Console.WriteLine(ex);
+		}
 	}
 }

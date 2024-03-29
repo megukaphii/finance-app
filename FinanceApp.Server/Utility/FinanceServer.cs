@@ -61,9 +61,9 @@ public class FinanceServer : IHostedService
 	}
 
 	private static X509Certificate GetCertificateFile() =>
-		Directory.Exists("/Certificates")
-			? X509Certificate2.CreateFromPemFile("/Certificates/certificate.crt", "/Certificates/certificate.key")
-			: X509Certificate2.CreateFromPemFile("certificate.crt", "certificate.key");
+		File.Exists("certificate.key")
+			? X509Certificate2.CreateFromPemFile("certificate.crt", "certificate.key")
+			: X509Certificate2.CreateFromPemFile("/Certificates/certificate.crt", "/Certificates/certificate.key");
 
 	private static async Task PerformMigrations(CancellationToken cancellationToken)
 	{

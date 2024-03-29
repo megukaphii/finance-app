@@ -14,7 +14,7 @@ public class SubscriptionManager : ISubscriptionManager
 
 	public async Task ApplyDueSubscriptions()
 	{
-		List<Subscription> dueSubscriptions = await GetDueSubscriptions().ToListAsync();
+		List<Subscription> dueSubscriptions = (await GetDueSubscriptions()).ToList();
 		foreach (Transaction created in dueSubscriptions.Select(subscription => new Transaction
 		         {
 			         Subscription = subscription,
@@ -35,16 +35,19 @@ public class SubscriptionManager : ISubscriptionManager
 			(subscription.EndDate >= DateTime.Today || subscription.EndDate.Equals(DateTime.UnixEpoch)));
 	}
 
-	private IQueryable<Subscription> GetDueSubscriptions()
+	private async Task<IEnumerable<Subscription>> GetDueSubscriptions()
 	{
 		DateTime currentDate = DateTime.Today;
-		return GetActiveSubscriptions().Where(
-			subscription => (
-				                subscription.FrequencyMeasure == Frequency.Daily ? (currentDate - subscription.StartDate).TotalDays :
-				                subscription.FrequencyMeasure == Frequency.Weekly ? (currentDate - subscription.StartDate).TotalDays / 7 :
-				                subscription.FrequencyMeasure == Frequency.Monthly ? (currentDate.Year - subscription.StartDate.Year) * 12 +
-				                                                                     (currentDate.Month - subscription.StartDate.Month) :
-				                currentDate.Year - subscription.StartDate.Year)
-			                % subscription.FrequencyCounter == 0);
+		IQueryable<Subscription> activeSubscriptions = GetActiveSubscriptions();
+		return (await activeSubscriptions.Include(subscription => subscription.Account)
+			        .Include(subscription => subscription.Counterparty).ToListAsync()).Where(
+			subscription => subscription.FrequencyMeasure switch
+			{
+				Frequency.Daily => (currentDate - subscription.StartDate).TotalDays,
+				Frequency.Weekly => (currentDate - subscription.StartDate).TotalDays / 7,
+				Frequency.Monthly => (currentDate.Year - subscription.StartDate.Year) * 12 +
+				                     (currentDate.Month - subscription.StartDate.Month),
+				_ => currentDate.Year - subscription.StartDate.Year
+			} % subscription.FrequencyCounter == 0);
 	}
 }
