@@ -15,16 +15,18 @@ public class SubscriptionManager : ISubscriptionManager
 	public async Task ApplyDueSubscriptions()
 	{
 		List<Subscription> dueSubscriptions = (await GetDueSubscriptions()).ToList();
-		foreach (Transaction created in dueSubscriptions.Select(subscription => new Transaction
-		         {
-			         Subscription = subscription,
-			         Account = subscription.Account,
-			         Counterparty = subscription.Counterparty,
-			         Value = subscription.Value,
-			         Timestamp = DateTime.Today
-		         })) {
+		foreach (Subscription subscription in dueSubscriptions) {
+			Transaction created = new()
+			{
+				Subscription = subscription,
+				Account = subscription.Account,
+				Counterparty = subscription.Counterparty,
+				Value = subscription.Value,
+				Timestamp = DateTime.Today
+			};
 			await _unitOfWork.AddTransaction(created);
 			_unitOfWork.SaveChanges();
+			Console.WriteLine($"Created {subscription.Name} transaction successfully");
 		}
 	}
 

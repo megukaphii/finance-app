@@ -34,12 +34,15 @@ public class SubscriptionRunner : IHostedService, IDisposable
 
 	private async void RunSubscriptions(object? state)
 	{
+		Console.WriteLine("Running subscriptions...");
 		try {
 			using IServiceScope scope = _scopeFactory.CreateScope();
 			ISubscriptionManager subscriptionManager = scope.ServiceProvider.GetRequiredService<ISubscriptionManager>();
 			await subscriptionManager.ApplyDueSubscriptions();
 		} catch (Exception ex) {
 			Console.WriteLine(ex);
+		} finally {
+			Console.WriteLine("Subscriptions applied");
 		}
 	}
 }
