@@ -13,18 +13,28 @@ public class GetTransactionsHandler : IRequestHandler<GetTransactions>
 	public async Task HandleAsync(GetTransactions request, IClient client)
 	{
 		using (UnitOfWork) {
-			List<Data.Models.Transaction> transactions =
-				await UnitOfWork.Repository<Data.Models.Transaction>()
-					.Include(transaction => transaction.Counterparty)
-					.Where(transaction => transaction.Account.Equals(client.Session.Account))
-					.ToListAsync();
+			GetTransactionsResponse response;
+			if (client.Session.IsAccountSet()) {
+				List<Data.Models.Transaction> transactions =
+					await UnitOfWork.Repository<Data.Models.Transaction>()
+						.Include(transaction => transaction.Counterparty)
+						.Where(transaction => transaction.Account.Id.Equals(client.Session.AccountId))
+						.ToListAsync();
 
-			GetTransactionsResponse response = new()
-			{
-				Success = true,
-				Transactions = transactions,
-				Value = client.Session.Account.Value
-			};
+				response = new()
+				{
+					Success = true,
+					Transactions = transactions,
+					Value = (await UnitOfWork.Repository<Data.Models.Account>().FindAsync(client.Session.AccountId))!.Value
+				};
+			} else {
+				response = new()
+				{
+					Success = false,
+					Transactions = new(),
+					Value = 0
+				};
+			}
 
 			await client.Send(response);
 		}

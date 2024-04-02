@@ -11,20 +11,20 @@ namespace FinanceApp.ServerTests.Validators.Counterparty;
 [TestOf(typeof(CounterpartyFieldsValidator))]
 public class CounterpartyFieldsValidatorTest
 {
-	private static readonly int MinNameLength = PropertyHelpers.GetMinLength((Data.Models.Counterparty a) => a.Name);
-	private static readonly int MaxNameLength = PropertyHelpers.GetMaxLength((Data.Models.Counterparty a) => a.Name);
-	private static readonly int SafeNameLength = (MinNameLength + MaxNameLength) / 2;
-
-	private CounterpartyFieldsValidator _counterpartyFieldsValidator = null!;
-
 	[SetUp]
 	public void SetUp()
 	{
 		_counterpartyFieldsValidator = new();
 	}
 
+	private static readonly int MinNameLength = PropertyHelpers.GetMinLength((Data.Models.Counterparty a) => a.Name);
+	private static readonly int MaxNameLength = PropertyHelpers.GetMaxLength((Data.Models.Counterparty a) => a.Name);
+	private static readonly int SafeNameLength = (MinNameLength + MaxNameLength) / 2;
+
+	private CounterpartyFieldsValidator _counterpartyFieldsValidator = null!;
+
 	[Test]
-	public async Task ValidateAsync_ShouldReturnTrue_WhenNameIsWithinValidLengths()
+	public async Task ValidateAsync_ShouldReturnTrue_WhenNameIsOfValidLength()
 	{
 		ICounterpartyFields request = Substitute.For<ICounterpartyFields>();
 		request.Name.Returns(new RequestField<string> { Value = new('a', SafeNameLength) });

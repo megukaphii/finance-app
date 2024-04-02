@@ -63,8 +63,7 @@ public class FinanceServer : IHostedService
 	private static X509Certificate GetCertificateFile() =>
 		File.Exists("certificate.key")
 			? X509Certificate2.CreateFromPemFile("certificate.crt", "certificate.key")
-			: X509Certificate2.CreateFromPemFile("/Certificates/certificate.crt",
-				"/Certificates/certificate.key");
+			: X509Certificate2.CreateFromPemFile("/Certificates/certificate.crt", "/Certificates/certificate.key");
 
 	private static async Task PerformMigrations(CancellationToken cancellationToken)
 	{
@@ -120,7 +119,6 @@ public class FinanceServer : IHostedService
 			if (e.InnerException is not null)
 				message +=
 					$"\nInner Exception: [{e.InnerException.GetType().Name} {e.InnerException.Message}\n{e.InnerException.StackTrace}";
-
 			client.WriteLine(message);
 		} finally {
 			await RemoveClientAsync(client);

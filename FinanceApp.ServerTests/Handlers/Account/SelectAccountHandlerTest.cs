@@ -1,4 +1,5 @@
-﻿using FinanceApp.Data.Requests.Account;
+﻿using System.Linq.Expressions;
+using FinanceApp.Data.Requests.Account;
 using FinanceApp.Data.Utility;
 using FinanceApp.Server.Handlers.Account;
 using FinanceApp.Server.Interfaces;
@@ -18,15 +19,7 @@ public class SelectAccountHandlerTests
 		Session session = Substitute.For<Session>();
 		_client.Session.Returns(session);
 
-		_account = new()
-		{
-			Name = "Test",
-			Description = "Test Description",
-			Value = 100
-		};
-		_unitOfWork.Repository<Data.Models.Account>()
-			.FindAsync(Arg.Any<long>())!
-			.Returns(_account);
+		_unitOfWork.Repository<Data.Models.Account>().AnyAsync(Arg.Any<Expression<Func<Data.Models.Account, bool>>>()).Returns(true);
 
 		_handler = new(_unitOfWork);
 	}
@@ -34,7 +27,6 @@ public class SelectAccountHandlerTests
 	private IClient _client = null!;
 	private IUnitOfWork _unitOfWork = null!;
 	private SelectAccountHandler _handler = null!;
-	private Data.Models.Account _account = null!;
 
 	[Test]
 	public async Task HandleAsync_ShouldInteractWithCorrectMethods()
@@ -46,8 +38,8 @@ public class SelectAccountHandlerTests
 
 		await _handler.HandleAsync(request, _client);
 
-		await _unitOfWork.Repository<Data.Models.Account>().Received().FindAsync(request.Id.Value);
+		await _unitOfWork.Repository<Data.Models.Account>().Received().AnyAsync(Arg.Any<Expression<Func<Data.Models.Account, bool>>>());
 		await _client.Received().Send(Arg.Is<SelectAccountResponse>(r => r.Success));
-		Assert.That(_client.Session.Account, Is.EqualTo(_account));
+		Assert.That(_client.Session.AccountId, Is.EqualTo(1L));
 	}
 }

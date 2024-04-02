@@ -1,9 +1,7 @@
-﻿using FinanceApp.Data.Models;
-
-namespace FinanceApp.Data.Interfaces;
+﻿namespace FinanceApp.Data.Interfaces;
 
 public interface ISession
 {
-	Account Account { get; set; }
+	long AccountId { get; set; }
 	bool IsAccountSet();
 }

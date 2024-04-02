@@ -6,6 +6,7 @@ namespace FinanceApp.Data.Models;
 public class Transaction : IModel
 {
 	public long Id { get; init; }
+	public Subscription? Subscription { get; init; }
 	public required Account Account { get; init; }
 	public required Counterparty Counterparty { get; init; }
 	[DataType(DataType.Currency)]
@@ -13,7 +14,7 @@ public class Transaction : IModel
 	public required DateTime Timestamp { get; init; }
 
 	public override string ToString() =>
-		$"{nameof(Id)}: {Id}, [{nameof(Account)}: {Account}], [{nameof(Counterparty)}: {Counterparty}], {nameof(Value)}: {Value}, {nameof(Timestamp)}: {Timestamp}";
+		$"{nameof(Id)}: {Id}, [{nameof(Subscription)}: {Subscription}], [{nameof(Account)}: {Account}], [{nameof(Counterparty)}: {Counterparty}], {nameof(Value)}: {Value}, {nameof(Timestamp)}: {Timestamp}";
 
 	public override bool Equals(object? obj)
 	{
@@ -22,9 +23,10 @@ public class Transaction : IModel
 		return obj.GetType() == GetType() && Equals((Transaction)obj);
 	}
 
-	private bool Equals(Transaction other) =>
-		(Id == other.Id || Id == 0 || other.Id == 0) && Account.Equals(other.Account) &&
-		Counterparty.Equals(other.Counterparty) && Value == other.Value;
+	private bool Equals(Transaction other) => (Id == other.Id || Id == 0 || other.Id == 0) &&
+	                                          (Subscription == null || Subscription.Equals(other.Subscription)) &&
+	                                          Account.Equals(other.Account) &&
+	                                          Counterparty.Equals(other.Counterparty) && Value == other.Value;
 
 	public override int GetHashCode() => HashCode.Combine(Id, Counterparty, Value);
 }

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:FinanceApp.Data.Models;assembly=FinanceApp.Data"
+             xmlns:viewmodel="clr-namespace:FinanceApp.MauiClient.ViewModel"
+             x:DataType="viewmodel:SubscriptionsViewModel"
+             x:Class="FinanceApp.MauiClient.View.Subscriptions"
+             Title="{Binding Title}">
+
+	<Grid RowDefinitions="48,*">
+		<Button Grid.Row="0" Text="Create Subscription" Command="{Binding CreateSubscriptionCommand}" />
+		<CollectionView Grid.Row="1" ItemsSource="{Binding Subscriptions}">
+			<CollectionView.ItemTemplate>
+				<DataTemplate x:DataType="models:Subscription">
+					<Grid Padding="10">
+						<Frame HeightRequest="150" Padding="10" BackgroundColor="#222222">
+							<VerticalStackLayout VerticalOptions="Center">
+								<Label Text="{Binding Name}" FontSize="24" TextColor="White" />
+								<HorizontalStackLayout>
+									<Label Text="{Binding StartDate}" TextColor="White" />
+									<Label Text="-" TextColor="White" />
+									<Label Text="{Binding EndDate}" TextColor="White" />
+								</HorizontalStackLayout>
+								<Label Text="{Binding Counterparty.Name}" TextColor="White" />
+								<Label Text="{Binding Value}" TextColor="White" />
+								<HorizontalStackLayout Spacing="5">
+									<Label Text="{Binding FrequencyCounter}" TextColor="White" />
+									<Label Text="{Binding FrequencyMeasure}" TextColor="White" />
+								</HorizontalStackLayout>
+							</VerticalStackLayout>
+						</Frame>
+					</Grid>
+				</DataTemplate>
+			</CollectionView.ItemTemplate>
+		</CollectionView>
+	</Grid>
+
+</ContentPage>

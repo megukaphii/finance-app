@@ -1,5 +1,4 @@
 ﻿using FinanceApp.Data.Interfaces;
-using FinanceApp.Data.Models;
 using FinanceApp.Server.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,11 +25,6 @@ public class UnitOfWork : IUnitOfWork
 		Repositories.Add(type, Activator.CreateInstance(repositoryType.MakeGenericType(typeof(T)), Context)
 		                       ?? throw new InvalidOperationException());
 		return Repositories[type];
-	}
-
-	public void AttachAccount(Account account)
-	{
-		Repository<Account>().Attach(account);
 	}
 
 	public void SaveChanges()

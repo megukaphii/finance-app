@@ -1,5 +1,4 @@
-﻿using FinanceApp.Data;
-using FinanceApp.Data.Models;
+﻿using FinanceApp.Data.Models;
 using FinanceApp.Server;
 using FinanceApp.ServerTests.Helpers;
 
@@ -27,14 +26,27 @@ public static class FinanceAppContextExtensions
 		return counterparties;
 	}
 
-	public static FinanceAppContext LoadTransactions(this FinanceAppContext context)
+	public static Transaction[] LoadTransactions(this FinanceAppContext context)
 	{
-		if (context.Transactions.Any()) return context;
+		if (context.Transactions.Any()) return context.Transactions.ToArray();
 
 		Account[] accounts = context.LoadAccounts();
 		Counterparty[] counterparties = context.LoadCounterparties();
-		context.Transactions.AddRange(DatabaseSeeder.GetTransactions(accounts, counterparties));
+		Transaction[] transactions = DatabaseSeeder.GetTransactions(accounts, counterparties);
+		context.Transactions.AddRange(transactions);
 		context.SaveChanges();
-		return context;
+		return transactions;
+	}
+
+	public static Subscription[] LoadSubscriptions(this FinanceAppContext context)
+	{
+		if (context.Subscriptions.Any()) return context.Subscriptions.ToArray();
+
+		Account[] accounts = context.LoadAccounts();
+		Counterparty[] counterparties = context.LoadCounterparties();
+		Subscription[] subscriptions = DatabaseSeeder.GetSubscriptions(accounts, counterparties);
+		context.Subscriptions.AddRange(subscriptions);
+		context.SaveChanges();
+		return subscriptions;
 	}
 }

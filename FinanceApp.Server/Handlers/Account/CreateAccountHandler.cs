@@ -23,8 +23,8 @@ public class CreateAccountHandler : IRequestHandler<CreateAccount>
 
 			CreateAccountResponse response = new()
 			{
-				Id = created.Id,
-				Success = true
+				Success = true,
+				Id = created.Id
 			};
 
 			await client.Send(response);

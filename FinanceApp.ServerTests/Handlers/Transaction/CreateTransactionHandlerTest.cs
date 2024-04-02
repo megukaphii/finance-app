@@ -24,7 +24,7 @@ public class CreateTransactionHandlerTest
 
 		_client = Substitute.For<IClient>();
 		ISession session = Substitute.For<ISession>();
-		session.Account.Returns(context.Accounts.Find(1L)!);
+		session.AccountId.Returns(1L);
 		session.IsAccountSet().Returns(true);
 		_client.Session.Returns(session);
 
@@ -47,19 +47,19 @@ public class CreateTransactionHandlerTest
 		};
 		Data.Models.Transaction expected = new()
 		{
-			Account = _client.Session.Account,
+			Account = DatabaseSeeder.Accounts[0],
 			Counterparty = DatabaseSeeder.Counterparties[0],
 			Value = 123.45m,
 			Timestamp = default
 		};
+		expected.Account.Value = 123.45m;
 
 		await _handler.HandleAsync(request, _client);
 		FinanceAppContext context = _databaseFactory.GetExistingDatabase();
 		UnitOfWork unitOfWork = new(context);
-		Data.Models.Transaction? actual = await unitOfWork.Repository<Data.Models.Transaction>()
-			                                  .IncludeAll(transaction => transaction.Account,
-				                                  transaction => transaction.Counterparty)
-			                                  .FirstAsync(transaction => transaction.Id == 1L);
+		Data.Models.Transaction actual = await unitOfWork.Repository<Data.Models.Transaction>()
+			                                 .IncludeAll(transaction => transaction.Account, transaction => transaction.Counterparty)
+			                                 .FirstAsync(transaction => transaction.Id == 1L);
 
 		Assert.That(actual, Is.EqualTo(expected));
 		await _client.Received().Send(Arg.Is<CreateTransactionResponse>(r => r.Success && r.Id > 0));
@@ -68,29 +68,36 @@ public class CreateTransactionHandlerTest
 	[Test]
 	public async Task CreateTransactionHandler_HandleAsync_MultipleTransactionsDoNotThrowException()
 	{
-		FinanceAppContext context = _databaseFactory.GetExistingDatabase();
-		UnitOfWork unitOfWork = new(context);
-		_handler = new(unitOfWork);
-		CreateTransaction request1 = new()
-		{
-			Counterparty = new() { Value = 1L },
-			Value = new() { Value = 123.45m },
-			Timestamp = new() { Value = default }
-		};
-		CreateTransaction request2 = new()
-		{
-			Counterparty = new() { Value = 1L },
-			Value = new() { Value = 123.45m },
-			Timestamp = new() { Value = default }
-		};
+		await using (FinanceAppContext context = _databaseFactory.GetExistingDatabase()) {
+			{
+				UnitOfWork unitOfWork = new(context);
+				_handler = new(unitOfWork);
+				CreateTransaction request1 = new()
+				{
+					Counterparty = new()
+					{
+						Value = 1L
+					},
+					Value = new() { Value = 123.45m },
+					Timestamp = new() { Value = default }
+				};
 
-		await _handler.HandleAsync(request1, _client);
+				await _handler.HandleAsync(request1, _client);
+			}
+		}
 
 		Assert.DoesNotThrowAsync(async () =>
 		{
-			context = _databaseFactory.GetExistingDatabase();
-			unitOfWork = new(context);
+			await using FinanceAppContext context = _databaseFactory.GetExistingDatabase();
+			UnitOfWork unitOfWork = new(context);
 			_handler = new(unitOfWork);
+			CreateTransaction request2 = new()
+			{
+				Counterparty = new() { Value = 1L },
+				Value = new() { Value = 123.45m },
+				Timestamp = new() { Value = default }
+			};
+
 			await _handler.HandleAsync(request2, _client);
 		});
 	}
@@ -127,7 +134,10 @@ public class CreateTransactionHandlerTest
 		_handler = new(unitOfWork);
 		await _handler.HandleAsync(request3, _client);
 
-		Assert.That(_client.Session.Account.Value, Is.EqualTo(request1.Value.Value + request2.Value.Value + request3.Value.Value));
+		context = _databaseFactory.GetExistingDatabase();
+		unitOfWork = new(context);
+		decimal result = (await unitOfWork.Repository<Data.Models.Account>().FindAsync(_client.Session.AccountId))!.Value;
+		Assert.That(result, Is.EqualTo(request1.Value.Value + request2.Value.Value + request3.Value.Value));
 	}
 
 	[Test]
@@ -145,8 +155,7 @@ public class CreateTransactionHandlerTest
 
 		await _handler.HandleAsync(request, _client);
 
-		await unitOfWork.Repository<Data.Models.Transaction>().DidNotReceive()
-			.AddAsync(Arg.Any<Data.Models.Transaction>());
+		await unitOfWork.Repository<Data.Models.Transaction>().DidNotReceive().AddAsync(Arg.Any<Data.Models.Transaction>());
 		await _client.Received().Send(Arg.Is<CreateTransactionResponse>(r => !r.Success && r.Id == 0));
 	}
 }

@@ -57,6 +57,47 @@ namespace FinanceApp.Server.Migrations
                     b.ToTable("Counterparties");
                 });
 
+            modelBuilder.Entity("FinanceApp.Data.Models.Subscription", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("AccountId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("CounterpartyId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("FrequencyCounter")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("FrequencyMeasure")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Value")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId");
+
+                    b.HasIndex("CounterpartyId");
+
+                    b.ToTable("Subscriptions");
+                });
+
             modelBuilder.Entity("FinanceApp.Data.Models.Transaction", b =>
                 {
                     b.Property<long>("Id")
@@ -67,6 +108,9 @@ namespace FinanceApp.Server.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<long>("CounterpartyId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long?>("SubscriptionId")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("Timestamp")
@@ -81,7 +125,28 @@ namespace FinanceApp.Server.Migrations
 
                     b.HasIndex("CounterpartyId");
 
+                    b.HasIndex("SubscriptionId");
+
                     b.ToTable("Transactions");
+                });
+
+            modelBuilder.Entity("FinanceApp.Data.Models.Subscription", b =>
+                {
+                    b.HasOne("FinanceApp.Data.Models.Account", "Account")
+                        .WithMany("Subscriptions")
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FinanceApp.Data.Models.Counterparty", "Counterparty")
+                        .WithMany("Subscriptions")
+                        .HasForeignKey("CounterpartyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+
+                    b.Navigation("Counterparty");
                 });
 
             modelBuilder.Entity("FinanceApp.Data.Models.Transaction", b =>
@@ -98,17 +163,32 @@ namespace FinanceApp.Server.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("FinanceApp.Data.Models.Subscription", "Subscription")
+                        .WithMany("Transactions")
+                        .HasForeignKey("SubscriptionId");
+
                     b.Navigation("Account");
 
                     b.Navigation("Counterparty");
+
+                    b.Navigation("Subscription");
                 });
 
             modelBuilder.Entity("FinanceApp.Data.Models.Account", b =>
                 {
+                    b.Navigation("Subscriptions");
+
                     b.Navigation("Transactions");
                 });
 
             modelBuilder.Entity("FinanceApp.Data.Models.Counterparty", b =>
+                {
+                    b.Navigation("Subscriptions");
+
+                    b.Navigation("Transactions");
+                });
+
+            modelBuilder.Entity("FinanceApp.Data.Models.Subscription", b =>
                 {
                     b.Navigation("Transactions");
                 });

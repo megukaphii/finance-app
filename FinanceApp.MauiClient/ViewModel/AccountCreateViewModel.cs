@@ -49,8 +49,7 @@ public partial class AccountCreateViewModel(ServerConnection serverConnection, I
 			}
 		} catch (ResponseException<CreateAccount> ex) {
 			if (!string.IsNullOrEmpty(ex.Response.Name.Error)) NameError = ex.Response.Name.Error;
-
-			if (!string.IsNullOrEmpty(ex.Response.Description.Error)) NameError = ex.Response.Description.Error;
+			if (!string.IsNullOrEmpty(ex.Response.Description.Error)) DescriptionError = ex.Response.Description.Error;
 		} catch (Exception ex) {
 			await ServerConnection.DisconnectAsync();
 			await Shell.Current.GoToAsync($"//{nameof(Login)}", true);

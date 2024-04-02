@@ -13,6 +13,8 @@ public partial class AppShell : Shell
 		Routing.RegisterRoute(nameof(AccountCreate), typeof(AccountCreate));
 		Routing.RegisterRoute(nameof(QuickAdd), typeof(QuickAdd));
 		Routing.RegisterRoute(nameof(Counterparties), typeof(Counterparties));
+		Routing.RegisterRoute(nameof(SubscriptionCreate), typeof(SubscriptionCreate));
+		Routing.RegisterRoute(nameof(Subscriptions), typeof(Subscriptions));
 		Routing.RegisterRoute(nameof(Transactions), typeof(Transactions));
 	}
 }

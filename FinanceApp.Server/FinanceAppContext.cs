@@ -15,13 +15,14 @@ public sealed class FinanceAppContext : DbContext
 		: base(options) { }
 
 	public DbSet<Account> Accounts { get; set; } = null!;
-	public DbSet<Transaction> Transactions { get; set; } = null!;
 	public DbSet<Counterparty> Counterparties { get; set; } = null!;
+	public DbSet<Subscription> Subscriptions { get; set; } = null!;
+	public DbSet<Transaction> Transactions { get; set; } = null!;
 
 	protected override void OnConfiguring(DbContextOptionsBuilder options)
 	{
 		if (!options.IsConfigured) {
-			options.UseSqlite("Data Source=test.db");
+			options.UseSqlite(Directory.Exists("/Database") ? "Data Source=/Database/Finance.db" : "Data Source=test.db");
 		}
 	}
 }

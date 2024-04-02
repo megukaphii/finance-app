@@ -1,12 +1,11 @@
 ﻿using FinanceApp.Data.Interfaces;
-using FinanceApp.Data.Models;
 
 namespace FinanceApp.Data.Utility;
 
 public class Session : ISession
 {
 	// TODO - Optional types?
-	public Account Account { get; set; } = Account.Empty;
+	public long AccountId { get; set; } = 0;
 
-	public bool IsAccountSet() => !Account.Equals(Account.Empty);
+	public bool IsAccountSet() => !AccountId.Equals(0);
 }

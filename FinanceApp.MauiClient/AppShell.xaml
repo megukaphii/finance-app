@@ -13,6 +13,7 @@
 		<ShellContent Title="Login" ContentTemplate="{DataTemplate views:Login}" Route="Login" />
 		<ShellContent Title="Accounts" ContentTemplate="{DataTemplate views:Accounts}" Route="Accounts" />
 		<ShellContent Title="Quick Add" ContentTemplate="{DataTemplate views:QuickAdd}" Route="QuickAdd" />
+		<ShellContent Title="Subscriptions" ContentTemplate="{DataTemplate views:Subscriptions}" Route="Subscriptions" />
 		<ShellContent Title="List" ContentTemplate="{DataTemplate views:Transactions}" Route="Transactions" />
 		<ShellContent Title="Counterparties" ContentTemplate="{DataTemplate views:Counterparties}" Route="Counterparties" />
 	</FlyoutItem>

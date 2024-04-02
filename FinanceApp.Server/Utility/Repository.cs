@@ -12,17 +12,6 @@ public class Repository<T> : IRepository<T> where T : class, IModel
 
 	private DbContext Context { get; }
 
-	public ValueTask<T?> FindAsync(long id) => Context.Set<T>().FindAsync(id);
-
-	public Task<T> FirstAsync(Expression<Func<T, bool>> predicate) => Context.Set<T>().FirstAsync(predicate);
-
-	public Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate) =>
-		Context.Set<T>().FirstOrDefaultAsync(predicate);
-
-	public Task<bool> AnyAsync(Expression<Func<T, bool>> predicate) => Context.Set<T>().AnyAsync(predicate);
-
-	public Task<List<T>> AllAsync() => Context.Set<T>().ToListAsync();
-
 	public IIncludableQueryable<T, object> Include(Expression<Func<T, object>> include) =>
 		Context.Set<T>().Include(include);
 
@@ -34,24 +23,28 @@ public class Repository<T> : IRepository<T> where T : class, IModel
 		return result;
 	}
 
+	public IQueryable<T> OrderBy<TKey>(Expression<Func<T, TKey>> expression) => Context.Set<T>().OrderBy(expression);
+
+	public ValueTask<T?> FindAsync(long id) => Context.Set<T>().FindAsync(id);
+
+	public Task<T> FirstAsync(Expression<Func<T, bool>> predicate) => Context.Set<T>().FirstAsync(predicate);
+
+	public Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate) =>
+		Context.Set<T>().FirstOrDefaultAsync(predicate);
+
+	public Task<bool> AnyAsync(Expression<Func<T, bool>> predicate) => Context.Set<T>().AnyAsync(predicate);
+
+	public IQueryable<T> Where(Expression<Func<T, bool>> predicate) => Context.Set<T>().Where(predicate);
+
+	public Task<List<T>> AllAsync() => Context.Set<T>().ToListAsync();
+
 	public async Task AddAsync(T entity)
 	{
 		await Context.Set<T>().AddAsync(entity);
 	}
 
-	public void Update(T entity)
-	{
-		Context.Set<T>().Attach(entity);
-		Context.Entry(entity).State = EntityState.Modified;
-	}
-
 	public void Delete(T entity)
 	{
 		Context.Set<T>().Remove(entity);
-	}
-
-	public void Attach(T entity)
-	{
-		Context.Set<T>().Attach(entity);
 	}
 }

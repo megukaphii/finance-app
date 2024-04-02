@@ -16,8 +16,8 @@ public class GetAccountsHandler : IRequestHandler<GetAccounts>
 
 			GetAccountsResponse response = new()
 			{
-				Accounts = accounts,
-				Success = true
+				Success = true,
+				Accounts = accounts
 			};
 
 			await client.Send(response);

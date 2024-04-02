@@ -17,8 +17,8 @@ public class GetCounterpartiesHandler : IRequestHandler<GetCounterparties>
 
 			GetCounterpartiesResponse response = new()
 			{
-				Counterparties = counterparties,
-				Success = true
+				Success = true,
+				Counterparties = counterparties
 			};
 
 			await client.Send(response);
