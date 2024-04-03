@@ -16,6 +16,9 @@ public partial class QuickAddViewModel(ServerConnection serverConnection, IMemor
 	private string _pageError = string.Empty;
 
 	[ObservableProperty]
+	private bool _isDebit = true;
+
+	[ObservableProperty]
 	private decimal _value;
 	[ObservableProperty]
 	private string _valueError = string.Empty;
@@ -58,7 +61,7 @@ public partial class QuickAddViewModel(ServerConnection serverConnection, IMemor
 
 			CreateTransaction request = new()
 			{
-				Value = new() { Value = Value },
+				Value = new() { Value = Value * (IsDebit ? -1 : 1) },
 				Counterparty = new() { Value = Counterparty.Id },
 				Timestamp = new() { Value = Timestamp }
 			};

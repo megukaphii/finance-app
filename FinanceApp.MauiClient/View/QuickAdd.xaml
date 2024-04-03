@@ -8,12 +8,16 @@
              Title="{Binding Title}">
 
 	<VerticalStackLayout Padding="10">
+		<HorizontalStackLayout>
+			<Switch IsToggled="{Binding IsDebit}" />
+			<Label Text="Credit/Debit" VerticalOptions="Center" />
+		</HorizontalStackLayout>
 		<Entry Text="{Binding Value}" Placeholder="Value..." Keyboard="Numeric" />
 		<Label Text="{Binding ValueError}" TextColor="{StaticResource Error}" />
 		<Button Text="{Binding Counterparty.Name}" Command="{Binding ViewCounterpartiesCommand}"/>
 		<Label Text="{Binding CounterpartyError}" TextColor="{StaticResource Error}" />
-        <DatePicker Date="{Binding Timestamp}"></DatePicker>
-        <Label Text="{Binding TimestampError}" TextColor="{StaticResource Error}"/>
+        <DatePicker Date="{Binding Timestamp}" />
+		<Label Text="{Binding TimestampError}" TextColor="{StaticResource Error}"/>
 		<Button Text="Quick Add" Command="{Binding SendTransactionCommand}" IsEnabled="{Binding IsNotBusy}"/>
 	</VerticalStackLayout>
 
