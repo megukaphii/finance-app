@@ -14,6 +14,9 @@ public partial class SubscriptionCreateViewModel(ServerConnection serverConnecti
 	: BaseViewModel(serverConnection, cache), IQueryAttributable
 {
 	[ObservableProperty]
+	private bool _isDebit = true;
+
+	[ObservableProperty]
 	private decimal _value;
 	[ObservableProperty]
 	private string _valueError = string.Empty;
@@ -79,7 +82,7 @@ public partial class SubscriptionCreateViewModel(ServerConnection serverConnecti
 				{
 					Counterparty = new() { Value = Counterparty.Id },
 					Name = new() { Value = Name },
-					Value = new() { Value = Value },
+					Value = new() { Value = Value * (IsDebit ? -1 : 1) },
 					FrequencyCounter = new() { Value = FrequencyCounter },
 					FrequencyMeasure = new() { Value = frequency },
 					StartDate = new() { Value = StartDate },

@@ -9,6 +9,10 @@
              Shell.PresentationMode="ModalAnimated">
 
 	<VerticalStackLayout Padding="10" Spacing="5">
+		<HorizontalStackLayout>
+			<Switch IsToggled="{Binding IsDebit}" />
+			<Label Text="Credit/Debit" VerticalOptions="Center" />
+		</HorizontalStackLayout>
 		<VerticalStackLayout>
 			<Label Text="Value" TextColor="White" />
 			<Entry Text="{Binding Value}" Placeholder="Value..." Keyboard="Numeric" />
