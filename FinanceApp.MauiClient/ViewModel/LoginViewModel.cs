@@ -10,7 +10,7 @@ public partial class LoginViewModel(ServerConnection serverConnection, IMemoryCa
 	: BaseViewModel(serverConnection, cache)
 {
 	[ObservableProperty]
-	private string _ipAddress = ServerConnection.DefaultAddress;
+	private string _ipAddress = Preferences.Default.Get("ip_address", ServerConnection.DefaultAddress);
 
 	[ObservableProperty]
 	[NotifyPropertyChangedFor(nameof(IsNotConnected))]
@@ -25,25 +25,18 @@ public partial class LoginViewModel(ServerConnection serverConnection, IMemoryCa
 	}
 
 	[RelayCommand]
-	private void SetNasIp()
-	{
-		IpAddress = "macdonald9999.synology.me";
-	}
-
-	[RelayCommand]
 	private async Task EstablishConnection()
 	{
 		try {
 			IsBusy = true;
 			if (await ServerConnection.EstablishConnection(IpAddress)) {
+				Preferences.Default.Set("ip_address", IpAddress);
 				IsConnected = ServerConnection.IsConnected;
-				await Shell.Current.DisplayAlert("Connection Established", $"Successfully connected to {IpAddress}!",
-					"OK");
+				await Shell.Current.DisplayAlert("Connection Established", $"Successfully connected to {IpAddress}!", "OK");
 				await Shell.Current.GoToAsync($"//{nameof(Accounts)}", true);
 			}
 		} catch (Exception ex) {
-			await Shell.Current.DisplayAlert("Error", ex.Message + " | Inner exception: " + ex.InnerException?.Message,
-				"OK");
+			await Shell.Current.DisplayAlert("Error", ex.Message + " | Inner exception: " + ex.InnerException?.Message, "OK");
 		} finally {
 			IsBusy = false;
 		}
@@ -58,8 +51,7 @@ public partial class LoginViewModel(ServerConnection serverConnection, IMemoryCa
 			IsConnected = ServerConnection.IsConnected;
 			await Shell.Current.DisplayAlert("Disconnected", "Successfully disconnected from server!", "OK");
 		} catch (Exception ex) {
-			await Shell.Current.DisplayAlert("Error", ex.Message + " | Inner exception: " + ex.InnerException?.Message,
-				"OK");
+			await Shell.Current.DisplayAlert("Error", ex.Message + " | Inner exception: " + ex.InnerException?.Message, "OK");
 		} finally {
 			IsBusy = false;
 		}

@@ -13,10 +13,7 @@
 		        IsVisible="{Binding IsNotConnected}" />
 		<Button Text="Disconnect" Command="{Binding DisconnectCommand}" IsEnabled="{Binding IsNotBusy}"
 		        IsVisible="{Binding IsConnected}" />
-		<Grid ColumnDefinitions="*,*" ColumnSpacing="10">
-			<Button Grid.Column="0" Text="Local IP" Command="{Binding SetLocalIpCommand}" />
-			<Button Grid.Column="1" Text="NAS IP" Command="{Binding SetNasIpCommand}" />
-		</Grid>
+		<Button Text="Local IP" Command="{Binding SetLocalIpCommand}" />
 	</VerticalStackLayout>
 
 </ContentPage>
