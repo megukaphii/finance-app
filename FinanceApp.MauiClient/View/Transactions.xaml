@@ -4,9 +4,16 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:models="clr-namespace:FinanceApp.Data.Models;assembly=FinanceApp.Data"
              xmlns:viewmodel="clr-namespace:FinanceApp.MauiClient.ViewModel"
+             xmlns:classes="clr-namespace:FinanceApp.MauiClient.Classes"
              x:DataType="viewmodel:TransactionsViewModel"
              x:Class="FinanceApp.MauiClient.View.Transactions"
              Title="{Binding Title}">
+
+	<ContentPage.Resources>
+		<ResourceDictionary>
+			<classes:DebitCreditColorConverter x:Key="DebitCreditColorConverter" />
+		</ResourceDictionary>
+	</ContentPage.Resources>
 
 	<Grid RowDefinitions="48,48,*">
 		<Button Grid.Row="0" Text="Load Transactions" Command="{Binding LoadTransactionsCommand}" />
@@ -19,7 +26,8 @@
 							<VerticalStackLayout Padding="10">
                                 <Label Text="{Binding Timestamp}" TextColor="White"/>
                                 <Label Text="{Binding Counterparty.Name}" TextColor="White"/>
-								<Label Text="{Binding Value}" TextColor="White"/>
+                                <Label x:Name="valueLabel" Text="{Binding Value}"
+                                       TextColor="{Binding Source={x:Reference valueLabel},Path=Text,Converter={StaticResource DebitCreditColorConverter}}" />
 							</VerticalStackLayout>
 						</Frame>
 					</Grid>

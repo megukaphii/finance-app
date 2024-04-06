@@ -36,7 +36,7 @@ public class CreateSubscriptionHandler : IRequestHandler<CreateSubscription>
 						Account = account,
 						Counterparty = counterparty,
 						Value = request.Value.Value,
-						Timestamp = default
+						Timestamp = request.StartDate.Value
 					};
 					await UnitOfWork.AddTransaction(initialTransaction);
 				}

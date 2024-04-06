@@ -41,7 +41,7 @@ public partial class SubscriptionCreateViewModel(ServerConnection serverConnecti
 	private string _frequencyMeasureError = string.Empty;
 
 	[ObservableProperty]
-	private DateTime _startDate = DateTime.Today;
+	private DateTime _startDate = DateTime.SpecifyKind(DateTime.Today, DateTimeKind.Unspecified);
 	[ObservableProperty]
 	private string _startDateError = string.Empty;
 
