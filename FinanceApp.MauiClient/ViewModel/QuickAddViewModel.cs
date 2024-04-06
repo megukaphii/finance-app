@@ -65,11 +65,12 @@ public partial class QuickAddViewModel(ServerConnection serverConnection, IMemor
 				Counterparty = new() { Value = Counterparty.Id },
 				Timestamp = new() { Value = Timestamp }
 			};
-			await Shell.Current.DisplayAlert("Time", request.Timestamp.Value.Kind.ToString(), "OK");
 			CreateTransactionResponse response = await ServerConnection.SendMessageAsync<CreateTransaction, CreateTransactionResponse>(request);
 
-			if (response.Success)
+			if (response.Success) {
 				await Shell.Current.DisplayAlert("Created Transaction", $"Successfully created transaction {response}", "OK");
+				ClearFields();
+			}
 		} catch (ResponseException<CreateTransaction> ex) {
 			if (!string.IsNullOrEmpty(ex.Response.Value.Error)) ValueError = ex.Response.Value.Error;
 		} catch (Exception ex) {
@@ -96,5 +97,12 @@ public partial class QuickAddViewModel(ServerConnection serverConnection, IMemor
 		ValueError = string.Empty;
 		TimestampError = string.Empty;
 		CounterpartyError = string.Empty;
+	}
+
+	private void ClearFields()
+	{
+		Value = 0;
+		Timestamp = DateTime.SpecifyKind(DateTime.Today, DateTimeKind.Unspecified);
+		Counterparty = Counterparty.Empty;
 	}
 }
